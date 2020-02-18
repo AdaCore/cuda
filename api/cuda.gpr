@@ -1,0 +1,7 @@
+project CUDA is
+
+   for Source_Dirs use ("cuda_api", "cuda_raw_binding");
+
+   for Object_Dir use "obj";
+
+end CUDA;
