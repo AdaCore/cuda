@@ -10,6 +10,21 @@ use cuda_runtime_api_h;
 
 package body CUDA.Runtime_Api is
 
+   overriding procedure Allocate (Self : in out CUDA_Device_Pool; Addr : out System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count) is
+   begin
+      Addr := Malloc (CUDA.Crtdefs.Size_T (Size));
+   end Allocate;
+
+   overriding procedure Copy_To_Pool (Self : in out CUDA_Device_Pool; Addr : System.Address; Value : aliased System.Storage_Elements.Storage_Array; Size : System.Storage_Elements.Storage_Count) is
+   begin
+      Memcpy (Addr, Value'Address, CUDA.Crtdefs.Size_T (Size), CUDA.Driver_Types.Memcpy_Host_To_Device);
+   end Copy_To_Pool;
+
+   overriding procedure Deallocate (Self : in out CUDA_Device_Pool; Addr : System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count) is
+   begin
+      Free (Addr);
+   end Deallocate;
+
    procedure Device_Reset is
 
       Local_Tmp_0 : driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:280
@@ -1414,21 +1429,20 @@ package body CUDA.Runtime_Api is
       end if;
    end Malloc_Managed;
 
-   procedure Malloc (Dev_Ptr : System.Address; Size : CUDA.Crtdefs.Size_T) is
+   function Malloc (Size : CUDA.Crtdefs.Size_T) return System.Address is
 
-      Local_Tmp_1 : System.Address with
-         Address => Dev_Ptr'Address,
-         Import;
-      Local_Tmp_2 : crtdefs_h.size_t with
+      Tmp         : aliased System.Address;
+      Local_Tmp_1 : crtdefs_h.size_t with
          Address => Size'Address,
          Import;
       Local_Tmp_0 : driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4289
-      := cuda_runtime_api_h.cudaMalloc (Local_Tmp_1, Local_Tmp_2);
+      := cuda_runtime_api_h.cudaMalloc (Tmp'Address, Local_Tmp_1);
 
    begin
       if Local_Tmp_0 /= 0 then
          Ada.Exceptions.Raise_Exception (CUDA.Exception_Registry.Element (Integer (Local_Tmp_0)));
       end if;
+      return Tmp;
    end Malloc;
 
    procedure Malloc_Host (Ptr : System.Address; Size : CUDA.Crtdefs.Size_T) is

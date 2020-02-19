@@ -7,9 +7,38 @@ with Interfaces.C;
 with Interfaces.C.Extensions;
 with Interfaces.C.Strings;
 with System;
+with System.Storage_Elements;
+with System.Storage_Pools;
 use Interfaces.C;
 
 package CUDA.Runtime_Api is
+   type CUDA_Device_Pool is new System.Storage_Pools.Root_Storage_Pool with null record;
+   overriding procedure Allocate (Self : in out CUDA_Device_Pool; Addr : out System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count);
+   overriding procedure Copy_To_Pool (Self : in out CUDA_Device_Pool; Addr : System.Address; Value : aliased System.Storage_Elements.Storage_Array; Size : System.Storage_Elements.Storage_Count);
+   overriding procedure Deallocate (Self : in out CUDA_Device_Pool; Addr : System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count);
+   overriding function Storage_Size (Self : CUDA_Device_Pool) return System.Storage_Elements.Storage_Count is (System.Storage_Elements.Storage_Count'Last) with
+      Inline => True;
+   CUDA_Device : CUDA_Device_Pool;
+   Grid_Dim    : CUDA.Vector_Types.Dim3 with
+      Import,
+      Convention    => Intrinsic,
+      External_Name => "gridDim";
+   Block_Idx : CUDA.Vector_Types.Uint3 with
+      Import,
+      Convention    => Intrinsic,
+      External_Name => "blockIdx";
+   Block_Dim : CUDA.Vector_Types.Dim3 with
+      Import,
+      Convention    => Intrinsic,
+      External_Name => "blockDim";
+   Thread_Idx : CUDA.Vector_Types.Uint3 with
+      Import,
+      Convention    => Intrinsic,
+      External_Name => "threadIdx";
+   Wrap_Size : Interfaces.C.int with
+      Import,
+      Convention    => Intrinsic,
+      External_Name => "wrapSize";
    CUDART_VERSION : constant := 10_020;
    procedure Device_Reset;
    procedure Device_Synchronize;
@@ -97,7 +126,7 @@ package CUDA.Runtime_Api is
    procedure Occupancy_Max_Active_Blocks_Per_Multiprocessor (Num_Blocks : out int; Func : System.Address; Block_Size : int; Dynamic_SMem_Size : CUDA.Crtdefs.Size_T);
    procedure Occupancy_Max_Active_Blocks_Per_Multiprocessor_With_Flags (Num_Blocks : out int; Func : System.Address; Block_Size : int; Dynamic_SMem_Size : CUDA.Crtdefs.Size_T; Flags : unsigned);
    procedure Malloc_Managed (Dev_Ptr : System.Address; Size : CUDA.Crtdefs.Size_T; Flags : unsigned);
-   procedure Malloc (Dev_Ptr : System.Address; Size : CUDA.Crtdefs.Size_T);
+   function Malloc (Size : CUDA.Crtdefs.Size_T) return System.Address;
    procedure Malloc_Host (Ptr : System.Address; Size : CUDA.Crtdefs.Size_T);
    procedure Malloc_Pitch (Dev_Ptr : System.Address; Pitch : out CUDA.Crtdefs.Size_T; Width : CUDA.Crtdefs.Size_T; Height : CUDA.Crtdefs.Size_T);
    procedure Malloc_Array (C_Array : System.Address; Desc : out CUDA.Driver_Types.Channel_Format_Desc; Width : CUDA.Crtdefs.Size_T; Height : CUDA.Crtdefs.Size_T; Flags : unsigned);
