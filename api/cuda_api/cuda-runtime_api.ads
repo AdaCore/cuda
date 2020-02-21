@@ -19,26 +19,16 @@ package CUDA.Runtime_Api is
    overriding function Storage_Size (Self : CUDA_Device_Pool) return System.Storage_Elements.Storage_Count is (System.Storage_Elements.Storage_Count'Last) with
       Inline => True;
    CUDA_Device : CUDA_Device_Pool;
-   Grid_Dim    : CUDA.Vector_Types.Dim3 with
-      Import,
-      Convention    => Intrinsic,
-      External_Name => "gridDim";
-   Block_Idx : CUDA.Vector_Types.Uint3 with
-      Import,
-      Convention    => Intrinsic,
-      External_Name => "blockIdx";
-   Block_Dim : CUDA.Vector_Types.Dim3 with
-      Import,
-      Convention    => Intrinsic,
-      External_Name => "blockDim";
-   Thread_Idx : CUDA.Vector_Types.Uint3 with
-      Import,
-      Convention    => Intrinsic,
-      External_Name => "threadIdx";
-   Wrap_Size : Interfaces.C.int with
-      Import,
-      Convention    => Intrinsic,
-      External_Name => "wrapSize";
+   function Grid_Dim return CUDA.Vector_Types.Dim3 with
+      Inline;
+   function Block_Idx return CUDA.Vector_Types.Uint3 with
+      Inline;
+   function Block_Dim return CUDA.Vector_Types.Dim3 with
+      Inline;
+   function Thread_Idx return CUDA.Vector_Types.Uint3 with
+      Inline;
+   function Wrap_Size return Interfaces.C.int with
+      Inline;
    CUDART_VERSION : constant := 10_020;
    procedure Device_Reset;
    procedure Device_Synchronize;
