@@ -31,17 +31,17 @@ package body CUDA.Runtime_Api is
          Inline,
          Import,
          Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ntaid.x";
+         External_Name => "nvvm.read.ptx.sreg.nctaid.x";
       function Nctaid_Y return Interfaces.C.unsigned with
          Inline,
          Import,
          Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ntaid.y";
+         External_Name => "nvvm.read.ptx.sreg.nctaid.y";
       function Nctaid_Z return Interfaces.C.unsigned with
          Inline,
          Import,
          Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ntaid.z";
+         External_Name => "nvvm.read.ptx.sreg.nctaid.z";
 
    begin
       return (Nctaid_X, Nctaid_Y, Nctaid_Z);
