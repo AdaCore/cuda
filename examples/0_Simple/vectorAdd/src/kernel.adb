@@ -13,7 +13,7 @@ package body Kernel is
       I : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
    begin
       if I < Num_Elements then
-         C (I) := A (I) + B (I);
+         C (C'First + I) := A (A'First + I) + B (B'First + I);
       end if;
    end Vector_Add;
    

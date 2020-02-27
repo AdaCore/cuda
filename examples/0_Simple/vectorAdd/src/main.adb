@@ -14,23 +14,23 @@ with Kernel; use Kernel;
 
 procedure Main is
    Num_Elements : Integer := 50_000;
-   Size : CUDA.Crtdefs.Size_T := CUDA.Crtdefs.Size_T (Num_Elements) * Float'Size;
 
-   H_A, H_B, H_C : Access_Device_Float_Array;
-   D_A, D_B, D_C : Access_Host_Float_Array;
+   H_A, H_B, H_C : Access_Host_Float_Array;
+   D_A, D_B, D_C : Access_Device_Float_Array;
 
    Threads_Per_Block : Integer := 256;
-   Blocks_Per_Grid : Integer :=(Num_Elements + Threads_Per_Block - 1) / Threads_Per_Block;
+   Blocks_Per_Grid : Integer :=
+     (Num_Elements + Threads_Per_Block - 1) / Threads_Per_Block;
 
    Gen : Generator;
-
    Err : Error_T;
+
 begin
    Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
 
-   H_A := new Float_Array (0 .. Num_Elements - 1);
-   H_B := new Float_Array (0 .. Num_Elements - 1);
-   H_C := new Float_Array (0 .. Num_Elements - 1);
+   H_A := new Float_Array (1 .. Num_Elements);
+   H_B := new Float_Array (1 .. Num_Elements);
+   H_C := new Float_Array (1 .. Num_Elements);
 
    if H_A = null or else H_B = null or else H_C = null then
       Put_Line("Failed to allocate host vectors!");
@@ -41,23 +41,24 @@ begin
    H_A.all := (others => Float (Random (Gen)));
    H_B.all := (others => Float (Random (Gen)));
 
-   D_A := new Float_Array (0 .. Num_Elements - 1);
-   D_B := new Float_Array (0 .. Num_Elements - 1);
-   D_C := new Float_Array (0 .. Num_Elements - 1);
+   D_A := new Float_Array (1 .. Num_Elements);
+   D_B := new Float_Array (1 .. Num_Elements);
+   D_C := new Float_Array (1 .. Num_Elements);
 
    Cuda.Runtime_Api.Memcpy
      (Dst   => D_A.all'Address,
       Src   => H_A.all'Address,
-      Count => Size,
+      Count => D_A.all'Size / 8,
       Kind  => Memcpy_Host_To_Device);
 
    Cuda.Runtime_Api.Memcpy
      (Dst   => D_B.all'Address,
       Src   => H_B.all'Address,
-      Count => Size,
+      Count => D_B.all'Size / 8.
       Kind  => Memcpy_Host_To_Device);
 
-   Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img & " blocks of " & Threads_Per_Block'Img & "  threads");
+   Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
+               " blocks of " & Threads_Per_Block'Img & "  threads");
 
    pragma CUDA_Execution
      (Add (D_A.all, D_B.all, D_C.all, Num_Elements,
@@ -77,7 +78,7 @@ begin
    Cuda.Runtime_Api.Memcpy
      (Dst   => H_C.all'Address,
       Src   => D_C.all'Address,
-      Count => Size,
+      Count => D_C.all'Size / 8,
       Kind  => Memcpy_Device_To_Host);
 
    for I in D_A.all'Range loop
