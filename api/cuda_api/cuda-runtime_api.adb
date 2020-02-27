@@ -30,18 +30,18 @@ package body CUDA.Runtime_Api is
       function Nctaid_X return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.nctaid.x";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.x";
       function Nctaid_Y return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.nctaid.y";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.y";
       function Nctaid_Z return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.nctaid.z";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.z";
 
    begin
       return (Nctaid_X, Nctaid_Y, Nctaid_Z);
@@ -52,18 +52,18 @@ package body CUDA.Runtime_Api is
       function Ctaid_X return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ctid.x";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.ctaid.x";
       function Ctaid_Y return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ctid.y";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.ctaid.y";
       function Ctaid_Z return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ctid.z";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.ctaid.z";
 
    begin
       return (Ctaid_X, Ctaid_Y, Ctaid_Z);
@@ -74,18 +74,18 @@ package body CUDA.Runtime_Api is
       function Ntid_X return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ntid.x";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.ntid.x";
       function Ntid_Y return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ntid.y";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.ntid.y";
       function Ntid_Z return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.ntid.z";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.ntid.z";
 
    begin
       return (Ntid_X, Ntid_Y, Ntid_Z);
@@ -96,18 +96,18 @@ package body CUDA.Runtime_Api is
       function Tid_X return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.tid.x";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.tid.x";
       function Tid_Y return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.tid.y";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.tid.y";
       function Tid_Z return Interfaces.C.unsigned with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.tid.z";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.tid.z";
 
    begin
       return (Tid_X, Tid_Y, Tid_Z);
@@ -118,8 +118,8 @@ package body CUDA.Runtime_Api is
       function Wrapsize return Interfaces.C.int with
          Inline,
          Import,
-         Convention    => Builtin,
-         External_Name => "nvvm.read.ptx.sreg.wrapsize";
+         Convention    => C,
+         External_Name => "*llvm.nvvm.read.ptx.sreg.wrapsize";
 
    begin
       return Wrapsize;
