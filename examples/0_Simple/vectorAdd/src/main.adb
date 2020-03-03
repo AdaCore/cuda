@@ -60,7 +60,7 @@ begin
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
-   pragma CUDA_Execution
+   pragma CUDA_Execute
      (Add (D_A.all, D_B.all, D_C.all, Num_Elements,
       (Blocks_Per_Grid, 1, 1),
       (Threads_Per_Block, 1, 1)));
