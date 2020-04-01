@@ -1,8 +1,10 @@
-project CUDA is
+with "../../../api/cuda";
 
-   for Source_Dirs use ("cuda_api", "cuda_raw_binding");
+project Main is
 
+   for Source_Dirs use ("src");
    for Object_Dir use "obj";
+   for Main use ("main.adb") & project'Main;
 
    package Compiler is
       for Switches ("Ada") use ("-g", "-gnatp");
@@ -12,4 +14,5 @@ project CUDA is
       for Default_Switches ("ada") use ("-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/local/cuda/targets/x86_64-linux/lib", "-lcudadevrt","-lcudart_static", "-lrt", "-lpthread", "-ldl");
    end Linker;
 
-end CUDA;
+end Main;
+
