@@ -42,10 +42,6 @@ package CUDA.Internal is
             External_Name => "__cudaPushCallConfiguration";
 
    procedure Pop_Call_Configuration 
-      --  (Grid_Dim : vector_types.dim3;
-      --   Block_Dim : vector_types.dim3;
-      --   Shared_Mem : crtdefs.Size_T;
-      --   Stream : Driver_Types.Stream_T)
       (Grid_Dim : System.Address;
        Block_Dim : System.Address;
        Shared_Mem : System.Address;
