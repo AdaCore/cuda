@@ -1,0 +1,140 @@
+import ada.wrappers;
+import ada.transformations;
+
+wrap wrap_ada_specs ();
+
+match DefiningName ()
+wrap w_DefiningName (normalize_ada_name (self));
+
+match DefiningName ("cuda(?<n>.*)")
+wrap w_DefiningName (normalize_ada_name (n));
+
+match DefiningName ("(?<n>.*)_h")
+wrap w_DefiningName ("CUDA." & normalize_ada_name (n));
+
+match DefiningName ("cuda_(?<n>.*)_h")
+wrap w_DefiningName ("CUDA." & normalize_ada_name (n));
+
+match DefiningName ("^cudaArray(.*)")
+wrap w_DefiningName ("CUDA_Array\1");
+
+match DefiningName ("cudaExtent") and parent (TypeDecl ())
+wrap w_DefiningName ("Extent_T");
+
+match DefiningName ("^cudaMemoryType$") and parent (TypeDecl ())
+wrap w_DefiningName ("Memory_Type_T");
+
+match ParamSpec() 
+   and f_type_expr ("Interfaces.C.Strings.chars_ptr") 
+wrap chars_into_string ();
+
+match SubpDecl() 
+    and child (f_subp_kind ("function")) 
+    and p_subp_decl_spec.p_returns ("Interfaces.C.Strings.chars_ptr")
+wrap chars_into_string ();
+
+match ObjectDecl(child (DefiningName ("^cuda(Error.*)$")))
+wrap error_code_into_exception ("CUDA", "Exception_Registry", "\1"); 
+
+match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) {
+    match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$")
+        wrap constant_into_enumeration (
+            "Surface_Type", 
+            normalize_ada_name ("\1") & "_\2_" & normalize_ada_name ("\3"));
+    else match d ("^cuda(SurfaceType.*)(1D|2D|3D)$")
+        wrap constant_into_enumeration (
+            "Surface_Type", 
+            normalize_ada_name ("\1") & "_\2");
+    else match d ("^cuda(SurfaceType.*)$")
+        wrap constant_into_enumeration (
+            "Surface_Type", 
+            normalize_ada_name ("\1"));
+}
+
+match SubpDecl ()
+   and child (f_subp_kind ("function")) 
+   and p_subp_decl_spec.p_returns ("driver_types_h.cudaError_t")
+   and not p_defining_name ("cudaPeekAtLastError|cudaGetLastError")
+wrap return_into_exception ("CUDA", "Exception_Registry");
+
+match ParamSpec ("access .*")
+wrap access_into_out ();
+
+# doesn't work yet, chaining procedure => function => procedure transformation
+# got the transformations lost (initial transformation is return to exception)
+#match SubpDecl (p_defining_name (".*Get.*")) 
+#    and child (p: ParamSpec (not prev (ParamSpec ()) and "access .*"))
+#wrap access_into_return (p);
+
+#match ParamSpec ("event.*:.*System.Address")
+#wrap addresss_into_return ("CUDA.Driver_Types.Event_T");
+
+#        Wrap
+#        (Match => Parent (Subp_Decl ("^cudaMalloc$")) and Parameter_Position (0),
+#         Transform =>
+#           Pre_Call_Decl ("Tmp : aliased System.Address;") &
+#           Actual ("Tmp'Address") &
+#           Result_Expr ("Tmp") &
+#           Result_Subtype_Indication ("System.Address"))
+
+match PackageDecl (p_defining_name ("cuda_runtime_api_h"))
+weave w_PackageDecl (
+    spec_content => """
+        function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
+        function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
+        function Block_Dim return CUDA.Vector_Types.Dim3  with Inline;
+        function Thread_Idx return CUDA.Vector_Types.Uint3 with Inline;
+        function Wrap_Size return Interfaces.C.Int with Inline;""",
+    
+    body_content => """
+        function Grid_Dim return CUDA.Vector_Types.Dim3 is
+            function Nctaid_X return Interfaces.C.unsigned 
+               with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.x";
+            function Nctaid_Y return Interfaces.C.unsigned 
+               with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.y";
+            function Nctaid_Z return Interfaces.C.unsigned 
+               with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.z";
+        begin
+            return (Nctaid_X, Nctaid_Y, Nctaid_Z);
+        end Grid_Dim;
+
+        function Block_Idx return CUDA.Vector_Types.Uint3 is
+            function Ctaid_X return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.ctaid.x";
+            function Ctaid_Y return Interfaces.C.unsigned
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.ctaid.y";
+            function Ctaid_Z return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.ctaid.z";
+        begin
+            return (Ctaid_X, Ctaid_Y, Ctaid_Z);
+        end Block_Idx;
+
+        function Block_Dim return CUDA.Vector_Types.Dim3 is 
+            function Ntid_X return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.ntid.x";
+            function Ntid_Y return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.ntid.y";
+            function Ntid_Z return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.ntid.z";
+        begin
+            return (Ntid_X, Ntid_Y, Ntid_Z);
+        end Block_Dim;
+
+        function Thread_Idx return CUDA.Vector_Types.Uint3 is
+            function Tid_X return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.tid.x";
+            function Tid_Y return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.tid.y";
+            function Tid_Z return Interfaces.C.unsigned 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.tid.z";
+        begin
+            return (Tid_X, Tid_Y, Tid_Z);
+        end Thread_Idx;
+
+        function Wrap_Size return Interfaces.C.Int is
+            function Wrapsize return Interfaces.C.Int 
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.wrapsize";
+        begin
+            return Wrapsize;
+        end Wrap_Size;"""
+);

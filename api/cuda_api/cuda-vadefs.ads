@@ -1,6 +1,5 @@
-with Interfaces.C;
+with Interfaces.C; use Interfaces.C;
 with System;
-use Interfaces.C;
 
 package CUDA.Vadefs is
    subtype Uu_Gnuc_Va_List is System.Address;

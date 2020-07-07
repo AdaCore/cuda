@@ -1,9 +1,10 @@
 pragma Ada_2012;
 pragma Style_Checks (Off);
+pragma Warnings ("U");
 
 with Interfaces.C; use Interfaces.C;
 with System;
-with crtdefs_h;
+with corecrt_h;
 with Interfaces.C.Extensions;
 with vector_types_h;
 
@@ -235,23 +236,23 @@ package driver_types_h is
 
    type cudaPitchedPtr is record
       ptr : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1047
-      pitch : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1048
-      xsize : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1049
-      ysize : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1050
+      pitch : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1048
+      xsize : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1049
+      ysize : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1050
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1045
 
    type cudaExtent is record
-      width : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1060
-      height : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1061
-      depth : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1062
+      width : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1060
+      height : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1061
+      depth : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1062
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1058
 
    type cudaPos is record
-      x : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1072
-      y : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1073
-      z : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1074
+      x : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1072
+      y : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1073
+      z : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1074
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1070
 
@@ -282,11 +283,11 @@ package driver_types_h is
 
    type cudaMemsetParams is record
       dst : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1116
-      pitch : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1117
+      pitch : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1117
       value : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1118
       elementSize : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1119
-      width : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1120
-      height : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1121
+      width : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1120
+      height : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1121
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1115
 
@@ -380,53 +381,53 @@ package driver_types_h is
       cudaResViewFormatUnsignedBlockCompressed7)
    with Convention => C;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1218
 
-   type anon985_c_array_struct is record
+   type anon985_struct987 is record
       c_array : cudaArray_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1265
    end record
    with Convention => C_Pass_By_Copy;
-   type anon985_mipmap_struct is record
+   type anon985_struct988 is record
       mipmap : cudaMipmappedArray_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1268
    end record
    with Convention => C_Pass_By_Copy;
-   type anon985_linear_struct is record
+   type anon985_struct989 is record
       devPtr : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1271
       desc : aliased cudaChannelFormatDesc;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1272
-      sizeInBytes : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1273
+      sizeInBytes : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1273
    end record
    with Convention => C_Pass_By_Copy;
-   type anon985_pitch2D_struct is record
+   type anon985_struct990 is record
       devPtr : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1276
       desc : aliased cudaChannelFormatDesc;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1277
-      width : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1278
-      height : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1279
-      pitchInBytes : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1280
+      width : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1278
+      height : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1279
+      pitchInBytes : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1280
    end record
    with Convention => C_Pass_By_Copy;
-   type anon985_res_union (discr : unsigned := 0) is record
+   type anon985_union986 (discr : unsigned := 0) is record
       case discr is
          when 0 =>
-            c_array : aliased anon985_c_array_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1266
+            c_array : aliased anon985_struct987;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1266
          when 1 =>
-            mipmap : aliased anon985_mipmap_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1269
+            mipmap : aliased anon985_struct988;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1269
          when 2 =>
-            linear : aliased anon985_linear_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1274
+            linear : aliased anon985_struct989;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1274
          when others =>
-            pitch2D : aliased anon985_pitch2D_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1281
+            pitch2D : aliased anon985_struct990;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1281
       end case;
    end record
    with Convention => C_Pass_By_Copy,
         Unchecked_Union => True;
    type cudaResourceDesc is record
       resType : aliased cudaResourceType;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1261
-      res : aliased anon985_res_union;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1282
+      res : aliased anon985_union986;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1282
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1260
 
    type cudaResourceViewDesc is record
       format : aliased cudaResourceViewFormat;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1290
-      width : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1291
-      height : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1292
-      depth : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1293
+      width : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1291
+      height : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1292
+      depth : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1293
       firstMipmapLevel : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1294
       lastMipmapLevel : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1295
       firstLayer : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1296
@@ -445,9 +446,9 @@ package driver_types_h is
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1303
 
    type cudaFuncAttributes is record
-      sharedSizeBytes : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1365
-      constSizeBytes : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1371
-      localSizeBytes : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1376
+      sharedSizeBytes : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1365
+      constSizeBytes : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1371
+      localSizeBytes : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1376
       maxThreadsPerBlock : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1383
       numRegs : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1388
       ptxVersion : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1395
@@ -624,9 +625,9 @@ package driver_types_h is
    cudaDevP2PAttrNativeAtomicSupported : constant unsigned := 3;
    cudaDevP2PAttrCudaArrayAccessSupported : constant unsigned := 4;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1636
 
-   subtype anon1005_bytes_array is Interfaces.C.char_array (0 .. 15);
+   subtype anon1005_array1007 is Interfaces.C.char_array (0 .. 15);
    type CUuuid_st is record
-      bytes : aliased anon1005_bytes_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1649
+      bytes : aliased anon1005_array1007;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1649
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1648
 
@@ -634,43 +635,29 @@ package driver_types_h is
 
    subtype cudaUUID_t is CUuuid_st;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1653
 
-   subtype anon1010_name_array is Interfaces.C.char_array (0 .. 255);
-   subtype anon1010_luid_array is Interfaces.C.char_array (0 .. 7);
-   type anon1010_maxThreadsDim_array is array (0 .. 2) of aliased int;
-   type anon1010_maxGridSize_array is array (0 .. 2) of aliased int;
-   type anon1010_maxTexture2D_array is array (0 .. 1) of aliased int;
-   type anon1010_maxTexture2DMipmap_array is array (0 .. 1) of aliased int;
-   type anon1010_maxTexture2DLinear_array is array (0 .. 2) of aliased int;
-   type anon1010_maxTexture2DGather_array is array (0 .. 1) of aliased int;
-   type anon1010_maxTexture3D_array is array (0 .. 2) of aliased int;
-   type anon1010_maxTexture3DAlt_array is array (0 .. 2) of aliased int;
-   type anon1010_maxTexture1DLayered_array is array (0 .. 1) of aliased int;
-   type anon1010_maxTexture2DLayered_array is array (0 .. 2) of aliased int;
-   type anon1010_maxTextureCubemapLayered_array is array (0 .. 1) of aliased int;
-   type anon1010_maxSurface2D_array is array (0 .. 1) of aliased int;
-   type anon1010_maxSurface3D_array is array (0 .. 2) of aliased int;
-   type anon1010_maxSurface1DLayered_array is array (0 .. 1) of aliased int;
-   type anon1010_maxSurface2DLayered_array is array (0 .. 2) of aliased int;
-   type anon1010_maxSurfaceCubemapLayered_array is array (0 .. 1) of aliased int;
+   subtype anon1010_array1012 is Interfaces.C.char_array (0 .. 255);
+   subtype anon1010_array1014 is Interfaces.C.char_array (0 .. 7);
+   type anon1010_array1016 is array (0 .. 2) of aliased int;
+   type anon1010_array1018 is array (0 .. 1) of aliased int;
    type cudaDeviceProp is record
-      name : aliased anon1010_name_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1660
+      name : aliased anon1010_array1012;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1660
       uuid : aliased cudaUUID_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1661
-      luid : aliased anon1010_luid_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1662
+      luid : aliased anon1010_array1014;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1662
       luidDeviceNodeMask : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1663
-      totalGlobalMem : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1664
-      sharedMemPerBlock : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1665
+      totalGlobalMem : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1664
+      sharedMemPerBlock : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1665
       regsPerBlock : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1666
       warpSize : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1667
-      memPitch : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1668
+      memPitch : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1668
       maxThreadsPerBlock : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1669
-      maxThreadsDim : aliased anon1010_maxThreadsDim_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1670
-      maxGridSize : aliased anon1010_maxGridSize_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1671
+      maxThreadsDim : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1670
+      maxGridSize : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1671
       clockRate : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1672
-      totalConstMem : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1673
+      totalConstMem : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1673
       major : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1674
       minor : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1675
-      textureAlignment : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1676
-      texturePitchAlignment : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1677
+      textureAlignment : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1676
+      texturePitchAlignment : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1677
       deviceOverlap : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1678
       multiProcessorCount : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1679
       kernelExecTimeoutEnabled : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1680
@@ -680,24 +667,24 @@ package driver_types_h is
       maxTexture1D : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1684
       maxTexture1DMipmap : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1685
       maxTexture1DLinear : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1686
-      maxTexture2D : aliased anon1010_maxTexture2D_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1687
-      maxTexture2DMipmap : aliased anon1010_maxTexture2DMipmap_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1688
-      maxTexture2DLinear : aliased anon1010_maxTexture2DLinear_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1689
-      maxTexture2DGather : aliased anon1010_maxTexture2DGather_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1690
-      maxTexture3D : aliased anon1010_maxTexture3D_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1691
-      maxTexture3DAlt : aliased anon1010_maxTexture3DAlt_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1692
+      maxTexture2D : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1687
+      maxTexture2DMipmap : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1688
+      maxTexture2DLinear : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1689
+      maxTexture2DGather : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1690
+      maxTexture3D : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1691
+      maxTexture3DAlt : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1692
       maxTextureCubemap : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1693
-      maxTexture1DLayered : aliased anon1010_maxTexture1DLayered_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1694
-      maxTexture2DLayered : aliased anon1010_maxTexture2DLayered_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1695
-      maxTextureCubemapLayered : aliased anon1010_maxTextureCubemapLayered_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1696
+      maxTexture1DLayered : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1694
+      maxTexture2DLayered : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1695
+      maxTextureCubemapLayered : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1696
       maxSurface1D : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1697
-      maxSurface2D : aliased anon1010_maxSurface2D_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1698
-      maxSurface3D : aliased anon1010_maxSurface3D_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1699
-      maxSurface1DLayered : aliased anon1010_maxSurface1DLayered_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1700
-      maxSurface2DLayered : aliased anon1010_maxSurface2DLayered_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1701
+      maxSurface2D : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1698
+      maxSurface3D : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1699
+      maxSurface1DLayered : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1700
+      maxSurface2DLayered : aliased anon1010_array1016;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1701
       maxSurfaceCubemap : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1702
-      maxSurfaceCubemapLayered : aliased anon1010_maxSurfaceCubemapLayered_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1703
-      surfaceAlignment : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1704
+      maxSurfaceCubemapLayered : aliased anon1010_array1018;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1703
+      surfaceAlignment : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1704
       concurrentKernels : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1705
       ECCEnabled : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1706
       pciBusID : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1707
@@ -713,7 +700,7 @@ package driver_types_h is
       streamPrioritiesSupported : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1717
       globalL1CacheSupported : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1718
       localL1CacheSupported : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1719
-      sharedMemPerMultiprocessor : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1720
+      sharedMemPerMultiprocessor : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1720
       regsPerMultiprocessor : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1721
       managedMemory : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1722
       isMultiGpuBoard : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1723
@@ -726,23 +713,23 @@ package driver_types_h is
       canUseHostPointerForRegisteredMem : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1730
       cooperativeLaunch : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1731
       cooperativeMultiDeviceLaunch : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1732
-      sharedMemPerBlockOptin : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1733
+      sharedMemPerBlockOptin : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1733
       pageableMemoryAccessUsesHostPageTables : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1734
       directManagedMemAccessFromHost : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1735
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1658
 
-   subtype anon1019_reserved_array is Interfaces.C.char_array (0 .. 63);
+   subtype anon1019_array1021 is Interfaces.C.char_array (0 .. 63);
    type cudaIpcEventHandle_st is record
-      reserved : aliased anon1019_reserved_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1828
+      reserved : aliased anon1019_array1021;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1828
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1826
 
    subtype cudaIpcEventHandle_t is cudaIpcEventHandle_st;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1829
 
-   subtype anon1023_reserved_array is Interfaces.C.char_array (0 .. 63);
+   subtype anon1023_array1021 is Interfaces.C.char_array (0 .. 63);
    type cudaIpcMemHandle_st is record
-      reserved : aliased anon1023_reserved_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1836
+      reserved : aliased anon1023_array1021;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1836
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1834
 
@@ -758,17 +745,17 @@ package driver_types_h is
    cudaExternalMemoryHandleTypeD3D11ResourceKmt : constant unsigned := 7;
    cudaExternalMemoryHandleTypeNvSciBuf : constant unsigned := 8;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1842
 
-   type anon1026_win32_struct is record
+   type anon1026_struct1028 is record
       handle : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1948
       name : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1953
    end record
    with Convention => C_Pass_By_Copy;
-   type anon1026_handle_union (discr : unsigned := 0) is record
+   type anon1026_union1027 (discr : unsigned := 0) is record
       case discr is
          when 0 =>
             fd : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1928
          when 1 =>
-            win32 : aliased anon1026_win32_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1954
+            win32 : aliased anon1026_struct1028;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1954
          when others =>
             nvSciBufObject : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1959
       end case;
@@ -777,7 +764,7 @@ package driver_types_h is
         Unchecked_Union => True;
    type cudaExternalMemoryHandleDesc is record
       c_type : aliased cudaExternalMemoryHandleType;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1921
-      handle : aliased anon1026_handle_union;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1960
+      handle : aliased anon1026_union1027;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1960
       size : aliased Extensions.unsigned_long_long;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1964
       flags : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:1968
    end record
@@ -809,17 +796,17 @@ package driver_types_h is
    cudaExternalSemaphoreHandleTypeKeyedMutex : constant unsigned := 7;
    cudaExternalSemaphoreHandleTypeKeyedMutexKmt : constant unsigned := 8;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2020
 
-   type anon1032_win32_struct is record
+   type anon1032_struct1034 is record
       handle : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2087
       name : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2092
    end record
    with Convention => C_Pass_By_Copy;
-   type anon1032_handle_union (discr : unsigned := 0) is record
+   type anon1032_union1033 (discr : unsigned := 0) is record
       case discr is
          when 0 =>
             fd : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2068
          when 1 =>
-            win32 : aliased anon1032_win32_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2093
+            win32 : aliased anon1032_struct1034;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2093
          when others =>
             nvSciSyncObj : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2097
       end case;
@@ -828,16 +815,16 @@ package driver_types_h is
         Unchecked_Union => True;
    type cudaExternalSemaphoreHandleDesc is record
       c_type : aliased cudaExternalSemaphoreHandleType;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2062
-      handle : aliased anon1032_handle_union;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2098
+      handle : aliased anon1032_union1033;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2098
       flags : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2102
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2058
 
-   type anon1035_fence_struct is record
+   type anon1035_struct1037 is record
       value : aliased Extensions.unsigned_long_long;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2117
    end record
    with Convention => C_Pass_By_Copy;
-   type anon1035_nvSciSync_union (discr : unsigned := 0) is record
+   type anon1035_union1038 (discr : unsigned := 0) is record
       case discr is
          when 0 =>
             fence : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2124
@@ -847,27 +834,27 @@ package driver_types_h is
    end record
    with Convention => C_Pass_By_Copy,
         Unchecked_Union => True;
-   type anon1035_keyedMutex_struct is record
+   type anon1035_struct1039 is record
       key : aliased Extensions.unsigned_long_long;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2134
    end record
    with Convention => C_Pass_By_Copy;
-   type anon1035_params_struct is record
-      fence : aliased anon1035_fence_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2118
-      nvSciSync : aliased anon1035_nvSciSync_union;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2126
-      keyedMutex : aliased anon1035_keyedMutex_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2135
+   type anon1035_struct1036 is record
+      fence : aliased anon1035_struct1037;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2118
+      nvSciSync : aliased anon1035_union1038;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2126
+      keyedMutex : aliased anon1035_struct1039;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2135
    end record
    with Convention => C_Pass_By_Copy;
    type cudaExternalSemaphoreSignalParams is record
-      params : aliased anon1035_params_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2136
+      params : aliased anon1035_struct1036;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2136
       flags : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2147
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2108
 
-   type anon1040_fence_struct is record
+   type anon1040_struct1042 is record
       value : aliased Extensions.unsigned_long_long;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2162
    end record
    with Convention => C_Pass_By_Copy;
-   type anon1040_nvSciSync_union (discr : unsigned := 0) is record
+   type anon1040_union1043 (discr : unsigned := 0) is record
       case discr is
          when 0 =>
             fence : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2169
@@ -877,19 +864,19 @@ package driver_types_h is
    end record
    with Convention => C_Pass_By_Copy,
         Unchecked_Union => True;
-   type anon1040_keyedMutex_struct is record
+   type anon1040_struct1044 is record
       key : aliased Extensions.unsigned_long_long;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2179
       timeoutMs : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2183
    end record
    with Convention => C_Pass_By_Copy;
-   type anon1040_params_struct is record
-      fence : aliased anon1040_fence_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2163
-      nvSciSync : aliased anon1040_nvSciSync_union;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2171
-      keyedMutex : aliased anon1040_keyedMutex_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2184
+   type anon1040_struct1041 is record
+      fence : aliased anon1040_struct1042;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2163
+      nvSciSync : aliased anon1040_union1043;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2171
+      keyedMutex : aliased anon1040_struct1044;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2184
    end record
    with Convention => C_Pass_By_Copy;
    type cudaExternalSemaphoreWaitParams is record
-      params : aliased anon1040_params_struct;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2185
+      params : aliased anon1040_struct1041;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2185
       flags : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2196
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2153
@@ -935,7 +922,7 @@ package driver_types_h is
       gridDim : aliased vector_types_h.dim3;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2266
       blockDim : aliased vector_types_h.dim3;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2267
       args : System.Address;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2268
-      sharedMem : aliased crtdefs_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2269
+      sharedMem : aliased corecrt_h.size_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2269
       stream : cudaStream_t;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2270
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/driver_types.h:2263

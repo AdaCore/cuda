@@ -1,5 +1,6 @@
 pragma Ada_2012;
 pragma Style_Checks (Off);
+pragma Warnings ("U");
 
 with Interfaces.C; use Interfaces.C;
 with driver_types_h;
@@ -32,12 +33,12 @@ package texture_types_h is
       cudaReadModeNormalizedFloat)
    with Convention => C;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:104
 
-   type anon1082_addressMode_array is array (0 .. 2) of aliased cudaTextureAddressMode;
-   type anon1082_uu_cudaReserved_array is array (0 .. 14) of aliased int;
+   type anon1082_array1083 is array (0 .. 2) of aliased cudaTextureAddressMode;
+   type anon1082_array1085 is array (0 .. 14) of aliased int;
    type textureReference is record
       normalized : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:118
       filterMode : aliased cudaTextureFilterMode;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:122
-      addressMode : aliased anon1082_addressMode_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:126
+      addressMode : aliased anon1082_array1083;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:126
       channelDesc : aliased driver_types_h.cudaChannelFormatDesc;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:130
       sRGB : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:134
       maxAnisotropy : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:138
@@ -45,18 +46,18 @@ package texture_types_h is
       mipmapLevelBias : aliased float;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:146
       minMipmapLevelClamp : aliased float;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:150
       maxMipmapLevelClamp : aliased float;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:154
-      uu_cudaReserved : aliased anon1082_uu_cudaReserved_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:155
+      uu_cudaReserved : aliased anon1082_array1085;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:155
    end record
    with Convention => C_Pass_By_Copy;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:113
 
-   type anon1086_addressMode_array is array (0 .. 2) of aliased cudaTextureAddressMode;
-   type anon1086_borderColor_array is array (0 .. 3) of aliased float;
+   type anon1086_array1083 is array (0 .. 2) of aliased cudaTextureAddressMode;
+   type anon1086_array1088 is array (0 .. 3) of aliased float;
    type cudaTextureDesc is record
-      addressMode : aliased anon1086_addressMode_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:166
+      addressMode : aliased anon1086_array1083;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:166
       filterMode : aliased cudaTextureFilterMode;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:170
       readMode : aliased cudaTextureReadMode;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:174
       sRGB : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:178
-      borderColor : aliased anon1086_borderColor_array;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:182
+      borderColor : aliased anon1086_array1088;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:182
       normalizedCoords : aliased int;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:186
       maxAnisotropy : aliased unsigned;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:190
       mipmapFilterMode : aliased cudaTextureFilterMode;  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/texture_types.h:194

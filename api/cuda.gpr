@@ -4,4 +4,6 @@ project CUDA is
 
    for Object_Dir use "obj";
 
+   for Languages use ("Ada");
+
 end CUDA;

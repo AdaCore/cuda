@@ -1,118 +1,25 @@
-with crtdefs_h;
-with driver_types_h;
-with vector_types_h;
-use driver_types_h;
+with driver_types_h; use driver_types_h;
 
 package body CUDA.Driver_Types is
+
+   procedure Host_Fn_T_Gen (Arg1 : System.Address) is
+
+      Temp_local_1 : aliased System.Address with
+         Address => Arg1'Address,
+         Import;
+
+   begin
+      declare
+      begin
+         Temp_1 (Temp_local_1);
+
+         declare
+         begin
+            null;
+         end;
+      end;
+   end Host_Fn_T_Gen;
+
 begin
    null;
-   CUDA.Exception_Registry.Insert (1, Error_Invalid_Value'Identity);
-   CUDA.Exception_Registry.Insert (2, Error_Memory_Allocation'Identity);
-   CUDA.Exception_Registry.Insert (3, Error_Initialization_Error'Identity);
-   CUDA.Exception_Registry.Insert (4, Error_Cudart_Unloading'Identity);
-   CUDA.Exception_Registry.Insert (5, Error_Profiler_Disabled'Identity);
-   CUDA.Exception_Registry.Insert (6, Error_Profiler_Not_Initialized'Identity);
-   CUDA.Exception_Registry.Insert (7, Error_Profiler_Already_Started'Identity);
-   CUDA.Exception_Registry.Insert (8, Error_Profiler_Already_Stopped'Identity);
-   CUDA.Exception_Registry.Insert (9, Error_Invalid_Configuration'Identity);
-   CUDA.Exception_Registry.Insert (12, Error_Invalid_Pitch_Value'Identity);
-   CUDA.Exception_Registry.Insert (13, Error_Invalid_Symbol'Identity);
-   CUDA.Exception_Registry.Insert (16, Error_Invalid_Host_Pointer'Identity);
-   CUDA.Exception_Registry.Insert (17, Error_Invalid_Device_Pointer'Identity);
-   CUDA.Exception_Registry.Insert (18, Error_Invalid_Texture'Identity);
-   CUDA.Exception_Registry.Insert (19, Error_Invalid_Texture_Binding'Identity);
-   CUDA.Exception_Registry.Insert (20, Error_Invalid_Channel_Descriptor'Identity);
-   CUDA.Exception_Registry.Insert (21, Error_Invalid_Memcpy_Direction'Identity);
-   CUDA.Exception_Registry.Insert (22, Error_Address_Of_Constant'Identity);
-   CUDA.Exception_Registry.Insert (23, Error_Texture_Fetch_Failed'Identity);
-   CUDA.Exception_Registry.Insert (24, Error_Texture_Not_Bound'Identity);
-   CUDA.Exception_Registry.Insert (25, Error_Synchronization_Error'Identity);
-   CUDA.Exception_Registry.Insert (26, Error_Invalid_Filter_Setting'Identity);
-   CUDA.Exception_Registry.Insert (27, Error_Invalid_Norm_Setting'Identity);
-   CUDA.Exception_Registry.Insert (28, Error_Mixed_Device_Execution'Identity);
-   CUDA.Exception_Registry.Insert (31, Error_Not_Yet_Implemented'Identity);
-   CUDA.Exception_Registry.Insert (32, Error_Memory_Value_Too_Large'Identity);
-   CUDA.Exception_Registry.Insert (35, Error_Insufficient_Driver'Identity);
-   CUDA.Exception_Registry.Insert (37, Error_Invalid_Surface'Identity);
-   CUDA.Exception_Registry.Insert (43, Error_Duplicate_Variable_Name'Identity);
-   CUDA.Exception_Registry.Insert (44, Error_Duplicate_Texture_Name'Identity);
-   CUDA.Exception_Registry.Insert (45, Error_Duplicate_Surface_Name'Identity);
-   CUDA.Exception_Registry.Insert (46, Error_Devices_Unavailable'Identity);
-   CUDA.Exception_Registry.Insert (49, Error_Incompatible_Driver_Context'Identity);
-   CUDA.Exception_Registry.Insert (52, Error_Missing_Configuration'Identity);
-   CUDA.Exception_Registry.Insert (53, Error_Prior_Launch_Failure'Identity);
-   CUDA.Exception_Registry.Insert (65, Error_Launch_Max_Depth_Exceeded'Identity);
-   CUDA.Exception_Registry.Insert (66, Error_Launch_File_Scoped_Tex'Identity);
-   CUDA.Exception_Registry.Insert (67, Error_Launch_File_Scoped_Surf'Identity);
-   CUDA.Exception_Registry.Insert (68, Error_Sync_Depth_Exceeded'Identity);
-   CUDA.Exception_Registry.Insert (69, Error_Launch_Pending_Count_Exceeded'Identity);
-   CUDA.Exception_Registry.Insert (98, Error_Invalid_Device_Function'Identity);
-   CUDA.Exception_Registry.Insert (100, Error_No_Device'Identity);
-   CUDA.Exception_Registry.Insert (101, Error_Invalid_Device'Identity);
-   CUDA.Exception_Registry.Insert (127, Error_Startup_Failure'Identity);
-   CUDA.Exception_Registry.Insert (200, Error_Invalid_Kernel_Image'Identity);
-   CUDA.Exception_Registry.Insert (201, Error_Device_Uninitialized'Identity);
-   CUDA.Exception_Registry.Insert (205, Error_Map_Buffer_Object_Failed'Identity);
-   CUDA.Exception_Registry.Insert (206, Error_Unmap_Buffer_Object_Failed'Identity);
-   CUDA.Exception_Registry.Insert (207, Error_Array_Is_Mapped'Identity);
-   CUDA.Exception_Registry.Insert (208, Error_Already_Mapped'Identity);
-   CUDA.Exception_Registry.Insert (209, Error_No_Kernel_Image_For_Device'Identity);
-   CUDA.Exception_Registry.Insert (210, Error_Already_Acquired'Identity);
-   CUDA.Exception_Registry.Insert (211, Error_Not_Mapped'Identity);
-   CUDA.Exception_Registry.Insert (212, Error_Not_Mapped_As_Array'Identity);
-   CUDA.Exception_Registry.Insert (213, Error_Not_Mapped_As_Pointer'Identity);
-   CUDA.Exception_Registry.Insert (214, Error_ECCUncorrectable'Identity);
-   CUDA.Exception_Registry.Insert (215, Error_Unsupported_Limit'Identity);
-   CUDA.Exception_Registry.Insert (216, Error_Device_Already_In_Use'Identity);
-   CUDA.Exception_Registry.Insert (217, Error_Peer_Access_Unsupported'Identity);
-   CUDA.Exception_Registry.Insert (218, Error_Invalid_Ptx'Identity);
-   CUDA.Exception_Registry.Insert (219, Error_Invalid_Graphics_Context'Identity);
-   CUDA.Exception_Registry.Insert (220, Error_Nvlink_Uncorrectable'Identity);
-   CUDA.Exception_Registry.Insert (221, Error_Jit_Compiler_Not_Found'Identity);
-   CUDA.Exception_Registry.Insert (300, Error_Invalid_Source'Identity);
-   CUDA.Exception_Registry.Insert (301, Error_File_Not_Found'Identity);
-   CUDA.Exception_Registry.Insert (302, Error_Shared_Object_Symbol_Not_Found'Identity);
-   CUDA.Exception_Registry.Insert (303, Error_Shared_Object_Init_Failed'Identity);
-   CUDA.Exception_Registry.Insert (304, Error_Operating_System'Identity);
-   CUDA.Exception_Registry.Insert (400, Error_Invalid_Resource_Handle'Identity);
-   CUDA.Exception_Registry.Insert (401, Error_Illegal_State'Identity);
-   CUDA.Exception_Registry.Insert (500, Error_Symbol_Not_Found'Identity);
-   CUDA.Exception_Registry.Insert (600, Error_Not_Ready'Identity);
-   CUDA.Exception_Registry.Insert (700, Error_Illegal_Address'Identity);
-   CUDA.Exception_Registry.Insert (701, Error_Launch_Out_Of_Resources'Identity);
-   CUDA.Exception_Registry.Insert (702, Error_Launch_Timeout'Identity);
-   CUDA.Exception_Registry.Insert (703, Error_Launch_Incompatible_Texturing'Identity);
-   CUDA.Exception_Registry.Insert (704, Error_Peer_Access_Already_Enabled'Identity);
-   CUDA.Exception_Registry.Insert (705, Error_Peer_Access_Not_Enabled'Identity);
-   CUDA.Exception_Registry.Insert (708, Error_Set_On_Active_Process'Identity);
-   CUDA.Exception_Registry.Insert (709, Error_Context_Is_Destroyed'Identity);
-   CUDA.Exception_Registry.Insert (710, Error_Assert'Identity);
-   CUDA.Exception_Registry.Insert (711, Error_Too_Many_Peers'Identity);
-   CUDA.Exception_Registry.Insert (712, Error_Host_Memory_Already_Registered'Identity);
-   CUDA.Exception_Registry.Insert (713, Error_Host_Memory_Not_Registered'Identity);
-   CUDA.Exception_Registry.Insert (714, Error_Hardware_Stack_Error'Identity);
-   CUDA.Exception_Registry.Insert (715, Error_Illegal_Instruction'Identity);
-   CUDA.Exception_Registry.Insert (716, Error_Misaligned_Address'Identity);
-   CUDA.Exception_Registry.Insert (717, Error_Invalid_Address_Space'Identity);
-   CUDA.Exception_Registry.Insert (718, Error_Invalid_Pc'Identity);
-   CUDA.Exception_Registry.Insert (719, Error_Launch_Failure'Identity);
-   CUDA.Exception_Registry.Insert (720, Error_Cooperative_Launch_Too_Large'Identity);
-   CUDA.Exception_Registry.Insert (800, Error_Not_Permitted'Identity);
-   CUDA.Exception_Registry.Insert (801, Error_Not_Supported'Identity);
-   CUDA.Exception_Registry.Insert (802, Error_System_Not_Ready'Identity);
-   CUDA.Exception_Registry.Insert (803, Error_System_Driver_Mismatch'Identity);
-   CUDA.Exception_Registry.Insert (804, Error_Compat_Not_Supported_On_Device'Identity);
-   CUDA.Exception_Registry.Insert (900, Error_Stream_Capture_Unsupported'Identity);
-   CUDA.Exception_Registry.Insert (901, Error_Stream_Capture_Invalidated'Identity);
-   CUDA.Exception_Registry.Insert (902, Error_Stream_Capture_Merge'Identity);
-   CUDA.Exception_Registry.Insert (903, Error_Stream_Capture_Unmatched'Identity);
-   CUDA.Exception_Registry.Insert (904, Error_Stream_Capture_Unjoined'Identity);
-   CUDA.Exception_Registry.Insert (905, Error_Stream_Capture_Isolation'Identity);
-   CUDA.Exception_Registry.Insert (906, Error_Stream_Capture_Implicit'Identity);
-   CUDA.Exception_Registry.Insert (907, Error_Captured_Event'Identity);
-   CUDA.Exception_Registry.Insert (908, Error_Stream_Capture_Wrong_Thread'Identity);
-   CUDA.Exception_Registry.Insert (909, Error_Timeout'Identity);
-   CUDA.Exception_Registry.Insert (910, Error_Graph_Exec_Update_Failure'Identity);
-   CUDA.Exception_Registry.Insert (999, Error_Unknown'Identity);
-   CUDA.Exception_Registry.Insert (10_000, Error_Api_Failure_Base'Identity);
 end CUDA.Driver_Types;

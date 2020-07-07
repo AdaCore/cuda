@@ -1,9 +1,10 @@
 pragma Ada_2012;
 pragma Style_Checks (Off);
+pragma Warnings ("U");
 
 with Interfaces.C; use Interfaces.C;
 with driver_types_h;
-with crtdefs_h;
+with corecrt_h;
 with Interfaces.C.Strings;
 with System;
 with Interfaces.C.Extensions;
@@ -26,12 +27,12 @@ package cuda_runtime_api_h is
         Convention => C, 
         External_Name => "cudaDeviceSynchronize";
 
-   function cudaDeviceSetLimit (limit : driver_types_h.cudaLimit; value : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:386
+   function cudaDeviceSetLimit (limit : driver_types_h.cudaLimit; value : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:386
    with Import => True, 
         Convention => C, 
         External_Name => "cudaDeviceSetLimit";
 
-   function cudaDeviceGetLimit (pValue : access crtdefs_h.size_t; limit : driver_types_h.cudaLimit) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:420
+   function cudaDeviceGetLimit (pValue : access corecrt_h.size_t; limit : driver_types_h.cudaLimit) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:420
    with Import => True, 
         Convention => C, 
         External_Name => "cudaDeviceGetLimit";
@@ -112,12 +113,12 @@ package cuda_runtime_api_h is
         Convention => C, 
         External_Name => "cudaThreadSynchronize";
 
-   function cudaThreadSetLimit (limit : driver_types_h.cudaLimit; value : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:1006
+   function cudaThreadSetLimit (limit : driver_types_h.cudaLimit; value : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:1006
    with Import => True, 
         Convention => C, 
         External_Name => "cudaThreadSetLimit";
 
-   function cudaThreadGetLimit (pValue : access crtdefs_h.size_t; limit : driver_types_h.cudaLimit) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:1039
+   function cudaThreadGetLimit (pValue : access corecrt_h.size_t; limit : driver_types_h.cudaLimit) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:1039
    with Import => True, 
         Convention => C, 
         External_Name => "cudaThreadGetLimit";
@@ -286,7 +287,7 @@ package cuda_runtime_api_h is
    function cudaStreamAttachMemAsync
      (stream : driver_types_h.cudaStream_t;
       devPtr : System.Address;
-      length : crtdefs_h.size_t;
+      length : corecrt_h.size_t;
       flags : unsigned) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:2496
    with Import => True, 
         Convention => C, 
@@ -417,7 +418,7 @@ package cuda_runtime_api_h is
       gridDim : vector_types_h.dim3;
       blockDim : vector_types_h.dim3;
       args : System.Address;
-      sharedMem : crtdefs_h.size_t;
+      sharedMem : corecrt_h.size_t;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:3591
    with Import => True, 
         Convention => C, 
@@ -428,7 +429,7 @@ package cuda_runtime_api_h is
       gridDim : vector_types_h.dim3;
       blockDim : vector_types_h.dim3;
       args : System.Address;
-      sharedMem : crtdefs_h.size_t;
+      sharedMem : corecrt_h.size_t;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:3648
    with Import => True, 
         Convention => C, 
@@ -487,7 +488,7 @@ package cuda_runtime_api_h is
      (numBlocks : access int;
       func : System.Address;
       blockSize : int;
-      dynamicSMemSize : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4094
+      dynamicSMemSize : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4094
    with Import => True, 
         Convention => C, 
         External_Name => "cudaOccupancyMaxActiveBlocksPerMultiprocessor";
@@ -496,7 +497,7 @@ package cuda_runtime_api_h is
      (numBlocks : access int;
       func : System.Address;
       blockSize : int;
-      dynamicSMemSize : crtdefs_h.size_t;
+      dynamicSMemSize : corecrt_h.size_t;
       flags : unsigned) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4138
    with Import => True, 
         Convention => C, 
@@ -504,27 +505,27 @@ package cuda_runtime_api_h is
 
    function cudaMallocManaged
      (devPtr : System.Address;
-      size : crtdefs_h.size_t;
+      size : corecrt_h.size_t;
       flags : unsigned) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4258
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMallocManaged";
 
-   function cudaMalloc (devPtr : System.Address; size : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4289
+   function cudaMalloc (devPtr : System.Address; size : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4289
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMalloc";
 
-   function cudaMallocHost (ptr : System.Address; size : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4322
+   function cudaMallocHost (ptr : System.Address; size : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4322
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMallocHost";
 
    function cudaMallocPitch
      (devPtr : System.Address;
-      pitch : access crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4365
+      pitch : access corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4365
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMallocPitch";
@@ -532,8 +533,8 @@ package cuda_runtime_api_h is
    function cudaMallocArray
      (c_array : System.Address;
       desc : access constant driver_types_h.cudaChannelFormatDesc;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       flags : unsigned) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4411
    with Import => True, 
         Convention => C, 
@@ -561,7 +562,7 @@ package cuda_runtime_api_h is
 
    function cudaHostAlloc
      (pHost : System.Address;
-      size : crtdefs_h.size_t;
+      size : corecrt_h.size_t;
       flags : unsigned) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4575
    with Import => True, 
         Convention => C, 
@@ -569,7 +570,7 @@ package cuda_runtime_api_h is
 
    function cudaHostRegister
      (ptr : System.Address;
-      size : crtdefs_h.size_t;
+      size : corecrt_h.size_t;
       flags : unsigned) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:4659
    with Import => True, 
         Convention => C, 
@@ -645,7 +646,7 @@ package cuda_runtime_api_h is
         Convention => C, 
         External_Name => "cudaMemcpy3DPeerAsync";
 
-   function cudaMemGetInfo (free : access crtdefs_h.size_t; total : access crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5397
+   function cudaMemGetInfo (free : access corecrt_h.size_t; total : access corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5397
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMemGetInfo";
@@ -662,7 +663,7 @@ package cuda_runtime_api_h is
    function cudaMemcpy
      (dst : System.Address;
       src : System.Address;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5466
    with Import => True, 
         Convention => C, 
@@ -673,18 +674,18 @@ package cuda_runtime_api_h is
       dstDevice : int;
       src : System.Address;
       srcDevice : int;
-      count : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5501
+      count : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5501
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMemcpyPeer";
 
    function cudaMemcpy2D
      (dst : System.Address;
-      dpitch : crtdefs_h.size_t;
+      dpitch : corecrt_h.size_t;
       src : System.Address;
-      spitch : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      spitch : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5549
    with Import => True, 
         Convention => C, 
@@ -692,12 +693,12 @@ package cuda_runtime_api_h is
 
    function cudaMemcpy2DToArray
      (dst : driver_types_h.cudaArray_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
       src : System.Address;
-      spitch : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      spitch : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5598
    with Import => True, 
         Convention => C, 
@@ -705,12 +706,12 @@ package cuda_runtime_api_h is
 
    function cudaMemcpy2DFromArray
      (dst : System.Address;
-      dpitch : crtdefs_h.size_t;
+      dpitch : corecrt_h.size_t;
       src : driver_types_h.cudaArray_const_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5647
    with Import => True, 
         Convention => C, 
@@ -718,13 +719,13 @@ package cuda_runtime_api_h is
 
    function cudaMemcpy2DArrayToArray
      (dst : driver_types_h.cudaArray_t;
-      wOffsetDst : crtdefs_h.size_t;
-      hOffsetDst : crtdefs_h.size_t;
+      wOffsetDst : corecrt_h.size_t;
+      hOffsetDst : corecrt_h.size_t;
       src : driver_types_h.cudaArray_const_t;
-      wOffsetSrc : crtdefs_h.size_t;
-      hOffsetSrc : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      wOffsetSrc : corecrt_h.size_t;
+      hOffsetSrc : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5694
    with Import => True, 
         Convention => C, 
@@ -733,8 +734,8 @@ package cuda_runtime_api_h is
    function cudaMemcpyToSymbol
      (symbol : System.Address;
       src : System.Address;
-      count : crtdefs_h.size_t;
-      offset : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
+      offset : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5737
    with Import => True, 
         Convention => C, 
@@ -743,8 +744,8 @@ package cuda_runtime_api_h is
    function cudaMemcpyFromSymbol
      (dst : System.Address;
       symbol : System.Address;
-      count : crtdefs_h.size_t;
-      offset : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
+      offset : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5780
    with Import => True, 
         Convention => C, 
@@ -753,7 +754,7 @@ package cuda_runtime_api_h is
    function cudaMemcpyAsync
      (dst : System.Address;
       src : System.Address;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5836
    with Import => True, 
@@ -765,7 +766,7 @@ package cuda_runtime_api_h is
       dstDevice : int;
       src : System.Address;
       srcDevice : int;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5871
    with Import => True, 
         Convention => C, 
@@ -773,11 +774,11 @@ package cuda_runtime_api_h is
 
    function cudaMemcpy2DAsync
      (dst : System.Address;
-      dpitch : crtdefs_h.size_t;
+      dpitch : corecrt_h.size_t;
       src : System.Address;
-      spitch : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      spitch : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5933
    with Import => True, 
@@ -786,12 +787,12 @@ package cuda_runtime_api_h is
 
    function cudaMemcpy2DToArrayAsync
      (dst : driver_types_h.cudaArray_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
       src : System.Address;
-      spitch : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      spitch : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:5990
    with Import => True, 
@@ -800,12 +801,12 @@ package cuda_runtime_api_h is
 
    function cudaMemcpy2DFromArrayAsync
      (dst : System.Address;
-      dpitch : crtdefs_h.size_t;
+      dpitch : corecrt_h.size_t;
       src : driver_types_h.cudaArray_const_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6046
    with Import => True, 
@@ -815,8 +816,8 @@ package cuda_runtime_api_h is
    function cudaMemcpyToSymbolAsync
      (symbol : System.Address;
       src : System.Address;
-      count : crtdefs_h.size_t;
-      offset : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
+      offset : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6097
    with Import => True, 
@@ -826,8 +827,8 @@ package cuda_runtime_api_h is
    function cudaMemcpyFromSymbolAsync
      (dst : System.Address;
       symbol : System.Address;
-      count : crtdefs_h.size_t;
-      offset : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
+      offset : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6148
    with Import => True, 
@@ -837,17 +838,17 @@ package cuda_runtime_api_h is
    function cudaMemset
      (devPtr : System.Address;
       value : int;
-      count : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6177
+      count : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6177
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMemset";
 
    function cudaMemset2D
      (devPtr : System.Address;
-      pitch : crtdefs_h.size_t;
+      pitch : corecrt_h.size_t;
       value : int;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6211
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6211
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMemset2D";
@@ -863,7 +864,7 @@ package cuda_runtime_api_h is
    function cudaMemsetAsync
      (devPtr : System.Address;
       value : int;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6291
    with Import => True, 
         Convention => C, 
@@ -871,10 +872,10 @@ package cuda_runtime_api_h is
 
    function cudaMemset2DAsync
      (devPtr : System.Address;
-      pitch : crtdefs_h.size_t;
+      pitch : corecrt_h.size_t;
       value : int;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6332
    with Import => True, 
         Convention => C, 
@@ -894,14 +895,14 @@ package cuda_runtime_api_h is
         Convention => C, 
         External_Name => "cudaGetSymbolAddress";
 
-   function cudaGetSymbolSize (size : access crtdefs_h.size_t; symbol : System.Address) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6438
+   function cudaGetSymbolSize (size : access corecrt_h.size_t; symbol : System.Address) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6438
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGetSymbolSize";
 
    function cudaMemPrefetchAsync
      (devPtr : System.Address;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       dstDevice : int;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6508
    with Import => True, 
@@ -910,7 +911,7 @@ package cuda_runtime_api_h is
 
    function cudaMemAdvise
      (devPtr : System.Address;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       advice : driver_types_h.cudaMemoryAdvise;
       device : int) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6624
    with Import => True, 
@@ -919,31 +920,31 @@ package cuda_runtime_api_h is
 
    function cudaMemRangeGetAttribute
      (data : System.Address;
-      dataSize : crtdefs_h.size_t;
+      dataSize : corecrt_h.size_t;
       attribute : driver_types_h.cudaMemRangeAttribute;
       devPtr : System.Address;
-      count : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6683
+      count : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6683
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMemRangeGetAttribute";
 
    function cudaMemRangeGetAttributes
      (data : System.Address;
-      dataSizes : access crtdefs_h.size_t;
+      dataSizes : access corecrt_h.size_t;
       attributes : access driver_types_h.cudaMemRangeAttribute;
-      numAttributes : crtdefs_h.size_t;
+      numAttributes : corecrt_h.size_t;
       devPtr : System.Address;
-      count : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6722
+      count : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6722
    with Import => True, 
         Convention => C, 
         External_Name => "cudaMemRangeGetAttributes";
 
    function cudaMemcpyToArray
      (dst : driver_types_h.cudaArray_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
       src : System.Address;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6782
    with Import => True, 
         Convention => C, 
@@ -952,9 +953,9 @@ package cuda_runtime_api_h is
    function cudaMemcpyFromArray
      (dst : System.Address;
       src : driver_types_h.cudaArray_const_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
-      count : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6824
    with Import => True, 
         Convention => C, 
@@ -962,12 +963,12 @@ package cuda_runtime_api_h is
 
    function cudaMemcpyArrayToArray
      (dst : driver_types_h.cudaArray_t;
-      wOffsetDst : crtdefs_h.size_t;
-      hOffsetDst : crtdefs_h.size_t;
+      wOffsetDst : corecrt_h.size_t;
+      hOffsetDst : corecrt_h.size_t;
       src : driver_types_h.cudaArray_const_t;
-      wOffsetSrc : crtdefs_h.size_t;
-      hOffsetSrc : crtdefs_h.size_t;
-      count : crtdefs_h.size_t;
+      wOffsetSrc : corecrt_h.size_t;
+      hOffsetSrc : corecrt_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6867
    with Import => True, 
         Convention => C, 
@@ -975,10 +976,10 @@ package cuda_runtime_api_h is
 
    function cudaMemcpyToArrayAsync
      (dst : driver_types_h.cudaArray_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
       src : System.Address;
-      count : crtdefs_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6918
    with Import => True, 
@@ -988,9 +989,9 @@ package cuda_runtime_api_h is
    function cudaMemcpyFromArrayAsync
      (dst : System.Address;
       src : driver_types_h.cudaArray_const_t;
-      wOffset : crtdefs_h.size_t;
-      hOffset : crtdefs_h.size_t;
-      count : crtdefs_h.size_t;
+      wOffset : corecrt_h.size_t;
+      hOffset : corecrt_h.size_t;
+      count : corecrt_h.size_t;
       kind : driver_types_h.cudaMemcpyKind;
       stream : driver_types_h.cudaStream_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:6968
    with Import => True, 
@@ -1048,7 +1049,7 @@ package cuda_runtime_api_h is
 
    function cudaGraphicsResourceGetMappedPointer
      (devPtr : System.Address;
-      size : access crtdefs_h.size_t;
+      size : access corecrt_h.size_t;
       resource : driver_types_h.cudaGraphicsResource_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7443
    with Import => True, 
         Convention => C, 
@@ -1069,23 +1070,23 @@ package cuda_runtime_api_h is
         External_Name => "cudaGraphicsResourceGetMappedMipmappedArray";
 
    function cudaBindTexture
-     (offset : access crtdefs_h.size_t;
+     (offset : access corecrt_h.size_t;
       texref : access constant texture_types_h.textureReference;
       devPtr : System.Address;
       desc : access constant driver_types_h.cudaChannelFormatDesc;
-      size : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7581
+      size : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7581
    with Import => True, 
         Convention => C, 
         External_Name => "cudaBindTexture";
 
    function cudaBindTexture2D
-     (offset : access crtdefs_h.size_t;
+     (offset : access corecrt_h.size_t;
       texref : access constant texture_types_h.textureReference;
       devPtr : System.Address;
       desc : access constant driver_types_h.cudaChannelFormatDesc;
-      width : crtdefs_h.size_t;
-      height : crtdefs_h.size_t;
-      pitch : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7640
+      width : corecrt_h.size_t;
+      height : corecrt_h.size_t;
+      pitch : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7640
    with Import => True, 
         Convention => C, 
         External_Name => "cudaBindTexture2D";
@@ -1111,7 +1112,7 @@ package cuda_runtime_api_h is
         Convention => C, 
         External_Name => "cudaUnbindTexture";
 
-   function cudaGetTextureAlignmentOffset (offset : access crtdefs_h.size_t; texref : access constant texture_types_h.textureReference) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7773
+   function cudaGetTextureAlignmentOffset (offset : access corecrt_h.size_t; texref : access constant texture_types_h.textureReference) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:7773
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGetTextureAlignmentOffset";
@@ -1212,7 +1213,7 @@ package cuda_runtime_api_h is
      (pGraphNode : System.Address;
       graph : driver_types_h.cudaGraph_t;
       pDependencies : System.Address;
-      numDependencies : crtdefs_h.size_t;
+      numDependencies : corecrt_h.size_t;
       pNodeParams : access constant driver_types_h.cudaKernelNodeParams) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8519
    with Import => True, 
         Convention => C, 
@@ -1232,7 +1233,7 @@ package cuda_runtime_api_h is
      (pGraphNode : System.Address;
       graph : driver_types_h.cudaGraph_t;
       pDependencies : System.Address;
-      numDependencies : crtdefs_h.size_t;
+      numDependencies : corecrt_h.size_t;
       pCopyParams : access constant driver_types_h.cudaMemcpy3DParms) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8621
    with Import => True, 
         Convention => C, 
@@ -1252,7 +1253,7 @@ package cuda_runtime_api_h is
      (pGraphNode : System.Address;
       graph : driver_types_h.cudaGraph_t;
       pDependencies : System.Address;
-      numDependencies : crtdefs_h.size_t;
+      numDependencies : corecrt_h.size_t;
       pMemsetParams : access constant driver_types_h.cudaMemsetParams) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8709
    with Import => True, 
         Convention => C, 
@@ -1272,7 +1273,7 @@ package cuda_runtime_api_h is
      (pGraphNode : System.Address;
       graph : driver_types_h.cudaGraph_t;
       pDependencies : System.Address;
-      numDependencies : crtdefs_h.size_t;
+      numDependencies : corecrt_h.size_t;
       pNodeParams : access constant driver_types_h.cudaHostNodeParams) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8796
    with Import => True, 
         Convention => C, 
@@ -1292,7 +1293,7 @@ package cuda_runtime_api_h is
      (pGraphNode : System.Address;
       graph : driver_types_h.cudaGraph_t;
       pDependencies : System.Address;
-      numDependencies : crtdefs_h.size_t;
+      numDependencies : corecrt_h.size_t;
       childGraph : driver_types_h.cudaGraph_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8880
    with Import => True, 
         Convention => C, 
@@ -1307,7 +1308,7 @@ package cuda_runtime_api_h is
      (pGraphNode : System.Address;
       graph : driver_types_h.cudaGraph_t;
       pDependencies : System.Address;
-      numDependencies : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8941
+      numDependencies : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:8941
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphAddEmptyNode";
@@ -1333,7 +1334,7 @@ package cuda_runtime_api_h is
    function cudaGraphGetNodes
      (graph : driver_types_h.cudaGraph_t;
       nodes : System.Address;
-      numNodes : access crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9058
+      numNodes : access corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9058
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphGetNodes";
@@ -1341,7 +1342,7 @@ package cuda_runtime_api_h is
    function cudaGraphGetRootNodes
      (graph : driver_types_h.cudaGraph_t;
       pRootNodes : System.Address;
-      pNumRootNodes : access crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9089
+      pNumRootNodes : access corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9089
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphGetRootNodes";
@@ -1350,7 +1351,7 @@ package cuda_runtime_api_h is
      (graph : driver_types_h.cudaGraph_t;
       from : System.Address;
       to : System.Address;
-      numEdges : access crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9123
+      numEdges : access corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9123
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphGetEdges";
@@ -1358,7 +1359,7 @@ package cuda_runtime_api_h is
    function cudaGraphNodeGetDependencies
      (node : driver_types_h.cudaGraphNode_t;
       pDependencies : System.Address;
-      pNumDependencies : access crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9154
+      pNumDependencies : access corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9154
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphNodeGetDependencies";
@@ -1366,7 +1367,7 @@ package cuda_runtime_api_h is
    function cudaGraphNodeGetDependentNodes
      (node : driver_types_h.cudaGraphNode_t;
       pDependentNodes : System.Address;
-      pNumDependentNodes : access crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9186
+      pNumDependentNodes : access corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9186
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphNodeGetDependentNodes";
@@ -1375,7 +1376,7 @@ package cuda_runtime_api_h is
      (graph : driver_types_h.cudaGraph_t;
       from : System.Address;
       to : System.Address;
-      numDependencies : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9217
+      numDependencies : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9217
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphAddDependencies";
@@ -1384,7 +1385,7 @@ package cuda_runtime_api_h is
      (graph : driver_types_h.cudaGraph_t;
       from : System.Address;
       to : System.Address;
-      numDependencies : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9248
+      numDependencies : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9248
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphRemoveDependencies";
@@ -1399,7 +1400,7 @@ package cuda_runtime_api_h is
       graph : driver_types_h.cudaGraph_t;
       pErrorNode : System.Address;
       pLogBuffer : Interfaces.C.Strings.chars_ptr;
-      bufferSize : crtdefs_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9310
+      bufferSize : corecrt_h.size_t) return driver_types_h.cudaError_t  -- /Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/include/cuda_runtime_api.h:9310
    with Import => True, 
         Convention => C, 
         External_Name => "cudaGraphInstantiate";
