@@ -1,6 +1,6 @@
 project CUDA is
 
-   for Source_Dirs use ("cuda_api", "cuda_raw_binding");
+   for Source_Dirs use ("cuda_api", "cuda_raw_binding", "cuda_internal");
 
    for Object_Dir use "obj";
 
