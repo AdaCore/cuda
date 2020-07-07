@@ -60,22 +60,12 @@ wrap return_into_exception ("CUDA", "Exception_Registry");
 match ParamSpec ("access .*")
 wrap access_into_out ();
 
-# doesn't work yet, chaining procedure => function => procedure transformation
-# got the transformations lost (initial transformation is return to exception)
-#match SubpDecl (p_defining_name (".*Get.*")) 
-#    and child (p: ParamSpec (not prev (ParamSpec ()) and "access .*"))
-#wrap access_into_return (p);
+match ParamSpec (not prev (ParamSpec ()) and "access .*")
+   and parent (SubpDecl (p_defining_name (".*Get.*")))
+wrap access_into_return ();
 
-#match ParamSpec ("event.*:.*System.Address")
-#wrap addresss_into_return ("CUDA.Driver_Types.Event_T");
-
-#        Wrap
-#        (Match => Parent (Subp_Decl ("^cudaMalloc$")) and Parameter_Position (0),
-#         Transform =>
-#           Pre_Call_Decl ("Tmp : aliased System.Address;") &
-#           Actual ("Tmp'Address") &
-#           Result_Expr ("Tmp") &
-#           Result_Subtype_Indication ("System.Address"))
+match ParamSpec ("event.*:.*System.Address")
+wrap address_into_return ("CUDA.Driver_Types.Event_T");
 
 match PackageDecl (p_defining_name ("cuda_runtime_api_h"))
 weave w_PackageDecl (

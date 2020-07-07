@@ -173,14 +173,15 @@ package body CUDA.Runtime_Api is
       end;
    end Device_Set_Limit;
 
-   procedure Device_Get_Limit
-     (P_Value : out CUDA.Corecrt.Size_T; Limit : CUDA.Driver_Types.Limit)
+   function Device_Get_Limit
+     (Limit : CUDA.Driver_Types.Limit) return CUDA.Corecrt.Size_T
    is
 
-      Temp_call_2 : aliased corecrt_h.size_t with
-         Address => P_Value'Address,
+      Temp_call_1 : aliased corecrt_h.size_t;
+      Temp_ret_2  : aliased CUDA.Corecrt.Size_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased driver_types_h.cudaLimit with
+      Temp_local_4 : aliased driver_types_h.cudaLimit with
          Address => Limit'Address,
          Import;
 
@@ -190,7 +191,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetLimit
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -201,16 +202,16 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_Limit;
 
-   procedure Device_Get_Cache_Config
-     (P_Cache_Config : out CUDA.Driver_Types.Func_Cache)
-   is
+   function Device_Get_Cache_Config return CUDA.Driver_Types.Func_Cache is
 
-      Temp_call_2 : aliased driver_types_h.cudaFuncCache with
-         Address => P_Cache_Config'Address,
+      Temp_call_1 : aliased driver_types_h.cudaFuncCache;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Func_Cache with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -219,7 +220,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetCacheConfig
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -230,18 +231,20 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_Cache_Config;
 
-   procedure Device_Get_Stream_Priority_Range
-     (Least_Priority : out int; Greatest_Priority : out int)
+   function Device_Get_Stream_Priority_Range
+     (Greatest_Priority : out int) return int
    is
 
-      Temp_call_2 : aliased int with
-         Address => Least_Priority'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_call_4 : aliased int with
+      Temp_call_3 : aliased int with
          Address => Greatest_Priority'Address,
          Import;
 
@@ -251,7 +254,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetStreamPriorityRange
-                (Temp_call_2'Unchecked_Access, Temp_call_4'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access, Temp_call_3'Unchecked_Access));
 
       begin
          null;
@@ -262,6 +265,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_Stream_Priority_Range;
@@ -293,12 +297,13 @@ package body CUDA.Runtime_Api is
       end;
    end Device_Set_Cache_Config;
 
-   procedure Device_Get_Shared_Mem_Config
-     (P_Config : out CUDA.Driver_Types.Shared_Mem_Config)
+   function Device_Get_Shared_Mem_Config
+      return CUDA.Driver_Types.Shared_Mem_Config
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaSharedMemConfig with
-         Address => P_Config'Address,
+      Temp_call_1 : aliased driver_types_h.cudaSharedMemConfig;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Shared_Mem_Config with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -307,7 +312,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetSharedMemConfig
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -318,6 +323,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_Shared_Mem_Config;
@@ -350,12 +356,13 @@ package body CUDA.Runtime_Api is
       end;
    end Device_Set_Shared_Mem_Config;
 
-   procedure Device_Get_By_PCIBus_Id (Device : out int; Pci_Bus_Id : String) is
+   function Device_Get_By_PCIBus_Id (Pci_Bus_Id : String) return int is
 
-      Temp_call_2 : aliased int with
-         Address => Device'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_c_string_4 : Interfaces.C.Strings.chars_ptr :=
+      Temp_c_string_3 : Interfaces.C.Strings.chars_ptr :=
         Interfaces.C.Strings.New_String (Pci_Bus_Id);
 
    begin
@@ -364,7 +371,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetByPCIBusId
-                (Temp_call_2'Unchecked_Access, Temp_c_string_4));
+                (Temp_call_1'Unchecked_Access, Temp_c_string_3));
 
       begin
          null;
@@ -375,7 +382,8 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
-            Interfaces.C.Strings.Free (Temp_c_string_4);
+            Interfaces.C.Strings.Free (Temp_c_string_3);
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_By_PCIBus_Id;
@@ -414,15 +422,16 @@ package body CUDA.Runtime_Api is
       end;
    end Device_Get_PCIBus_Id;
 
-   procedure Ipc_Get_Event_Handle
-     (Handle : out CUDA.Driver_Types.Ipc_Event_Handle_T;
-      Event  :     CUDA.Driver_Types.Event_T)
+   function Ipc_Get_Event_Handle
+     (Event : CUDA.Driver_Types.Event_T)
+      return CUDA.Driver_Types.Ipc_Event_Handle_T
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaIpcEventHandle_t with
-         Address => Handle'Address,
+      Temp_call_1 : aliased driver_types_h.cudaIpcEventHandle_t;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Ipc_Event_Handle_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased driver_types_h.cudaEvent_t with
+      Temp_local_4 : aliased driver_types_h.cudaEvent_t with
          Address => Event'Address,
          Import;
 
@@ -432,7 +441,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaIpcGetEventHandle
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -443,18 +452,19 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Ipc_Get_Event_Handle;
 
-   procedure Ipc_Open_Event_Handle
-     (Event : System.Address; Handle : CUDA.Driver_Types.Ipc_Event_Handle_T)
+   function Ipc_Open_Event_Handle
+     (Handle : CUDA.Driver_Types.Ipc_Event_Handle_T)
+      return CUDA.Driver_Types.Event_T
    is
 
-      Temp_local_3 : aliased System.Address with
-         Address => Event'Address,
-         Import;
-      Temp_local_5 : aliased driver_types_h.cudaIpcEventHandle_t with
+      Temp_ret_2   : aliased CUDA.Driver_Types.Event_T;
+      Temp_call_1  : aliased System.Address := Temp_ret_2'Address;
+      Temp_local_4 : aliased driver_types_h.cudaIpcEventHandle_t with
          Address => Handle'Address,
          Import;
 
@@ -464,7 +474,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaIpcOpenEventHandle
-                (Temp_local_3, Temp_local_5));
+                (Temp_call_1, Temp_local_4));
 
       begin
          null;
@@ -475,18 +485,20 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Ipc_Open_Event_Handle;
 
-   procedure Ipc_Get_Mem_Handle
-     (Handle : out CUDA.Driver_Types.Ipc_Mem_Handle_T; Dev_Ptr : System.Address)
+   function Ipc_Get_Mem_Handle
+     (Dev_Ptr : System.Address) return CUDA.Driver_Types.Ipc_Mem_Handle_T
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaIpcMemHandle_t with
-         Address => Handle'Address,
+      Temp_call_1 : aliased driver_types_h.cudaIpcMemHandle_t;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Ipc_Mem_Handle_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased System.Address with
+      Temp_local_4 : aliased System.Address with
          Address => Dev_Ptr'Address,
          Import;
 
@@ -496,7 +508,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaIpcGetMemHandle
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -507,6 +519,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Ipc_Get_Mem_Handle;
@@ -643,14 +656,15 @@ package body CUDA.Runtime_Api is
       end;
    end Thread_Set_Limit;
 
-   procedure Thread_Get_Limit
-     (P_Value : out CUDA.Corecrt.Size_T; Limit : CUDA.Driver_Types.Limit)
+   function Thread_Get_Limit
+     (Limit : CUDA.Driver_Types.Limit) return CUDA.Corecrt.Size_T
    is
 
-      Temp_call_2 : aliased corecrt_h.size_t with
-         Address => P_Value'Address,
+      Temp_call_1 : aliased corecrt_h.size_t;
+      Temp_ret_2  : aliased CUDA.Corecrt.Size_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased driver_types_h.cudaLimit with
+      Temp_local_4 : aliased driver_types_h.cudaLimit with
          Address => Limit'Address,
          Import;
 
@@ -660,7 +674,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaThreadGetLimit
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -671,16 +685,16 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Thread_Get_Limit;
 
-   procedure Thread_Get_Cache_Config
-     (P_Cache_Config : out CUDA.Driver_Types.Func_Cache)
-   is
+   function Thread_Get_Cache_Config return CUDA.Driver_Types.Func_Cache is
 
-      Temp_call_2 : aliased driver_types_h.cudaFuncCache with
-         Address => P_Cache_Config'Address,
+      Temp_call_1 : aliased driver_types_h.cudaFuncCache;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Func_Cache with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -689,7 +703,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaThreadGetCacheConfig
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -700,6 +714,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Thread_Get_Cache_Config;
@@ -819,10 +834,11 @@ package body CUDA.Runtime_Api is
       end;
    end Get_Error_String;
 
-   procedure Get_Device_Count (Count : out int) is
+   function Get_Device_Count return int is
 
-      Temp_call_2 : aliased int with
-         Address => Count'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -831,7 +847,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetDeviceCount
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -842,18 +858,20 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Device_Count;
 
-   procedure Get_Device_Properties
-     (Prop : out CUDA.Driver_Types.Device_Prop; Device : int)
+   function Get_Device_Properties
+     (Device : int) return CUDA.Driver_Types.Device_Prop
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaDeviceProp with
-         Address => Prop'Address,
+      Temp_call_1 : aliased driver_types_h.cudaDeviceProp;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Device_Prop with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased int with
+      Temp_local_4 : aliased int with
          Address => Device'Address,
          Import;
 
@@ -863,7 +881,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetDeviceProperties
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -874,21 +892,23 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Device_Properties;
 
-   procedure Device_Get_Attribute
-     (Value : out int; Attr : CUDA.Driver_Types.Device_Attr; Device : int)
+   function Device_Get_Attribute
+     (Attr : CUDA.Driver_Types.Device_Attr; Device : int) return int
    is
 
-      Temp_call_2 : aliased int with
-         Address => Value'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased driver_types_h.cudaDeviceAttr with
+      Temp_local_4 : aliased driver_types_h.cudaDeviceAttr with
          Address => Attr'Address,
          Import;
-      Temp_local_7 : aliased int with
+      Temp_local_6 : aliased int with
          Address => Device'Address,
          Import;
 
@@ -898,7 +918,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetAttribute
-                (Temp_call_2'Unchecked_Access, Temp_local_5, Temp_local_7));
+                (Temp_call_1'Unchecked_Access, Temp_local_4, Temp_local_6));
 
       begin
          null;
@@ -909,6 +929,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_Attribute;
@@ -948,21 +969,22 @@ package body CUDA.Runtime_Api is
       end;
    end Device_Get_Nv_Sci_Sync_Attributes;
 
-   procedure Device_Get_P2_PAttribute
-     (Value      : out int; Attr : CUDA.Driver_Types.Device_P2_PAttr;
-      Src_Device :     int; Dst_Device : int)
+   function Device_Get_P2_PAttribute
+     (Attr       : CUDA.Driver_Types.Device_P2_PAttr; Src_Device : int;
+      Dst_Device : int) return int
    is
 
-      Temp_call_2 : aliased int with
-         Address => Value'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased driver_types_h.cudaDeviceP2PAttr with
+      Temp_local_4 : aliased driver_types_h.cudaDeviceP2PAttr with
          Address => Attr'Address,
          Import;
-      Temp_local_7 : aliased int with
+      Temp_local_6 : aliased int with
          Address => Src_Device'Address,
          Import;
-      Temp_local_9 : aliased int with
+      Temp_local_8 : aliased int with
          Address => Dst_Device'Address,
          Import;
 
@@ -972,8 +994,8 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDeviceGetP2PAttribute
-                (Temp_call_2'Unchecked_Access, Temp_local_5, Temp_local_7,
-                 Temp_local_9));
+                (Temp_call_1'Unchecked_Access, Temp_local_4, Temp_local_6,
+                 Temp_local_8));
 
       begin
          null;
@@ -984,6 +1006,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Device_Get_P2_PAttribute;
@@ -1045,10 +1068,11 @@ package body CUDA.Runtime_Api is
       end;
    end Set_Device;
 
-   procedure Get_Device (Device : out int) is
+   function Get_Device return int is
 
-      Temp_call_2 : aliased int with
-         Address => Device'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -1056,7 +1080,7 @@ package body CUDA.Runtime_Api is
 
          Temp_res_1 : Integer :=
            Integer
-             (cuda_runtime_api_h.cudaGetDevice (Temp_call_2'Unchecked_Access));
+             (cuda_runtime_api_h.cudaGetDevice (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -1067,6 +1091,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Device;
@@ -1126,10 +1151,11 @@ package body CUDA.Runtime_Api is
       end;
    end Set_Device_Flags;
 
-   procedure Get_Device_Flags (Flags : out unsigned) is
+   function Get_Device_Flags return unsigned is
 
-      Temp_call_2 : aliased unsigned with
-         Address => Flags'Address,
+      Temp_call_1 : aliased unsigned;
+      Temp_ret_2  : aliased unsigned with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -1138,7 +1164,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetDeviceFlags
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -1149,6 +1175,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Device_Flags;
@@ -1690,17 +1717,16 @@ package body CUDA.Runtime_Api is
       end;
    end Stream_Get_Capture_Info;
 
-   procedure Event_Create (Event : System.Address) is
+   function Event_Create return CUDA.Driver_Types.Event_T is
 
-      Temp_local_3 : aliased System.Address with
-         Address => Event'Address,
-         Import;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Event_T;
+      Temp_call_1 : aliased System.Address := Temp_ret_2'Address;
 
    begin
       declare
 
          Temp_res_1 : Integer :=
-           Integer (cuda_runtime_api_h.cudaEventCreate (Temp_local_3));
+           Integer (cuda_runtime_api_h.cudaEventCreate (Temp_call_1));
 
       begin
          null;
@@ -1711,17 +1737,18 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Event_Create;
 
-   procedure Event_Create_With_Flags (Event : System.Address; Flags : unsigned)
+   function Event_Create_With_Flags
+     (Flags : unsigned) return CUDA.Driver_Types.Event_T
    is
 
-      Temp_local_3 : aliased System.Address with
-         Address => Event'Address,
-         Import;
-      Temp_local_5 : aliased unsigned with
+      Temp_ret_2   : aliased CUDA.Driver_Types.Event_T;
+      Temp_call_1  : aliased System.Address := Temp_ret_2'Address;
+      Temp_local_4 : aliased unsigned with
          Address => Flags'Address,
          Import;
 
@@ -1731,7 +1758,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaEventCreateWithFlags
-                (Temp_local_3, Temp_local_5));
+                (Temp_call_1, Temp_local_4));
 
       begin
          null;
@@ -1742,6 +1769,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Event_Create_With_Flags;
@@ -2360,14 +2388,15 @@ package body CUDA.Runtime_Api is
       end;
    end Func_Set_Shared_Mem_Config;
 
-   procedure Func_Get_Attributes
-     (Attr : out CUDA.Driver_Types.Func_Attributes; Func : System.Address)
+   function Func_Get_Attributes
+     (Func : System.Address) return CUDA.Driver_Types.Func_Attributes
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaFuncAttributes with
-         Address => Attr'Address,
+      Temp_call_1 : aliased driver_types_h.cudaFuncAttributes;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Func_Attributes with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased System.Address with
+      Temp_local_4 : aliased System.Address with
          Address => Func'Address,
          Import;
 
@@ -2377,7 +2406,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaFuncGetAttributes
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -2388,6 +2417,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Func_Get_Attributes;
@@ -3011,12 +3041,13 @@ package body CUDA.Runtime_Api is
       end;
    end Host_Get_Device_Pointer;
 
-   procedure Host_Get_Flags (P_Flags : out unsigned; P_Host : System.Address) is
+   function Host_Get_Flags (P_Host : System.Address) return unsigned is
 
-      Temp_call_2 : aliased unsigned with
-         Address => P_Flags'Address,
+      Temp_call_1 : aliased unsigned;
+      Temp_ret_2  : aliased unsigned with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased System.Address with
+      Temp_local_4 : aliased System.Address with
          Address => P_Host'Address,
          Import;
 
@@ -3026,7 +3057,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaHostGetFlags
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -3037,6 +3068,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Host_Get_Flags;
@@ -3316,14 +3348,15 @@ package body CUDA.Runtime_Api is
       end;
    end Memcpy3_DPeer_Async;
 
-   procedure Mem_Get_Info
-     (Free : out CUDA.Corecrt.Size_T; Total : out CUDA.Corecrt.Size_T)
+   function Mem_Get_Info
+     (Total : out CUDA.Corecrt.Size_T) return CUDA.Corecrt.Size_T
    is
 
-      Temp_call_2 : aliased corecrt_h.size_t with
-         Address => Free'Address,
+      Temp_call_1 : aliased corecrt_h.size_t;
+      Temp_ret_2  : aliased CUDA.Corecrt.Size_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_call_4 : aliased corecrt_h.size_t with
+      Temp_call_3 : aliased corecrt_h.size_t with
          Address => Total'Address,
          Import;
 
@@ -3333,7 +3366,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaMemGetInfo
-                (Temp_call_2'Unchecked_Access, Temp_call_4'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access, Temp_call_3'Unchecked_Access));
 
       begin
          null;
@@ -3344,26 +3377,28 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Mem_Get_Info;
 
-   procedure CUDA_ArrayGetInfo
-     (Desc    : out CUDA.Driver_Types.Channel_Format_Desc;
-      Extent  : out CUDA.Driver_Types.Extent_T; Flags : out unsigned;
+   function CUDA_ArrayGetInfo
+     (Extent  : out CUDA.Driver_Types.Extent_T; Flags : out unsigned;
       C_Array :     CUDA.Driver_Types.CUDA_Array_t)
+      return CUDA.Driver_Types.Channel_Format_Desc
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaChannelFormatDesc with
-         Address => Desc'Address,
+      Temp_call_1 : aliased driver_types_h.cudaChannelFormatDesc;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Channel_Format_Desc with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_call_4 : aliased driver_types_h.cudaExtent with
+      Temp_call_3 : aliased driver_types_h.cudaExtent with
          Address => Extent'Address,
          Import;
-      Temp_call_6 : aliased unsigned with
+      Temp_call_5 : aliased unsigned with
          Address => Flags'Address,
          Import;
-      Temp_local_9 : aliased driver_types_h.cudaArray_t with
+      Temp_local_8 : aliased driver_types_h.cudaArray_t with
          Address => C_Array'Address,
          Import;
 
@@ -3373,8 +3408,8 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaArrayGetInfo
-                (Temp_call_2'Unchecked_Access, Temp_call_4'Unchecked_Access,
-                 Temp_call_6'Unchecked_Access, Temp_local_9));
+                (Temp_call_1'Unchecked_Access, Temp_call_3'Unchecked_Access,
+                 Temp_call_5'Unchecked_Access, Temp_local_8));
 
       begin
          null;
@@ -3385,6 +3420,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end CUDA_ArrayGetInfo;
@@ -4405,14 +4441,14 @@ package body CUDA.Runtime_Api is
       end;
    end Get_Symbol_Address;
 
-   procedure Get_Symbol_Size
-     (Size : out CUDA.Corecrt.Size_T; Symbol : System.Address)
+   function Get_Symbol_Size (Symbol : System.Address) return CUDA.Corecrt.Size_T
    is
 
-      Temp_call_2 : aliased corecrt_h.size_t with
-         Address => Size'Address,
+      Temp_call_1 : aliased corecrt_h.size_t;
+      Temp_ret_2  : aliased CUDA.Corecrt.Size_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased System.Address with
+      Temp_local_4 : aliased System.Address with
          Address => Symbol'Address,
          Import;
 
@@ -4422,7 +4458,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetSymbolSize
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -4433,6 +4469,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Symbol_Size;
@@ -4859,15 +4896,15 @@ package body CUDA.Runtime_Api is
       end;
    end Memcpy_From_Array_Async;
 
-   procedure Pointer_Get_Attributes
-     (Attributes : out CUDA.Driver_Types.Pointer_Attributes;
-      Ptr        :     System.Address)
+   function Pointer_Get_Attributes
+     (Ptr : System.Address) return CUDA.Driver_Types.Pointer_Attributes
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaPointerAttributes with
-         Address => Attributes'Address,
+      Temp_call_1 : aliased driver_types_h.cudaPointerAttributes;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Pointer_Attributes with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased System.Address with
+      Temp_local_4 : aliased System.Address with
          Address => Ptr'Address,
          Import;
 
@@ -4877,7 +4914,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaPointerGetAttributes
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -4888,6 +4925,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Pointer_Get_Attributes;
@@ -5428,15 +5466,16 @@ package body CUDA.Runtime_Api is
       end;
    end Unbind_Texture;
 
-   procedure Get_Texture_Alignment_Offset
-     (Offset : out CUDA.Corecrt.Size_T;
-      Texref : out CUDA.Texture_Types.Texture_Reference)
+   function Get_Texture_Alignment_Offset
+     (Texref : out CUDA.Texture_Types.Texture_Reference)
+      return CUDA.Corecrt.Size_T
    is
 
-      Temp_call_2 : aliased corecrt_h.size_t with
-         Address => Offset'Address,
+      Temp_call_1 : aliased corecrt_h.size_t;
+      Temp_ret_2  : aliased CUDA.Corecrt.Size_T with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_call_4 : aliased texture_types_h.textureReference with
+      Temp_call_3 : aliased texture_types_h.textureReference with
          Address => Texref'Address,
          Import;
 
@@ -5446,7 +5485,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetTextureAlignmentOffset
-                (Temp_call_2'Unchecked_Access, Temp_call_4'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access, Temp_call_3'Unchecked_Access));
 
       begin
          null;
@@ -5457,6 +5496,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Texture_Alignment_Offset;
@@ -5563,15 +5603,16 @@ package body CUDA.Runtime_Api is
       end;
    end Get_Surface_Reference;
 
-   procedure Get_Channel_Desc
-     (Desc    : out CUDA.Driver_Types.Channel_Format_Desc;
-      C_Array :     CUDA.Driver_Types.CUDA_Array_const_t)
+   function Get_Channel_Desc
+     (C_Array : CUDA.Driver_Types.CUDA_Array_const_t)
+      return CUDA.Driver_Types.Channel_Format_Desc
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaChannelFormatDesc with
-         Address => Desc'Address,
+      Temp_call_1 : aliased driver_types_h.cudaChannelFormatDesc;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Channel_Format_Desc with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased driver_types_h.cudaArray_const_t with
+      Temp_local_4 : aliased driver_types_h.cudaArray_const_t with
          Address => C_Array'Address,
          Import;
 
@@ -5581,7 +5622,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetChannelDesc
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -5592,6 +5633,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Channel_Desc;
@@ -5711,15 +5753,16 @@ package body CUDA.Runtime_Api is
       end;
    end Destroy_Texture_Object;
 
-   procedure Get_Texture_Object_Resource_Desc
-     (P_Res_Desc : out CUDA.Driver_Types.Resource_Desc;
-      Tex_Object :     CUDA.Texture_Types.Texture_Object_T)
+   function Get_Texture_Object_Resource_Desc
+     (Tex_Object : CUDA.Texture_Types.Texture_Object_T)
+      return CUDA.Driver_Types.Resource_Desc
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaResourceDesc with
-         Address => P_Res_Desc'Address,
+      Temp_call_1 : aliased driver_types_h.cudaResourceDesc;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Resource_Desc with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased texture_types_h.cudaTextureObject_t with
+      Temp_local_4 : aliased texture_types_h.cudaTextureObject_t with
          Address => Tex_Object'Address,
          Import;
 
@@ -5729,7 +5772,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetTextureObjectResourceDesc
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -5740,19 +5783,21 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Texture_Object_Resource_Desc;
 
-   procedure Get_Texture_Object_Texture_Desc
-     (P_Tex_Desc : out CUDA.Texture_Types.Texture_Desc;
-      Tex_Object :     CUDA.Texture_Types.Texture_Object_T)
+   function Get_Texture_Object_Texture_Desc
+     (Tex_Object : CUDA.Texture_Types.Texture_Object_T)
+      return CUDA.Texture_Types.Texture_Desc
    is
 
-      Temp_call_2 : aliased texture_types_h.cudaTextureDesc with
-         Address => P_Tex_Desc'Address,
+      Temp_call_1 : aliased texture_types_h.cudaTextureDesc;
+      Temp_ret_2  : aliased CUDA.Texture_Types.Texture_Desc with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased texture_types_h.cudaTextureObject_t with
+      Temp_local_4 : aliased texture_types_h.cudaTextureObject_t with
          Address => Tex_Object'Address,
          Import;
 
@@ -5762,7 +5807,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetTextureObjectTextureDesc
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -5773,19 +5818,21 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Texture_Object_Texture_Desc;
 
-   procedure Get_Texture_Object_Resource_View_Desc
-     (P_Res_View_Desc : out CUDA.Driver_Types.Resource_View_Desc;
-      Tex_Object      :     CUDA.Texture_Types.Texture_Object_T)
+   function Get_Texture_Object_Resource_View_Desc
+     (Tex_Object : CUDA.Texture_Types.Texture_Object_T)
+      return CUDA.Driver_Types.Resource_View_Desc
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaResourceViewDesc with
-         Address => P_Res_View_Desc'Address,
+      Temp_call_1 : aliased driver_types_h.cudaResourceViewDesc;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Resource_View_Desc with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased texture_types_h.cudaTextureObject_t with
+      Temp_local_4 : aliased texture_types_h.cudaTextureObject_t with
          Address => Tex_Object'Address,
          Import;
 
@@ -5795,7 +5842,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetTextureObjectResourceViewDesc
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -5806,6 +5853,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Texture_Object_Resource_View_Desc;
@@ -5870,15 +5918,16 @@ package body CUDA.Runtime_Api is
       end;
    end Destroy_Surface_Object;
 
-   procedure Get_Surface_Object_Resource_Desc
-     (P_Res_Desc  : out CUDA.Driver_Types.Resource_Desc;
-      Surf_Object :     CUDA.Surface_Types.Surface_Object_T)
+   function Get_Surface_Object_Resource_Desc
+     (Surf_Object : CUDA.Surface_Types.Surface_Object_T)
+      return CUDA.Driver_Types.Resource_Desc
    is
 
-      Temp_call_2 : aliased driver_types_h.cudaResourceDesc with
-         Address => P_Res_Desc'Address,
+      Temp_call_1 : aliased driver_types_h.cudaResourceDesc;
+      Temp_ret_2  : aliased CUDA.Driver_Types.Resource_Desc with
+         Address => Temp_call_1'Address,
          Import;
-      Temp_local_5 : aliased surface_types_h.cudaSurfaceObject_t with
+      Temp_local_4 : aliased surface_types_h.cudaSurfaceObject_t with
          Address => Surf_Object'Address,
          Import;
 
@@ -5888,7 +5937,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaGetSurfaceObjectResourceDesc
-                (Temp_call_2'Unchecked_Access, Temp_local_5));
+                (Temp_call_1'Unchecked_Access, Temp_local_4));
 
       begin
          null;
@@ -5899,14 +5948,16 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Get_Surface_Object_Resource_Desc;
 
-   procedure Driver_Get_Version (Driver_Version : out int) is
+   function Driver_Get_Version return int is
 
-      Temp_call_2 : aliased int with
-         Address => Driver_Version'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -5915,7 +5966,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaDriverGetVersion
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -5926,14 +5977,16 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Driver_Get_Version;
 
-   procedure Runtime_Get_Version (Runtime_Version : out int) is
+   function Runtime_Get_Version return int is
 
-      Temp_call_2 : aliased int with
-         Address => Runtime_Version'Address,
+      Temp_call_1 : aliased int;
+      Temp_ret_2  : aliased int with
+         Address => Temp_call_1'Address,
          Import;
 
    begin
@@ -5942,7 +5995,7 @@ package body CUDA.Runtime_Api is
          Temp_res_1 : Integer :=
            Integer
              (cuda_runtime_api_h.cudaRuntimeGetVersion
-                (Temp_call_2'Unchecked_Access));
+                (Temp_call_1'Unchecked_Access));
 
       begin
          null;
@@ -5953,6 +6006,7 @@ package body CUDA.Runtime_Api is
                Ada.Exceptions.Raise_Exception
                  (CUDA.Exception_Registry.Element (Integer (Temp_res_1)));
             end if;
+            return Temp_ret_2;
          end;
       end;
    end Runtime_Get_Version;

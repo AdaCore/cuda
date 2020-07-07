@@ -30,29 +30,28 @@ package CUDA.Runtime_Api is
    procedure Device_Synchronize;
    procedure Device_Set_Limit
      (Limit : CUDA.Driver_Types.Limit; Value : CUDA.Corecrt.Size_T);
-   procedure Device_Get_Limit
-     (P_Value : out CUDA.Corecrt.Size_T; Limit : CUDA.Driver_Types.Limit);
-   procedure Device_Get_Cache_Config
-     (P_Cache_Config : out CUDA.Driver_Types.Func_Cache);
-   procedure Device_Get_Stream_Priority_Range
-     (Least_Priority : out int; Greatest_Priority : out int);
+   function Device_Get_Limit
+     (Limit : CUDA.Driver_Types.Limit) return CUDA.Corecrt.Size_T;
+   function Device_Get_Cache_Config return CUDA.Driver_Types.Func_Cache;
+   function Device_Get_Stream_Priority_Range
+     (Greatest_Priority : out int) return int;
    procedure Device_Set_Cache_Config
      (Cache_Config : CUDA.Driver_Types.Func_Cache);
-   procedure Device_Get_Shared_Mem_Config
-     (P_Config : out CUDA.Driver_Types.Shared_Mem_Config);
+   function Device_Get_Shared_Mem_Config
+      return CUDA.Driver_Types.Shared_Mem_Config;
    procedure Device_Set_Shared_Mem_Config
      (Config : CUDA.Driver_Types.Shared_Mem_Config);
-   procedure Device_Get_By_PCIBus_Id (Device : out int; Pci_Bus_Id : String);
+   function Device_Get_By_PCIBus_Id (Pci_Bus_Id : String) return int;
    procedure Device_Get_PCIBus_Id
      (Pci_Bus_Id : String; Len : int; Device : int);
-   procedure Ipc_Get_Event_Handle
-     (Handle : out CUDA.Driver_Types.Ipc_Event_Handle_T;
-      Event  :     CUDA.Driver_Types.Event_T);
-   procedure Ipc_Open_Event_Handle
-     (Event : System.Address; Handle : CUDA.Driver_Types.Ipc_Event_Handle_T);
-   procedure Ipc_Get_Mem_Handle
-     (Handle  : out CUDA.Driver_Types.Ipc_Mem_Handle_T;
-      Dev_Ptr :     System.Address);
+   function Ipc_Get_Event_Handle
+     (Event : CUDA.Driver_Types.Event_T)
+      return CUDA.Driver_Types.Ipc_Event_Handle_T;
+   function Ipc_Open_Event_Handle
+     (Handle : CUDA.Driver_Types.Ipc_Event_Handle_T)
+      return CUDA.Driver_Types.Event_T;
+   function Ipc_Get_Mem_Handle
+     (Dev_Ptr : System.Address) return CUDA.Driver_Types.Ipc_Mem_Handle_T;
    procedure Ipc_Open_Mem_Handle
      (Dev_Ptr : System.Address; Handle : CUDA.Driver_Types.Ipc_Mem_Handle_T;
       Flags   : unsigned);
@@ -61,33 +60,32 @@ package CUDA.Runtime_Api is
    procedure Thread_Synchronize;
    procedure Thread_Set_Limit
      (Limit : CUDA.Driver_Types.Limit; Value : CUDA.Corecrt.Size_T);
-   procedure Thread_Get_Limit
-     (P_Value : out CUDA.Corecrt.Size_T; Limit : CUDA.Driver_Types.Limit);
-   procedure Thread_Get_Cache_Config
-     (P_Cache_Config : out CUDA.Driver_Types.Func_Cache);
+   function Thread_Get_Limit
+     (Limit : CUDA.Driver_Types.Limit) return CUDA.Corecrt.Size_T;
+   function Thread_Get_Cache_Config return CUDA.Driver_Types.Func_Cache;
    procedure Thread_Set_Cache_Config
      (Cache_Config : CUDA.Driver_Types.Func_Cache);
    function Get_Last_Error return CUDA.Driver_Types.Error_T;
    function Peek_At_Last_Error return CUDA.Driver_Types.Error_T;
    function Get_Error_Name (Arg1 : CUDA.Driver_Types.Error_T) return String;
    function Get_Error_String (Arg1 : CUDA.Driver_Types.Error_T) return String;
-   procedure Get_Device_Count (Count : out int);
-   procedure Get_Device_Properties
-     (Prop : out CUDA.Driver_Types.Device_Prop; Device : int);
-   procedure Device_Get_Attribute
-     (Value : out int; Attr : CUDA.Driver_Types.Device_Attr; Device : int);
+   function Get_Device_Count return int;
+   function Get_Device_Properties
+     (Device : int) return CUDA.Driver_Types.Device_Prop;
+   function Device_Get_Attribute
+     (Attr : CUDA.Driver_Types.Device_Attr; Device : int) return int;
    procedure Device_Get_Nv_Sci_Sync_Attributes
      (Nv_Sci_Sync_Attr_List : System.Address; Device : int; Flags : int);
-   procedure Device_Get_P2_PAttribute
-     (Value      : out int; Attr : CUDA.Driver_Types.Device_P2_PAttr;
-      Src_Device :     int; Dst_Device : int);
+   function Device_Get_P2_PAttribute
+     (Attr       : CUDA.Driver_Types.Device_P2_PAttr; Src_Device : int;
+      Dst_Device : int) return int;
    procedure Choose_Device
      (Device : out int; Prop : out CUDA.Driver_Types.Device_Prop);
    procedure Set_Device (Device : int);
-   procedure Get_Device (Device : out int);
+   function Get_Device return int;
    procedure Set_Valid_Devices (Device_Arr : out int; Len : int);
    procedure Set_Device_Flags (Flags : unsigned);
-   procedure Get_Device_Flags (Flags : out unsigned);
+   function Get_Device_Flags return unsigned;
    procedure Stream_Create (P_Stream : System.Address);
    procedure Stream_Create_With_Flags
      (P_Stream : System.Address; Flags : unsigned);
@@ -135,8 +133,9 @@ package CUDA.Runtime_Api is
      (Stream           :     CUDA.Driver_Types.Stream_T;
       P_Capture_Status : out CUDA.Driver_Types.Stream_Capture_Status;
       P_Id             : out Extensions.unsigned_long_long);
-   procedure Event_Create (Event : System.Address);
-   procedure Event_Create_With_Flags (Event : System.Address; Flags : unsigned);
+   function Event_Create return CUDA.Driver_Types.Event_T;
+   function Event_Create_With_Flags
+     (Flags : unsigned) return CUDA.Driver_Types.Event_T;
    procedure Event_Record
      (Event : CUDA.Driver_Types.Event_T; Stream : CUDA.Driver_Types.Stream_T);
    procedure Event_Query (Event : CUDA.Driver_Types.Event_T);
@@ -184,8 +183,8 @@ package CUDA.Runtime_Api is
      (Func : System.Address; Cache_Config : CUDA.Driver_Types.Func_Cache);
    procedure Func_Set_Shared_Mem_Config
      (Func : System.Address; Config : CUDA.Driver_Types.Shared_Mem_Config);
-   procedure Func_Get_Attributes
-     (Attr : out CUDA.Driver_Types.Func_Attributes; Func : System.Address);
+   function Func_Get_Attributes
+     (Func : System.Address) return CUDA.Driver_Types.Func_Attributes;
    procedure Func_Set_Attribute
      (Func  : System.Address; Attr : CUDA.Driver_Types.Func_Attribute;
       Value : int);
@@ -224,7 +223,7 @@ package CUDA.Runtime_Api is
    procedure Host_Unregister (Ptr : System.Address);
    procedure Host_Get_Device_Pointer
      (P_Device : System.Address; P_Host : System.Address; Flags : unsigned);
-   procedure Host_Get_Flags (P_Flags : out unsigned; P_Host : System.Address);
+   function Host_Get_Flags (P_Host : System.Address) return unsigned;
    procedure Malloc3_D
      (Pitched_Dev_Ptr : out CUDA.Driver_Types.Pitched_Ptr;
       Extent          :     CUDA.Driver_Types.Extent_T);
@@ -249,12 +248,12 @@ package CUDA.Runtime_Api is
    procedure Memcpy3_DPeer_Async
      (P      : out CUDA.Driver_Types.Memcpy3_DPeer_Parms;
       Stream :     CUDA.Driver_Types.Stream_T);
-   procedure Mem_Get_Info
-     (Free : out CUDA.Corecrt.Size_T; Total : out CUDA.Corecrt.Size_T);
-   procedure CUDA_ArrayGetInfo
-     (Desc    : out CUDA.Driver_Types.Channel_Format_Desc;
-      Extent  : out CUDA.Driver_Types.Extent_T; Flags : out unsigned;
-      C_Array :     CUDA.Driver_Types.CUDA_Array_t);
+   function Mem_Get_Info
+     (Total : out CUDA.Corecrt.Size_T) return CUDA.Corecrt.Size_T;
+   function CUDA_ArrayGetInfo
+     (Extent  : out CUDA.Driver_Types.Extent_T; Flags : out unsigned;
+      C_Array :     CUDA.Driver_Types.CUDA_Array_t)
+      return CUDA.Driver_Types.Channel_Format_Desc;
    procedure Memcpy
      (Dst  : System.Address; Src : System.Address; Count : CUDA.Corecrt.Size_T;
       Kind : CUDA.Driver_Types.Memcpy_Kind);
@@ -347,8 +346,8 @@ package CUDA.Runtime_Api is
       Extent : CUDA.Driver_Types.Extent_T; Stream : CUDA.Driver_Types.Stream_T);
    procedure Get_Symbol_Address
      (Dev_Ptr : System.Address; Symbol : System.Address);
-   procedure Get_Symbol_Size
-     (Size : out CUDA.Corecrt.Size_T; Symbol : System.Address);
+   function Get_Symbol_Size
+     (Symbol : System.Address) return CUDA.Corecrt.Size_T;
    procedure Mem_Prefetch_Async
      (Dev_Ptr : System.Address; Count : CUDA.Corecrt.Size_T; Dst_Device : int;
       Stream  : CUDA.Driver_Types.Stream_T);
@@ -388,9 +387,8 @@ package CUDA.Runtime_Api is
       W_Offset : CUDA.Corecrt.Size_T; H_Offset : CUDA.Corecrt.Size_T;
       Count    : CUDA.Corecrt.Size_T; Kind : CUDA.Driver_Types.Memcpy_Kind;
       Stream   : CUDA.Driver_Types.Stream_T);
-   procedure Pointer_Get_Attributes
-     (Attributes : out CUDA.Driver_Types.Pointer_Attributes;
-      Ptr        :     System.Address);
+   function Pointer_Get_Attributes
+     (Ptr : System.Address) return CUDA.Driver_Types.Pointer_Attributes;
    procedure Device_Can_Access_Peer
      (Can_Access_Peer : out int; Device : int; Peer_Device : int);
    procedure Device_Enable_Peer_Access (Peer_Device : int; Flags : unsigned);
@@ -437,9 +435,9 @@ package CUDA.Runtime_Api is
       Mipmapped_Array :     CUDA.Driver_Types.Mipmapped_Array_Const_T;
       Desc            : out CUDA.Driver_Types.Channel_Format_Desc);
    procedure Unbind_Texture (Texref : out CUDA.Texture_Types.Texture_Reference);
-   procedure Get_Texture_Alignment_Offset
-     (Offset : out CUDA.Corecrt.Size_T;
-      Texref : out CUDA.Texture_Types.Texture_Reference);
+   function Get_Texture_Alignment_Offset
+     (Texref : out CUDA.Texture_Types.Texture_Reference)
+      return CUDA.Corecrt.Size_T;
    procedure Get_Texture_Reference
      (Texref : System.Address; Symbol : System.Address);
    procedure Bind_Surface_To_Array
@@ -448,9 +446,9 @@ package CUDA.Runtime_Api is
       Desc    : out CUDA.Driver_Types.Channel_Format_Desc);
    procedure Get_Surface_Reference
      (Surfref : System.Address; Symbol : System.Address);
-   procedure Get_Channel_Desc
-     (Desc    : out CUDA.Driver_Types.Channel_Format_Desc;
-      C_Array :     CUDA.Driver_Types.CUDA_Array_const_t);
+   function Get_Channel_Desc
+     (C_Array : CUDA.Driver_Types.CUDA_Array_const_t)
+      return CUDA.Driver_Types.Channel_Format_Desc;
    function Create_Channel_Desc
      (X : int; Y : int; Z : int; W : int;
       F : CUDA.Driver_Types.Channel_Format_Kind)
@@ -462,25 +460,25 @@ package CUDA.Runtime_Api is
       P_Res_View_Desc : out CUDA.Driver_Types.Resource_View_Desc);
    procedure Destroy_Texture_Object
      (Tex_Object : CUDA.Texture_Types.Texture_Object_T);
-   procedure Get_Texture_Object_Resource_Desc
-     (P_Res_Desc : out CUDA.Driver_Types.Resource_Desc;
-      Tex_Object :     CUDA.Texture_Types.Texture_Object_T);
-   procedure Get_Texture_Object_Texture_Desc
-     (P_Tex_Desc : out CUDA.Texture_Types.Texture_Desc;
-      Tex_Object :     CUDA.Texture_Types.Texture_Object_T);
-   procedure Get_Texture_Object_Resource_View_Desc
-     (P_Res_View_Desc : out CUDA.Driver_Types.Resource_View_Desc;
-      Tex_Object      :     CUDA.Texture_Types.Texture_Object_T);
+   function Get_Texture_Object_Resource_Desc
+     (Tex_Object : CUDA.Texture_Types.Texture_Object_T)
+      return CUDA.Driver_Types.Resource_Desc;
+   function Get_Texture_Object_Texture_Desc
+     (Tex_Object : CUDA.Texture_Types.Texture_Object_T)
+      return CUDA.Texture_Types.Texture_Desc;
+   function Get_Texture_Object_Resource_View_Desc
+     (Tex_Object : CUDA.Texture_Types.Texture_Object_T)
+      return CUDA.Driver_Types.Resource_View_Desc;
    procedure Create_Surface_Object
      (P_Surf_Object : out CUDA.Surface_Types.Surface_Object_T;
       P_Res_Desc    : out CUDA.Driver_Types.Resource_Desc);
    procedure Destroy_Surface_Object
      (Surf_Object : CUDA.Surface_Types.Surface_Object_T);
-   procedure Get_Surface_Object_Resource_Desc
-     (P_Res_Desc  : out CUDA.Driver_Types.Resource_Desc;
-      Surf_Object :     CUDA.Surface_Types.Surface_Object_T);
-   procedure Driver_Get_Version (Driver_Version : out int);
-   procedure Runtime_Get_Version (Runtime_Version : out int);
+   function Get_Surface_Object_Resource_Desc
+     (Surf_Object : CUDA.Surface_Types.Surface_Object_T)
+      return CUDA.Driver_Types.Resource_Desc;
+   function Driver_Get_Version return int;
+   function Runtime_Get_Version return int;
    procedure Graph_Create (P_Graph : System.Address; Flags : unsigned);
    procedure Graph_Add_Kernel_Node
      (P_Graph_Node   :     System.Address; Graph : CUDA.Driver_Types.Graph_T;
