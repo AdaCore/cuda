@@ -1,10 +1,18 @@
 with System;
+with Interfaces.C;
 with Interfaces.C.Strings;
 with CUDA.Vector_Types;
 with CUDA.Crtdefs;
 with CUDA.Driver_Types;
 
 package CUDA.Internal is
+
+   type Fatbin_Wrapper is record
+      Magic : Interfaces.C.int;
+      Version : Interfaces.C.int;
+      Data : System.Address;
+      Filename_Or_Fatbins : System.Address;
+   end record;
 
    procedure Register_Function
       (Fat_Binary_Handle : System.Address;
@@ -35,7 +43,7 @@ package CUDA.Internal is
    procedure Push_Call_Configuration 
       (Grid_Dim : Vector_Types.Dim3;
        Block_Dim : Vector_Types.Dim3;
-       Shared_Mem : Crtdefs.Size_T;
+       Shared_Mem : Interfaces.C.Unsigned_Long_Long;
        Stream : Driver_Types.Stream_T)
        with Import => True,
             Convention => C,

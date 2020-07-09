@@ -3,7 +3,6 @@ with CUDA.Vector_Types;
 with Interfaces.C;
 with Interfaces.C.Extensions;
 with System;
-use Interfaces.C;
 
 package CUDA.Driver_Types is
    pragma Elaborate_Body;
@@ -51,8 +50,8 @@ package CUDA.Driver_Types is
    External_Semaphore_Wait_Skip_Nv_Sci_Buf_Mem_Sync   : constant := 16#02#;
    Nv_Sci_Sync_Attr_Signal                            : constant := 16#1#;
    Nv_Sci_Sync_Attr_Wait                              : constant := 16#2#;
-   subtype Error is unsigned;
-   Success : constant unsigned := 0;
+   subtype Error is Interfaces.C.unsigned;
+   Success : constant Interfaces.C.unsigned := 0;
    Error_Invalid_Value                  : exception;
    Error_Memory_Allocation              : exception;
    Error_Initialization_Error           : exception;
@@ -167,10 +166,10 @@ package CUDA.Driver_Types is
       Convention => C;
 
    type Channel_Format_Desc is record
-      X : aliased int;
-      Y : aliased int;
-      Z : aliased int;
-      W : aliased int;
+      X : aliased Interfaces.C.int;
+      Y : aliased Interfaces.C.int;
+      Z : aliased Interfaces.C.int;
+      W : aliased Interfaces.C.int;
       F : aliased Channel_Format_Kind;
    end record with
       Convention => C_Pass_By_Copy;
@@ -231,11 +230,11 @@ package CUDA.Driver_Types is
       Src_Array  : CUDA_Array_T;
       Src_Pos    : aliased Pos;
       Src_Ptr    : aliased Pitched_Ptr;
-      Src_Device : aliased int;
+      Src_Device : aliased Interfaces.C.int;
       Dst_Array  : CUDA_Array_T;
       Dst_Pos    : aliased Pos;
       Dst_Ptr    : aliased Pitched_Ptr;
-      Dst_Device : aliased int;
+      Dst_Device : aliased Interfaces.C.int;
       Extent     : aliased Extent_T;
    end record with
       Convention => C_Pass_By_Copy;
@@ -243,8 +242,8 @@ package CUDA.Driver_Types is
    type Memset_Params is record
       Dst          : System.Address;
       Pitch        : aliased CUDA.Crtdefs.Size_T;
-      Value        : aliased unsigned;
-      Element_Size : aliased unsigned;
+      Value        : aliased Interfaces.C.unsigned;
+      Element_Size : aliased Interfaces.C.unsigned;
       Width        : aliased CUDA.Crtdefs.Size_T;
       Height       : aliased CUDA.Crtdefs.Size_T;
    end record with
@@ -266,12 +265,12 @@ package CUDA.Driver_Types is
       Convention => C;
 
    type Graphics_Resource is null record;
-   subtype Graphics_Register_Flags is unsigned;
-   Graphics_Register_Flags_None               : constant unsigned := 0;
-   Graphics_Register_Flags_Read_Only          : constant unsigned := 1;
-   Graphics_Register_Flags_Write_Discard      : constant unsigned := 2;
-   Graphics_Register_Flags_Surface_Load_Store : constant unsigned := 4;
-   Graphics_Register_Flags_Texture_Gather     : constant unsigned := 8;
+   subtype Graphics_Register_Flags is Interfaces.C.unsigned;
+   Graphics_Register_Flags_None               : constant Interfaces.C.unsigned := 0;
+   Graphics_Register_Flags_Read_Only          : constant Interfaces.C.unsigned := 1;
+   Graphics_Register_Flags_Write_Discard      : constant Interfaces.C.unsigned := 2;
+   Graphics_Register_Flags_Surface_Load_Store : constant Interfaces.C.unsigned := 4;
+   Graphics_Register_Flags_Texture_Gather     : constant Interfaces.C.unsigned := 8;
 
    type Graphics_Map_Flags is (Graphics_Map_Flags_None, Graphics_Map_Flags_Read_Only, Graphics_Map_Flags_Write_Discard) with
       Convention => C;
@@ -316,7 +315,7 @@ package CUDA.Driver_Types is
    end record with
       Convention => C_Pass_By_Copy;
 
-   type Anon985_Res_Union (discr : unsigned := 0) is record
+   type Anon985_Res_Union (discr : Interfaces.C.unsigned := 0) is record
       case discr is
          when 0 =>
             C_Array : aliased Anon985_C_Array_Struct;
@@ -345,20 +344,20 @@ package CUDA.Driver_Types is
       Width              : aliased CUDA.Crtdefs.Size_T;
       Height             : aliased CUDA.Crtdefs.Size_T;
       Depth              : aliased CUDA.Crtdefs.Size_T;
-      First_Mipmap_Level : aliased unsigned;
-      Last_Mipmap_Level  : aliased unsigned;
-      First_Layer        : aliased unsigned;
-      Last_Layer         : aliased unsigned;
+      First_Mipmap_Level : aliased Interfaces.C.unsigned;
+      Last_Mipmap_Level  : aliased Interfaces.C.unsigned;
+      First_Layer        : aliased Interfaces.C.unsigned;
+      Last_Layer         : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
 
    type Pointer_Attributes is record
       Memory_Type    : aliased Memory_Type_T;
       C_Type         : aliased Memory_Type_T;
-      Device         : aliased int;
+      Device         : aliased Interfaces.C.int;
       Device_Pointer : System.Address;
       Host_Pointer   : System.Address;
-      Is_Managed     : aliased int;
+      Is_Managed     : aliased Interfaces.C.int;
    end record with
       Convention => C_Pass_By_Copy;
 
@@ -366,156 +365,152 @@ package CUDA.Driver_Types is
       Shared_Size_Bytes             : aliased CUDA.Crtdefs.Size_T;
       Const_Size_Bytes              : aliased CUDA.Crtdefs.Size_T;
       Local_Size_Bytes              : aliased CUDA.Crtdefs.Size_T;
-      Max_Threads_Per_Block         : aliased int;
-      Num_Regs                      : aliased int;
-      Ptx_Version                   : aliased int;
-      Binary_Version                : aliased int;
-      Cache_Mode_CA                 : aliased int;
-      Max_Dynamic_Shared_Size_Bytes : aliased int;
-      Preferred_Shmem_Carveout      : aliased int;
+      Max_Threads_Per_Block         : aliased Interfaces.C.int;
+      Num_Regs                      : aliased Interfaces.C.int;
+      Ptx_Version                   : aliased Interfaces.C.int;
+      Binary_Version                : aliased Interfaces.C.int;
+      Cache_Mode_CA                 : aliased Interfaces.C.int;
+      Max_Dynamic_Shared_Size_Bytes : aliased Interfaces.C.int;
+      Preferred_Shmem_Carveout      : aliased Interfaces.C.int;
    end record with
       Convention => C_Pass_By_Copy;
-   subtype Func_Attribute is unsigned;
-   Func_Attribute_Max_Dynamic_Shared_Memory_Size   : constant unsigned := 8;
-   Func_Attribute_Preferred_Shared_Memory_Carveout : constant unsigned := 9;
-   Func_Attribute_Max                              : constant unsigned := 10;
+   subtype Func_Attribute is Interfaces.C.unsigned;
+   Func_Attribute_Max_Dynamic_Shared_Memory_Size   : constant Interfaces.C.unsigned := 8;
+   Func_Attribute_Preferred_Shared_Memory_Carveout : constant Interfaces.C.unsigned := 9;
+   Func_Attribute_Max                              : constant Interfaces.C.unsigned := 10;
 
    type Func_Cache is (Func_Cache_Prefer_None, Func_Cache_Prefer_Shared, Func_Cache_Prefer_L1, Func_Cache_Prefer_Equal) with
       Convention => C;
 
    type Shared_Mem_Config is (Shared_Mem_Bank_Size_Default, Shared_Mem_Bank_Size_Four_Byte, Shared_Mem_Bank_Size_Eight_Byte) with
       Convention => C;
-   subtype Shared_Carveout is int;
-   Sharedmem_Carveout_Default    : constant int := -1;
-   Sharedmem_Carveout_Max_Shared : constant int := 100;
-   Sharedmem_Carveout_Max_L1     : constant int := 0;
 
    type Compute_Mode is (Compute_Mode_Default, Compute_Mode_Exclusive, Compute_Mode_Prohibited, Compute_Mode_Exclusive_Process) with
       Convention => C;
 
    type Limit is (Limit_Stack_Size, Limit_Printf_Fifo_Size, Limit_Malloc_Heap_Size, Limit_Dev_Runtime_Sync_Depth, Limit_Dev_Runtime_Pending_Launch_Count, Limit_Max_L2_Fetch_Granularity) with
       Convention => C;
-   subtype Memory_Advise is unsigned;
-   Mem_Advise_Set_Read_Mostly          : constant unsigned := 1;
-   Mem_Advise_Unset_Read_Mostly        : constant unsigned := 2;
-   Mem_Advise_Set_Preferred_Location   : constant unsigned := 3;
-   Mem_Advise_Unset_Preferred_Location : constant unsigned := 4;
-   Mem_Advise_Set_Accessed_By          : constant unsigned := 5;
-   Mem_Advise_Unset_Accessed_By        : constant unsigned := 6;
-   subtype Mem_Range_Attribute is unsigned;
-   Mem_Range_Attribute_Read_Mostly            : constant unsigned := 1;
-   Mem_Range_Attribute_Preferred_Location     : constant unsigned := 2;
-   Mem_Range_Attribute_Accessed_By            : constant unsigned := 3;
-   Mem_Range_Attribute_Last_Prefetch_Location : constant unsigned := 4;
+   subtype Memory_Advise is Interfaces.C.unsigned;
+   Mem_Advise_Set_Read_Mostly          : constant Interfaces.C.unsigned := 1;
+   Mem_Advise_Unset_Read_Mostly        : constant Interfaces.C.unsigned := 2;
+   Mem_Advise_Set_Preferred_Location   : constant Interfaces.C.unsigned := 3;
+   Mem_Advise_Unset_Preferred_Location : constant Interfaces.C.unsigned := 4;
+   Mem_Advise_Set_Accessed_By          : constant Interfaces.C.unsigned := 5;
+   Mem_Advise_Unset_Accessed_By        : constant Interfaces.C.unsigned := 6;
+   subtype Mem_Range_Attribute is Interfaces.C.unsigned;
+   Mem_Range_Attribute_Read_Mostly            : constant Interfaces.C.unsigned := 1;
+   Mem_Range_Attribute_Preferred_Location     : constant Interfaces.C.unsigned := 2;
+   Mem_Range_Attribute_Accessed_By            : constant Interfaces.C.unsigned := 3;
+   Mem_Range_Attribute_Last_Prefetch_Location : constant Interfaces.C.unsigned := 4;
 
    type Output_Mode is (Key_Value_Pair, CSV) with
       Convention => C;
-   subtype Device_Attr is unsigned;
-   Dev_Attr_Max_Threads_Per_Block                        : constant unsigned := 1;
-   Dev_Attr_Max_Block_Dim_X                              : constant unsigned := 2;
-   Dev_Attr_Max_Block_Dim_Y                              : constant unsigned := 3;
-   Dev_Attr_Max_Block_Dim_Z                              : constant unsigned := 4;
-   Dev_Attr_Max_Grid_Dim_X                               : constant unsigned := 5;
-   Dev_Attr_Max_Grid_Dim_Y                               : constant unsigned := 6;
-   Dev_Attr_Max_Grid_Dim_Z                               : constant unsigned := 7;
-   Dev_Attr_Max_Shared_Memory_Per_Block                  : constant unsigned := 8;
-   Dev_Attr_Total_Constant_Memory                        : constant unsigned := 9;
-   Dev_Attr_Warp_Size                                    : constant unsigned := 10;
-   Dev_Attr_Max_Pitch                                    : constant unsigned := 11;
-   Dev_Attr_Max_Registers_Per_Block                      : constant unsigned := 12;
-   Dev_Attr_Clock_Rate                                   : constant unsigned := 13;
-   Dev_Attr_Texture_Alignment                            : constant unsigned := 14;
-   Dev_Attr_Gpu_Overlap                                  : constant unsigned := 15;
-   Dev_Attr_Multi_Processor_Count                        : constant unsigned := 16;
-   Dev_Attr_Kernel_Exec_Timeout                          : constant unsigned := 17;
-   Dev_Attr_Integrated                                   : constant unsigned := 18;
-   Dev_Attr_Can_Map_Host_Memory                          : constant unsigned := 19;
-   Dev_Attr_Compute_Mode                                 : constant unsigned := 20;
-   Dev_Attr_Max_Texture1_DWidth                          : constant unsigned := 21;
-   Dev_Attr_Max_Texture2_DWidth                          : constant unsigned := 22;
-   Dev_Attr_Max_Texture2_DHeight                         : constant unsigned := 23;
-   Dev_Attr_Max_Texture3_DWidth                          : constant unsigned := 24;
-   Dev_Attr_Max_Texture3_DHeight                         : constant unsigned := 25;
-   Dev_Attr_Max_Texture3_DDepth                          : constant unsigned := 26;
-   Dev_Attr_Max_Texture2_DLayered_Width                  : constant unsigned := 27;
-   Dev_Attr_Max_Texture2_DLayered_Height                 : constant unsigned := 28;
-   Dev_Attr_Max_Texture2_DLayered_Layers                 : constant unsigned := 29;
-   Dev_Attr_Surface_Alignment                            : constant unsigned := 30;
-   Dev_Attr_Concurrent_Kernels                           : constant unsigned := 31;
-   Dev_Attr_Ecc_Enabled                                  : constant unsigned := 32;
-   Dev_Attr_Pci_Bus_Id                                   : constant unsigned := 33;
-   Dev_Attr_Pci_Device_Id                                : constant unsigned := 34;
-   Dev_Attr_Tcc_Driver                                   : constant unsigned := 35;
-   Dev_Attr_Memory_Clock_Rate                            : constant unsigned := 36;
-   Dev_Attr_Global_Memory_Bus_Width                      : constant unsigned := 37;
-   Dev_Attr_L2_Cache_Size                                : constant unsigned := 38;
-   Dev_Attr_Max_Threads_Per_Multi_Processor              : constant unsigned := 39;
-   Dev_Attr_Async_Engine_Count                           : constant unsigned := 40;
-   Dev_Attr_Unified_Addressing                           : constant unsigned := 41;
-   Dev_Attr_Max_Texture1_DLayered_Width                  : constant unsigned := 42;
-   Dev_Attr_Max_Texture1_DLayered_Layers                 : constant unsigned := 43;
-   Dev_Attr_Max_Texture2_DGather_Width                   : constant unsigned := 45;
-   Dev_Attr_Max_Texture2_DGather_Height                  : constant unsigned := 46;
-   Dev_Attr_Max_Texture3_DWidth_Alt                      : constant unsigned := 47;
-   Dev_Attr_Max_Texture3_DHeight_Alt                     : constant unsigned := 48;
-   Dev_Attr_Max_Texture3_DDepth_Alt                      : constant unsigned := 49;
-   Dev_Attr_Pci_Domain_Id                                : constant unsigned := 50;
-   Dev_Attr_Texture_Pitch_Alignment                      : constant unsigned := 51;
-   Dev_Attr_Max_Texture_Cubemap_Width                    : constant unsigned := 52;
-   Dev_Attr_Max_Texture_Cubemap_Layered_Width            : constant unsigned := 53;
-   Dev_Attr_Max_Texture_Cubemap_Layered_Layers           : constant unsigned := 54;
-   Dev_Attr_Max_Surface1_DWidth                          : constant unsigned := 55;
-   Dev_Attr_Max_Surface2_DWidth                          : constant unsigned := 56;
-   Dev_Attr_Max_Surface2_DHeight                         : constant unsigned := 57;
-   Dev_Attr_Max_Surface3_DWidth                          : constant unsigned := 58;
-   Dev_Attr_Max_Surface3_DHeight                         : constant unsigned := 59;
-   Dev_Attr_Max_Surface3_DDepth                          : constant unsigned := 60;
-   Dev_Attr_Max_Surface1_DLayered_Width                  : constant unsigned := 61;
-   Dev_Attr_Max_Surface1_DLayered_Layers                 : constant unsigned := 62;
-   Dev_Attr_Max_Surface2_DLayered_Width                  : constant unsigned := 63;
-   Dev_Attr_Max_Surface2_DLayered_Height                 : constant unsigned := 64;
-   Dev_Attr_Max_Surface2_DLayered_Layers                 : constant unsigned := 65;
-   Dev_Attr_Max_Surface_Cubemap_Width                    : constant unsigned := 66;
-   Dev_Attr_Max_Surface_Cubemap_Layered_Width            : constant unsigned := 67;
-   Dev_Attr_Max_Surface_Cubemap_Layered_Layers           : constant unsigned := 68;
-   Dev_Attr_Max_Texture1_DLinear_Width                   : constant unsigned := 69;
-   Dev_Attr_Max_Texture2_DLinear_Width                   : constant unsigned := 70;
-   Dev_Attr_Max_Texture2_DLinear_Height                  : constant unsigned := 71;
-   Dev_Attr_Max_Texture2_DLinear_Pitch                   : constant unsigned := 72;
-   Dev_Attr_Max_Texture2_DMipmapped_Width                : constant unsigned := 73;
-   Dev_Attr_Max_Texture2_DMipmapped_Height               : constant unsigned := 74;
-   Dev_Attr_Compute_Capability_Major                     : constant unsigned := 75;
-   Dev_Attr_Compute_Capability_Minor                     : constant unsigned := 76;
-   Dev_Attr_Max_Texture1_DMipmapped_Width                : constant unsigned := 77;
-   Dev_Attr_Stream_Priorities_Supported                  : constant unsigned := 78;
-   Dev_Attr_Global_L1_Cache_Supported                    : constant unsigned := 79;
-   Dev_Attr_Local_L1_Cache_Supported                     : constant unsigned := 80;
-   Dev_Attr_Max_Shared_Memory_Per_Multiprocessor         : constant unsigned := 81;
-   Dev_Attr_Max_Registers_Per_Multiprocessor             : constant unsigned := 82;
-   Dev_Attr_Managed_Memory                               : constant unsigned := 83;
-   Dev_Attr_Is_Multi_Gpu_Board                           : constant unsigned := 84;
-   Dev_Attr_Multi_Gpu_Board_Group_ID                     : constant unsigned := 85;
-   Dev_Attr_Host_Native_Atomic_Supported                 : constant unsigned := 86;
-   Dev_Attr_Single_To_Double_Precision_Perf_Ratio        : constant unsigned := 87;
-   Dev_Attr_Pageable_Memory_Access                       : constant unsigned := 88;
-   Dev_Attr_Concurrent_Managed_Access                    : constant unsigned := 89;
-   Dev_Attr_Compute_Preemption_Supported                 : constant unsigned := 90;
-   Dev_Attr_Can_Use_Host_Pointer_For_Registered_Mem      : constant unsigned := 91;
-   Dev_Attr_Reserved92                                   : constant unsigned := 92;
-   Dev_Attr_Reserved93                                   : constant unsigned := 93;
-   Dev_Attr_Reserved94                                   : constant unsigned := 94;
-   Dev_Attr_Cooperative_Launch                           : constant unsigned := 95;
-   Dev_Attr_Cooperative_Multi_Device_Launch              : constant unsigned := 96;
-   Dev_Attr_Max_Shared_Memory_Per_Block_Optin            : constant unsigned := 97;
-   Dev_Attr_Can_Flush_Remote_Writes                      : constant unsigned := 98;
-   Dev_Attr_Host_Register_Supported                      : constant unsigned := 99;
-   Dev_Attr_Pageable_Memory_Access_Uses_Host_Page_Tables : constant unsigned := 100;
-   Dev_Attr_Direct_Managed_Mem_Access_From_Host          : constant unsigned := 101;
-   subtype Device_P2_PAttr is unsigned;
-   Dev_P2_PAttr_Performance_Rank            : constant unsigned := 1;
-   Dev_P2_PAttr_Access_Supported            : constant unsigned := 2;
-   Dev_P2_PAttr_Native_Atomic_Supported     : constant unsigned := 3;
-   Dev_P2_PAttr_Cuda_Array_Access_Supported : constant unsigned := 4;
+   subtype Device_Attr is Interfaces.C.unsigned;
+   Dev_Attr_Max_Threads_Per_Block                        : constant Interfaces.C.unsigned := 1;
+   Dev_Attr_Max_Block_Dim_X                              : constant Interfaces.C.unsigned := 2;
+   Dev_Attr_Max_Block_Dim_Y                              : constant Interfaces.C.unsigned := 3;
+   Dev_Attr_Max_Block_Dim_Z                              : constant Interfaces.C.unsigned := 4;
+   Dev_Attr_Max_Grid_Dim_X                               : constant Interfaces.C.unsigned := 5;
+   Dev_Attr_Max_Grid_Dim_Y                               : constant Interfaces.C.unsigned := 6;
+   Dev_Attr_Max_Grid_Dim_Z                               : constant Interfaces.C.unsigned := 7;
+   Dev_Attr_Max_Shared_Memory_Per_Block                  : constant Interfaces.C.unsigned := 8;
+   Dev_Attr_Total_Constant_Memory                        : constant Interfaces.C.unsigned := 9;
+   Dev_Attr_Warp_Size                                    : constant Interfaces.C.unsigned := 10;
+   Dev_Attr_Max_Pitch                                    : constant Interfaces.C.unsigned := 11;
+   Dev_Attr_Max_Registers_Per_Block                      : constant Interfaces.C.unsigned := 12;
+   Dev_Attr_Clock_Rate                                   : constant Interfaces.C.unsigned := 13;
+   Dev_Attr_Texture_Alignment                            : constant Interfaces.C.unsigned := 14;
+   Dev_Attr_Gpu_Overlap                                  : constant Interfaces.C.unsigned := 15;
+   Dev_Attr_Multi_Processor_Count                        : constant Interfaces.C.unsigned := 16;
+   Dev_Attr_Kernel_Exec_Timeout                          : constant Interfaces.C.unsigned := 17;
+   Dev_Attr_Integrated                                   : constant Interfaces.C.unsigned := 18;
+   Dev_Attr_Can_Map_Host_Memory                          : constant Interfaces.C.unsigned := 19;
+   Dev_Attr_Compute_Mode                                 : constant Interfaces.C.unsigned := 20;
+   Dev_Attr_Max_Texture1_DWidth                          : constant Interfaces.C.unsigned := 21;
+   Dev_Attr_Max_Texture2_DWidth                          : constant Interfaces.C.unsigned := 22;
+   Dev_Attr_Max_Texture2_DHeight                         : constant Interfaces.C.unsigned := 23;
+   Dev_Attr_Max_Texture3_DWidth                          : constant Interfaces.C.unsigned := 24;
+   Dev_Attr_Max_Texture3_DHeight                         : constant Interfaces.C.unsigned := 25;
+   Dev_Attr_Max_Texture3_DDepth                          : constant Interfaces.C.unsigned := 26;
+   Dev_Attr_Max_Texture2_DLayered_Width                  : constant Interfaces.C.unsigned := 27;
+   Dev_Attr_Max_Texture2_DLayered_Height                 : constant Interfaces.C.unsigned := 28;
+   Dev_Attr_Max_Texture2_DLayered_Layers                 : constant Interfaces.C.unsigned := 29;
+   Dev_Attr_Surface_Alignment                            : constant Interfaces.C.unsigned := 30;
+   Dev_Attr_Concurrent_Kernels                           : constant Interfaces.C.unsigned := 31;
+   Dev_Attr_Ecc_Enabled                                  : constant Interfaces.C.unsigned := 32;
+   Dev_Attr_Pci_Bus_Id                                   : constant Interfaces.C.unsigned := 33;
+   Dev_Attr_Pci_Device_Id                                : constant Interfaces.C.unsigned := 34;
+   Dev_Attr_Tcc_Driver                                   : constant Interfaces.C.unsigned := 35;
+   Dev_Attr_Memory_Clock_Rate                            : constant Interfaces.C.unsigned := 36;
+   Dev_Attr_Global_Memory_Bus_Width                      : constant Interfaces.C.unsigned := 37;
+   Dev_Attr_L2_Cache_Size                                : constant Interfaces.C.unsigned := 38;
+   Dev_Attr_Max_Threads_Per_Multi_Processor              : constant Interfaces.C.unsigned := 39;
+   Dev_Attr_Async_Engine_Count                           : constant Interfaces.C.unsigned := 40;
+   Dev_Attr_Unified_Addressing                           : constant Interfaces.C.unsigned := 41;
+   Dev_Attr_Max_Texture1_DLayered_Width                  : constant Interfaces.C.unsigned := 42;
+   Dev_Attr_Max_Texture1_DLayered_Layers                 : constant Interfaces.C.unsigned := 43;
+   Dev_Attr_Max_Texture2_DGather_Width                   : constant Interfaces.C.unsigned := 45;
+   Dev_Attr_Max_Texture2_DGather_Height                  : constant Interfaces.C.unsigned := 46;
+   Dev_Attr_Max_Texture3_DWidth_Alt                      : constant Interfaces.C.unsigned := 47;
+   Dev_Attr_Max_Texture3_DHeight_Alt                     : constant Interfaces.C.unsigned := 48;
+   Dev_Attr_Max_Texture3_DDepth_Alt                      : constant Interfaces.C.unsigned := 49;
+   Dev_Attr_Pci_Domain_Id                                : constant Interfaces.C.unsigned := 50;
+   Dev_Attr_Texture_Pitch_Alignment                      : constant Interfaces.C.unsigned := 51;
+   Dev_Attr_Max_Texture_Cubemap_Width                    : constant Interfaces.C.unsigned := 52;
+   Dev_Attr_Max_Texture_Cubemap_Layered_Width            : constant Interfaces.C.unsigned := 53;
+   Dev_Attr_Max_Texture_Cubemap_Layered_Layers           : constant Interfaces.C.unsigned := 54;
+   Dev_Attr_Max_Surface1_DWidth                          : constant Interfaces.C.unsigned := 55;
+   Dev_Attr_Max_Surface2_DWidth                          : constant Interfaces.C.unsigned := 56;
+   Dev_Attr_Max_Surface2_DHeight                         : constant Interfaces.C.unsigned := 57;
+   Dev_Attr_Max_Surface3_DWidth                          : constant Interfaces.C.unsigned := 58;
+   Dev_Attr_Max_Surface3_DHeight                         : constant Interfaces.C.unsigned := 59;
+   Dev_Attr_Max_Surface3_DDepth                          : constant Interfaces.C.unsigned := 60;
+   Dev_Attr_Max_Surface1_DLayered_Width                  : constant Interfaces.C.unsigned := 61;
+   Dev_Attr_Max_Surface1_DLayered_Layers                 : constant Interfaces.C.unsigned := 62;
+   Dev_Attr_Max_Surface2_DLayered_Width                  : constant Interfaces.C.unsigned := 63;
+   Dev_Attr_Max_Surface2_DLayered_Height                 : constant Interfaces.C.unsigned := 64;
+   Dev_Attr_Max_Surface2_DLayered_Layers                 : constant Interfaces.C.unsigned := 65;
+   Dev_Attr_Max_Surface_Cubemap_Width                    : constant Interfaces.C.unsigned := 66;
+   Dev_Attr_Max_Surface_Cubemap_Layered_Width            : constant Interfaces.C.unsigned := 67;
+   Dev_Attr_Max_Surface_Cubemap_Layered_Layers           : constant Interfaces.C.unsigned := 68;
+   Dev_Attr_Max_Texture1_DLinear_Width                   : constant Interfaces.C.unsigned := 69;
+   Dev_Attr_Max_Texture2_DLinear_Width                   : constant Interfaces.C.unsigned := 70;
+   Dev_Attr_Max_Texture2_DLinear_Height                  : constant Interfaces.C.unsigned := 71;
+   Dev_Attr_Max_Texture2_DLinear_Pitch                   : constant Interfaces.C.unsigned := 72;
+   Dev_Attr_Max_Texture2_DMipmapped_Width                : constant Interfaces.C.unsigned := 73;
+   Dev_Attr_Max_Texture2_DMipmapped_Height               : constant Interfaces.C.unsigned := 74;
+   Dev_Attr_Compute_Capability_Major                     : constant Interfaces.C.unsigned := 75;
+   Dev_Attr_Compute_Capability_Minor                     : constant Interfaces.C.unsigned := 76;
+   Dev_Attr_Max_Texture1_DMipmapped_Width                : constant Interfaces.C.unsigned := 77;
+   Dev_Attr_Stream_Priorities_Supported                  : constant Interfaces.C.unsigned := 78;
+   Dev_Attr_Global_L1_Cache_Supported                    : constant Interfaces.C.unsigned := 79;
+   Dev_Attr_Local_L1_Cache_Supported                     : constant Interfaces.C.unsigned := 80;
+   Dev_Attr_Max_Shared_Memory_Per_Multiprocessor         : constant Interfaces.C.unsigned := 81;
+   Dev_Attr_Max_Registers_Per_Multiprocessor             : constant Interfaces.C.unsigned := 82;
+   Dev_Attr_Managed_Memory                               : constant Interfaces.C.unsigned := 83;
+   Dev_Attr_Is_Multi_Gpu_Board                           : constant Interfaces.C.unsigned := 84;
+   Dev_Attr_Multi_Gpu_Board_Group_ID                     : constant Interfaces.C.unsigned := 85;
+   Dev_Attr_Host_Native_Atomic_Supported                 : constant Interfaces.C.unsigned := 86;
+   Dev_Attr_Single_To_Double_Precision_Perf_Ratio        : constant Interfaces.C.unsigned := 87;
+   Dev_Attr_Pageable_Memory_Access                       : constant Interfaces.C.unsigned := 88;
+   Dev_Attr_Concurrent_Managed_Access                    : constant Interfaces.C.unsigned := 89;
+   Dev_Attr_Compute_Preemption_Supported                 : constant Interfaces.C.unsigned := 90;
+   Dev_Attr_Can_Use_Host_Pointer_For_Registered_Mem      : constant Interfaces.C.unsigned := 91;
+   Dev_Attr_Reserved92                                   : constant Interfaces.C.unsigned := 92;
+   Dev_Attr_Reserved93                                   : constant Interfaces.C.unsigned := 93;
+   Dev_Attr_Reserved94                                   : constant Interfaces.C.unsigned := 94;
+   Dev_Attr_Cooperative_Launch                           : constant Interfaces.C.unsigned := 95;
+   Dev_Attr_Cooperative_Multi_Device_Launch              : constant Interfaces.C.unsigned := 96;
+   Dev_Attr_Max_Shared_Memory_Per_Block_Optin            : constant Interfaces.C.unsigned := 97;
+   Dev_Attr_Can_Flush_Remote_Writes                      : constant Interfaces.C.unsigned := 98;
+   Dev_Attr_Host_Register_Supported                      : constant Interfaces.C.unsigned := 99;
+   Dev_Attr_Pageable_Memory_Access_Uses_Host_Page_Tables : constant Interfaces.C.unsigned := 100;
+   Dev_Attr_Direct_Managed_Mem_Access_From_Host          : constant Interfaces.C.unsigned := 101;
+   subtype Device_P2_PAttr is Interfaces.C.unsigned;
+   Dev_P2_PAttr_Performance_Rank            : constant Interfaces.C.unsigned := 1;
+   Dev_P2_PAttr_Access_Supported            : constant Interfaces.C.unsigned := 2;
+   Dev_P2_PAttr_Native_Atomic_Supported     : constant Interfaces.C.unsigned := 3;
+   Dev_P2_PAttr_Cuda_Array_Access_Supported : constant Interfaces.C.unsigned := 4;
    subtype Anon1005_Bytes_Array is Interfaces.C.char_array (0 .. 15);
 
    type CUuuid_St is record
@@ -527,115 +522,115 @@ package CUDA.Driver_Types is
    subtype Anon1010_Name_Array is Interfaces.C.char_array (0 .. 255);
    subtype Anon1010_Luid_Array is Interfaces.C.char_array (0 .. 7);
 
-   type Anon1010_Max_Threads_Dim_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Threads_Dim_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Grid_Size_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Grid_Size_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture2_D_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Texture2_D_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture2_DMipmap_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Texture2_DMipmap_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture2_DLinear_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Texture2_DLinear_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture2_DGather_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Texture2_DGather_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture3_D_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Texture3_D_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture3_DAlt_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Texture3_DAlt_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture1_DLayered_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Texture1_DLayered_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture2_DLayered_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Texture2_DLayered_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Texture_Cubemap_Layered_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Texture_Cubemap_Layered_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Surface2_D_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Surface2_D_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Surface3_D_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Surface3_D_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Surface1_DLayered_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Surface1_DLayered_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Surface2_DLayered_Array is array (0 .. 2) of aliased int;
+   type Anon1010_Max_Surface2_DLayered_Array is array (0 .. 2) of aliased Interfaces.C.int;
 
-   type Anon1010_Max_Surface_Cubemap_Layered_Array is array (0 .. 1) of aliased int;
+   type Anon1010_Max_Surface_Cubemap_Layered_Array is array (0 .. 1) of aliased Interfaces.C.int;
 
    type Device_Prop is record
       Name                                         : aliased Anon1010_Name_Array;
       Uuid                                         : aliased UUID_T;
       Luid                                         : aliased Anon1010_Luid_Array;
-      Luid_Device_Node_Mask                        : aliased unsigned;
+      Luid_Device_Node_Mask                        : aliased Interfaces.C.unsigned;
       Total_Global_Mem                             : aliased CUDA.Crtdefs.Size_T;
       Shared_Mem_Per_Block                         : aliased CUDA.Crtdefs.Size_T;
-      Regs_Per_Block                               : aliased int;
-      Warp_Size                                    : aliased int;
+      Regs_Per_Block                               : aliased Interfaces.C.int;
+      Warp_Size                                    : aliased Interfaces.C.int;
       Mem_Pitch                                    : aliased CUDA.Crtdefs.Size_T;
-      Max_Threads_Per_Block                        : aliased int;
+      Max_Threads_Per_Block                        : aliased Interfaces.C.int;
       Max_Threads_Dim                              : aliased Anon1010_Max_Threads_Dim_Array;
       Max_Grid_Size                                : aliased Anon1010_Max_Grid_Size_Array;
-      Clock_Rate                                   : aliased int;
+      Clock_Rate                                   : aliased Interfaces.C.int;
       Total_Const_Mem                              : aliased CUDA.Crtdefs.Size_T;
-      Major                                        : aliased int;
-      Minor                                        : aliased int;
+      Major                                        : aliased Interfaces.C.int;
+      Minor                                        : aliased Interfaces.C.int;
       Texture_Alignment                            : aliased CUDA.Crtdefs.Size_T;
       Texture_Pitch_Alignment                      : aliased CUDA.Crtdefs.Size_T;
-      Device_Overlap                               : aliased int;
-      Multi_Processor_Count                        : aliased int;
-      Kernel_Exec_Timeout_Enabled                  : aliased int;
-      Integrated                                   : aliased int;
-      Can_Map_Host_Memory                          : aliased int;
-      Compute_Mode                                 : aliased int;
-      Max_Texture1_D                               : aliased int;
-      Max_Texture1_DMipmap                         : aliased int;
-      Max_Texture1_DLinear                         : aliased int;
+      Device_Overlap                               : aliased Interfaces.C.int;
+      Multi_Processor_Count                        : aliased Interfaces.C.int;
+      Kernel_Exec_Timeout_Enabled                  : aliased Interfaces.C.int;
+      Integrated                                   : aliased Interfaces.C.int;
+      Can_Map_Host_Memory                          : aliased Interfaces.C.int;
+      Compute_Mode                                 : aliased Interfaces.C.int;
+      Max_Texture1_D                               : aliased Interfaces.C.int;
+      Max_Texture1_DMipmap                         : aliased Interfaces.C.int;
+      Max_Texture1_DLinear                         : aliased Interfaces.C.int;
       Max_Texture2_D                               : aliased Anon1010_Max_Texture2_D_Array;
       Max_Texture2_DMipmap                         : aliased Anon1010_Max_Texture2_DMipmap_Array;
       Max_Texture2_DLinear                         : aliased Anon1010_Max_Texture2_DLinear_Array;
       Max_Texture2_DGather                         : aliased Anon1010_Max_Texture2_DGather_Array;
       Max_Texture3_D                               : aliased Anon1010_Max_Texture3_D_Array;
       Max_Texture3_DAlt                            : aliased Anon1010_Max_Texture3_DAlt_Array;
-      Max_Texture_Cubemap                          : aliased int;
+      Max_Texture_Cubemap                          : aliased Interfaces.C.int;
       Max_Texture1_DLayered                        : aliased Anon1010_Max_Texture1_DLayered_Array;
       Max_Texture2_DLayered                        : aliased Anon1010_Max_Texture2_DLayered_Array;
       Max_Texture_Cubemap_Layered                  : aliased Anon1010_Max_Texture_Cubemap_Layered_Array;
-      Max_Surface1_D                               : aliased int;
+      Max_Surface1_D                               : aliased Interfaces.C.int;
       Max_Surface2_D                               : aliased Anon1010_Max_Surface2_D_Array;
       Max_Surface3_D                               : aliased Anon1010_Max_Surface3_D_Array;
       Max_Surface1_DLayered                        : aliased Anon1010_Max_Surface1_DLayered_Array;
       Max_Surface2_DLayered                        : aliased Anon1010_Max_Surface2_DLayered_Array;
-      Max_Surface_Cubemap                          : aliased int;
+      Max_Surface_Cubemap                          : aliased Interfaces.C.int;
       Max_Surface_Cubemap_Layered                  : aliased Anon1010_Max_Surface_Cubemap_Layered_Array;
       Surface_Alignment                            : aliased CUDA.Crtdefs.Size_T;
-      Concurrent_Kernels                           : aliased int;
-      ECCEnabled                                   : aliased int;
-      Pci_Bus_ID                                   : aliased int;
-      Pci_Device_ID                                : aliased int;
-      Pci_Domain_ID                                : aliased int;
-      Tcc_Driver                                   : aliased int;
-      Async_Engine_Count                           : aliased int;
-      Unified_Addressing                           : aliased int;
-      Memory_Clock_Rate                            : aliased int;
-      Memory_Bus_Width                             : aliased int;
-      L2_Cache_Size                                : aliased int;
-      Max_Threads_Per_Multi_Processor              : aliased int;
-      Stream_Priorities_Supported                  : aliased int;
-      Global_L1_Cache_Supported                    : aliased int;
-      Local_L1_Cache_Supported                     : aliased int;
+      Concurrent_Kernels                           : aliased Interfaces.C.int;
+      ECCEnabled                                   : aliased Interfaces.C.int;
+      Pci_Bus_ID                                   : aliased Interfaces.C.int;
+      Pci_Device_ID                                : aliased Interfaces.C.int;
+      Pci_Domain_ID                                : aliased Interfaces.C.int;
+      Tcc_Driver                                   : aliased Interfaces.C.int;
+      Async_Engine_Count                           : aliased Interfaces.C.int;
+      Unified_Addressing                           : aliased Interfaces.C.int;
+      Memory_Clock_Rate                            : aliased Interfaces.C.int;
+      Memory_Bus_Width                             : aliased Interfaces.C.int;
+      L2_Cache_Size                                : aliased Interfaces.C.int;
+      Max_Threads_Per_Multi_Processor              : aliased Interfaces.C.int;
+      Stream_Priorities_Supported                  : aliased Interfaces.C.int;
+      Global_L1_Cache_Supported                    : aliased Interfaces.C.int;
+      Local_L1_Cache_Supported                     : aliased Interfaces.C.int;
       Shared_Mem_Per_Multiprocessor                : aliased CUDA.Crtdefs.Size_T;
-      Regs_Per_Multiprocessor                      : aliased int;
-      Managed_Memory                               : aliased int;
-      Is_Multi_Gpu_Board                           : aliased int;
-      Multi_Gpu_Board_Group_ID                     : aliased int;
-      Host_Native_Atomic_Supported                 : aliased int;
-      Single_To_Double_Precision_Perf_Ratio        : aliased int;
-      Pageable_Memory_Access                       : aliased int;
-      Concurrent_Managed_Access                    : aliased int;
-      Compute_Preemption_Supported                 : aliased int;
-      Can_Use_Host_Pointer_For_Registered_Mem      : aliased int;
-      Cooperative_Launch                           : aliased int;
-      Cooperative_Multi_Device_Launch              : aliased int;
+      Regs_Per_Multiprocessor                      : aliased Interfaces.C.int;
+      Managed_Memory                               : aliased Interfaces.C.int;
+      Is_Multi_Gpu_Board                           : aliased Interfaces.C.int;
+      Multi_Gpu_Board_Group_ID                     : aliased Interfaces.C.int;
+      Host_Native_Atomic_Supported                 : aliased Interfaces.C.int;
+      Single_To_Double_Precision_Perf_Ratio        : aliased Interfaces.C.int;
+      Pageable_Memory_Access                       : aliased Interfaces.C.int;
+      Concurrent_Managed_Access                    : aliased Interfaces.C.int;
+      Compute_Preemption_Supported                 : aliased Interfaces.C.int;
+      Can_Use_Host_Pointer_For_Registered_Mem      : aliased Interfaces.C.int;
+      Cooperative_Launch                           : aliased Interfaces.C.int;
+      Cooperative_Multi_Device_Launch              : aliased Interfaces.C.int;
       Shared_Mem_Per_Block_Optin                   : aliased CUDA.Crtdefs.Size_T;
-      Pageable_Memory_Access_Uses_Host_Page_Tables : aliased int;
-      Direct_Managed_Mem_Access_From_Host          : aliased int;
+      Pageable_Memory_Access_Uses_Host_Page_Tables : aliased Interfaces.C.int;
+      Direct_Managed_Mem_Access_From_Host          : aliased Interfaces.C.int;
    end record with
       Convention => C_Pass_By_Copy;
    subtype Anon1019_Reserved_Array is Interfaces.C.char_array (0 .. 63);
@@ -652,15 +647,15 @@ package CUDA.Driver_Types is
    end record with
       Convention => C_Pass_By_Copy;
    subtype Ipc_Mem_Handle_T is Ipc_Mem_Handle_St;
-   subtype External_Memory_Handle_Type is unsigned;
-   External_Memory_Handle_Type_Opaque_Fd           : constant unsigned := 1;
-   External_Memory_Handle_Type_Opaque_Win32        : constant unsigned := 2;
-   External_Memory_Handle_Type_Opaque_Win32_Kmt    : constant unsigned := 3;
-   External_Memory_Handle_Type_D3_D12_Heap         : constant unsigned := 4;
-   External_Memory_Handle_Type_D3_D12_Resource     : constant unsigned := 5;
-   External_Memory_Handle_Type_D3_D11_Resource     : constant unsigned := 6;
-   External_Memory_Handle_Type_D3_D11_Resource_Kmt : constant unsigned := 7;
-   External_Memory_Handle_Type_Nv_Sci_Buf          : constant unsigned := 8;
+   subtype External_Memory_Handle_Type is Interfaces.C.unsigned;
+   External_Memory_Handle_Type_Opaque_Fd           : constant Interfaces.C.unsigned := 1;
+   External_Memory_Handle_Type_Opaque_Win32        : constant Interfaces.C.unsigned := 2;
+   External_Memory_Handle_Type_Opaque_Win32_Kmt    : constant Interfaces.C.unsigned := 3;
+   External_Memory_Handle_Type_D3_D12_Heap         : constant Interfaces.C.unsigned := 4;
+   External_Memory_Handle_Type_D3_D12_Resource     : constant Interfaces.C.unsigned := 5;
+   External_Memory_Handle_Type_D3_D11_Resource     : constant Interfaces.C.unsigned := 6;
+   External_Memory_Handle_Type_D3_D11_Resource_Kmt : constant Interfaces.C.unsigned := 7;
+   External_Memory_Handle_Type_Nv_Sci_Buf          : constant Interfaces.C.unsigned := 8;
 
    type Anon1026_Win32_Struct is record
       Handle : System.Address;
@@ -668,10 +663,10 @@ package CUDA.Driver_Types is
    end record with
       Convention => C_Pass_By_Copy;
 
-   type Anon1026_Handle_Union (discr : unsigned := 0) is record
+   type Anon1026_Handle_Union (discr : Interfaces.C.unsigned := 0) is record
       case discr is
          when 0 =>
-            Fd : aliased int;
+            Fd : aliased Interfaces.C.int;
 
          when 1 =>
             Win32 : aliased Anon1026_Win32_Struct;
@@ -686,35 +681,35 @@ package CUDA.Driver_Types is
    type External_Memory_Handle_Desc is record
       C_Type : aliased External_Memory_Handle_Type;
       Handle : aliased Anon1026_Handle_Union;
-      Size   : aliased Extensions.unsigned_long_long;
-      Flags  : aliased unsigned;
+      Size   : aliased Interfaces.C.Extensions.unsigned_long_long;
+      Flags  : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
 
    type External_Memory_Buffer_Desc is record
-      Offset : aliased Extensions.unsigned_long_long;
-      Size   : aliased Extensions.unsigned_long_long;
-      Flags  : aliased unsigned;
+      Offset : aliased Interfaces.C.Extensions.unsigned_long_long;
+      Size   : aliased Interfaces.C.Extensions.unsigned_long_long;
+      Flags  : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
 
    type External_Memory_Mipmapped_Array_Desc is record
-      Offset      : aliased Extensions.unsigned_long_long;
+      Offset      : aliased Interfaces.C.Extensions.unsigned_long_long;
       Format_Desc : aliased Channel_Format_Desc;
       Extent      : aliased Extent_T;
-      Flags       : aliased unsigned;
-      Num_Levels  : aliased unsigned;
+      Flags       : aliased Interfaces.C.unsigned;
+      Num_Levels  : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
-   subtype External_Semaphore_Handle_Type is unsigned;
-   External_Semaphore_Handle_Type_Opaque_Fd        : constant unsigned := 1;
-   External_Semaphore_Handle_Type_Opaque_Win32     : constant unsigned := 2;
-   External_Semaphore_Handle_Type_Opaque_Win32_Kmt : constant unsigned := 3;
-   External_Semaphore_Handle_Type_D3_D12_Fence     : constant unsigned := 4;
-   External_Semaphore_Handle_Type_D3_D11_Fence     : constant unsigned := 5;
-   External_Semaphore_Handle_Type_Nv_Sci_Sync      : constant unsigned := 6;
-   External_Semaphore_Handle_Type_Keyed_Mutex      : constant unsigned := 7;
-   External_Semaphore_Handle_Type_Keyed_Mutex_Kmt  : constant unsigned := 8;
+   subtype External_Semaphore_Handle_Type is Interfaces.C.unsigned;
+   External_Semaphore_Handle_Type_Opaque_Fd        : constant Interfaces.C.unsigned := 1;
+   External_Semaphore_Handle_Type_Opaque_Win32     : constant Interfaces.C.unsigned := 2;
+   External_Semaphore_Handle_Type_Opaque_Win32_Kmt : constant Interfaces.C.unsigned := 3;
+   External_Semaphore_Handle_Type_D3_D12_Fence     : constant Interfaces.C.unsigned := 4;
+   External_Semaphore_Handle_Type_D3_D11_Fence     : constant Interfaces.C.unsigned := 5;
+   External_Semaphore_Handle_Type_Nv_Sci_Sync      : constant Interfaces.C.unsigned := 6;
+   External_Semaphore_Handle_Type_Keyed_Mutex      : constant Interfaces.C.unsigned := 7;
+   External_Semaphore_Handle_Type_Keyed_Mutex_Kmt  : constant Interfaces.C.unsigned := 8;
 
    type Anon1032_Win32_Struct is record
       Handle : System.Address;
@@ -722,10 +717,10 @@ package CUDA.Driver_Types is
    end record with
       Convention => C_Pass_By_Copy;
 
-   type Anon1032_Handle_Union (discr : unsigned := 0) is record
+   type Anon1032_Handle_Union (discr : Interfaces.C.unsigned := 0) is record
       case discr is
          when 0 =>
-            Fd : aliased int;
+            Fd : aliased Interfaces.C.int;
 
          when 1 =>
             Win32 : aliased Anon1032_Win32_Struct;
@@ -740,29 +735,29 @@ package CUDA.Driver_Types is
    type External_Semaphore_Handle_Desc is record
       C_Type : aliased External_Semaphore_Handle_Type;
       Handle : aliased Anon1032_Handle_Union;
-      Flags  : aliased unsigned;
+      Flags  : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
 
    type Anon1035_Fence_Struct is record
-      Value : aliased Extensions.unsigned_long_long;
+      Value : aliased Interfaces.C.Extensions.unsigned_long_long;
    end record with
       Convention => C_Pass_By_Copy;
 
-   type Anon1035_Nv_Sci_Sync_Union (discr : unsigned := 0) is record
+   type Anon1035_Nv_Sci_Sync_Union (discr : Interfaces.C.unsigned := 0) is record
       case discr is
          when 0 =>
             Fence : System.Address;
 
          when others =>
-            Reserved : aliased Extensions.unsigned_long_long;
+            Reserved : aliased Interfaces.C.Extensions.unsigned_long_long;
       end case;
    end record with
       Convention      => C_Pass_By_Copy,
       Unchecked_Union => True;
 
    type Anon1035_Keyed_Mutex_Struct is record
-      Key : aliased Extensions.unsigned_long_long;
+      Key : aliased Interfaces.C.Extensions.unsigned_long_long;
    end record with
       Convention => C_Pass_By_Copy;
 
@@ -775,30 +770,30 @@ package CUDA.Driver_Types is
 
    type External_Semaphore_Signal_Params is record
       Params : aliased Anon1035_Params_Struct;
-      Flags  : aliased unsigned;
+      Flags  : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
 
    type Anon1040_Fence_Struct is record
-      Value : aliased Extensions.unsigned_long_long;
+      Value : aliased Interfaces.C.Extensions.unsigned_long_long;
    end record with
       Convention => C_Pass_By_Copy;
 
-   type Anon1040_Nv_Sci_Sync_Union (discr : unsigned := 0) is record
+   type Anon1040_Nv_Sci_Sync_Union (discr : Interfaces.C.unsigned := 0) is record
       case discr is
          when 0 =>
             Fence : System.Address;
 
          when others =>
-            Reserved : aliased Extensions.unsigned_long_long;
+            Reserved : aliased Interfaces.C.Extensions.unsigned_long_long;
       end case;
    end record with
       Convention      => C_Pass_By_Copy,
       Unchecked_Union => True;
 
    type Anon1040_Keyed_Mutex_Struct is record
-      Key        : aliased Extensions.unsigned_long_long;
-      Timeout_Ms : aliased unsigned;
+      Key        : aliased Interfaces.C.Extensions.unsigned_long_long;
+      Timeout_Ms : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
 
@@ -811,7 +806,7 @@ package CUDA.Driver_Types is
 
    type External_Semaphore_Wait_Params is record
       Params : aliased Anon1040_Params_Struct;
-      Flags  : aliased unsigned;
+      Flags  : aliased Interfaces.C.unsigned;
    end record with
       Convention => C_Pass_By_Copy;
    subtype Error_T is Error;
@@ -860,7 +855,7 @@ package CUDA.Driver_Types is
       Func             : System.Address;
       Grid_Dim         : aliased CUDA.Vector_Types.Dim3;
       Block_Dim        : aliased CUDA.Vector_Types.Dim3;
-      Shared_Mem_Bytes : aliased unsigned;
+      Shared_Mem_Bytes : aliased Interfaces.C.unsigned;
       Kernel_Params    : System.Address;
       Extra            : System.Address;
    end record with

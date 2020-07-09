@@ -9,7 +9,7 @@ project Main is
    for Main use ("main.adb") & project'Main;
 
    package Compiler is
-      for Switches ("Ada") use ("-g", "-gnatp");
+      for Switches ("Ada") use ("-g", "-gnatp", "-gnatd_c");
    end Compiler;
 
    package Linker is

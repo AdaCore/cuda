@@ -1,6 +1,11 @@
 with System;
-with Ada.Unchecked_Deallocation;
 with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
+
+with Interfaces; use Interfaces;
+with Interfaces.C;            use Interfaces.C;
+with Interfaces.C.Extensions; use Interfaces.C.Extensions;
+with Interfaces.C.Strings;
+with Ada.Unchecked_Deallocation;
 
 package Kernel is
 
@@ -17,9 +22,5 @@ package Kernel is
       C_Addr : System.Address;
       Num_Elements : Integer)
      with CUDA_Global;
-
-   --  procedure Initialize_Cuda_Kernel;
-
-   --  pragma Linker_Constructor (Initialize_Cuda_Kernel);
 
 end Kernel;
