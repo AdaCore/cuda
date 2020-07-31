@@ -6,23 +6,26 @@ wrap wrap_ada_specs ();
 match DefiningName ()
 wrap w_DefiningName (normalize_ada_name (self));
 
-match DefiningName ("cuda(?<n>.*)")
+match DefiningName (x"cuda(?<n>.*)")
 wrap w_DefiningName (normalize_ada_name (n));
 
-match DefiningName ("(?<n>.*)_h")
+match DefiningName (x"u?(?<n>.*)_h")
 wrap w_DefiningName ("CUDA." & normalize_ada_name (n));
 
-match DefiningName ("cuda_(?<n>.*)_h")
+match DefiningName (x"cuda_(?<n>.*)_h")
 wrap w_DefiningName ("CUDA." & normalize_ada_name (n));
 
-match DefiningName ("^cudaArray(.*)")
+match DefiningName (x"^cudaArray(.*)")
 wrap w_DefiningName ("CUDA_Array\1");
 
 match DefiningName ("cudaExtent") and parent (TypeDecl ())
 wrap w_DefiningName ("Extent_T");
 
-match DefiningName ("^cudaMemoryType$") and parent (TypeDecl ())
+match DefiningName (x"^cudaMemoryType$") and parent (TypeDecl ())
 wrap w_DefiningName ("Memory_Type_T");
+
+match DefiningName ("cudaAccessPolicyWindow") and parent (TypeDecl ())
+wrap w_DefiningName ("Access_Policy_Window_T");
 
 match ParamSpec() 
    and f_type_expr ("Interfaces.C.Strings.chars_ptr") 
@@ -33,19 +36,19 @@ match SubpDecl()
     and p_subp_decl_spec.p_returns ("Interfaces.C.Strings.chars_ptr")
 wrap chars_into_string ();
 
-match ObjectDecl(child (DefiningName ("^cuda(Error.*)$")))
+match ObjectDecl(child (DefiningName (x"^cuda(Error.*)$")))
 wrap error_code_into_exception ("CUDA", "Exception_Registry", "\1"); 
 
-match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) dp
-    match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$")
+match NumberDecl (child (d: DefiningName (x"^cudaSurfaceType.*$"))) do
+    match d (x"^cuda(SurfaceType.*)(1D|2D|3D)(.+)$")
         wrap constant_into_enumeration (
             "Surface_Type", 
             normalize_ada_name ("\1") & "_\2_" & normalize_ada_name ("\3"));
-    else match d ("^cuda(SurfaceType.*)(1D|2D|3D)$")
+    else match d (x"^cuda(SurfaceType.*)(1D|2D|3D)$")
         wrap constant_into_enumeration (
             "Surface_Type", 
             normalize_ada_name ("\1") & "_\2");
-    else match d ("^cuda(SurfaceType.*)$")
+    else match d (x"^cuda(SurfaceType.*)$")
         wrap constant_into_enumeration (
             "Surface_Type", 
             normalize_ada_name ("\1"));
@@ -53,30 +56,30 @@ end;
 
 match SubpDecl ()
    and child (f_subp_kind ("function")) 
-   and p_subp_decl_spec.p_returns ("driver_types_h.cudaError_t")
-   and not p_defining_name ("cudaPeekAtLastError|cudaGetLastError")
+   and p_subp_decl_spec.p_returns (x"driver_types_h.cudaError_t")
+   and not p_defining_name (x"cudaPeekAtLastError|cudaGetLastError")
 wrap return_into_exception ("CUDA", "Exception_Registry");
 
-match ParamSpec ("access .*")
+match ParamSpec (x"access .*")
 wrap access_into_out ();
 
-match ParamSpec (not prev (ParamSpec ()) and "access .*")
-   and parent (SubpDecl (p_defining_name (".*Get.*")))
+match ParamSpec (not prev (ParamSpec ()) and x"access .*")
+   and parent (SubpDecl (p_defining_name (x".*Get.*")))
 wrap access_into_return ();
 
-match ParamSpec ("event.*:.*System.Address")
+match ParamSpec (x"event.*:.*System.Address")
 wrap address_into_return ("CUDA.Driver_Types.Event_T");
 
-match PackageDecl (p_defining_name ("cuda_runtime_api_h"))
+match PackageDecl (p_defining_name (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
-    spec_content => """
+    spec_content => @ & i"""
         function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
         function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
         function Block_Dim return CUDA.Vector_Types.Dim3  with Inline;
         function Thread_Idx return CUDA.Vector_Types.Uint3 with Inline;
         function Wrap_Size return Interfaces.C.Int with Inline;""",
     
-    body_content => """
+    body_content => @ & i"""
         function Grid_Dim return CUDA.Vector_Types.Dim3 is
             function Nctaid_X return Interfaces.C.unsigned 
                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.nctaid.x";
