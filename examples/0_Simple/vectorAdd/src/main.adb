@@ -2,21 +2,27 @@ with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
+with Interfaces; use Interfaces;
 with Interfaces.C;            use Interfaces.C;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
+with Interfaces.C.Strings;
 
+with System;
+with System.Storage_Elements;
 with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
 with CUDA.Driver_Types; use CUDA.Driver_Types;
-with CUDA.Vector_Types; use CUDA.Vector_Types;
+with CUDA.Vector_Types;
 with CUDA.Crtdefs;
 
 with Kernel; use Kernel;
 
 procedure Main is
-   Num_Elements : Integer := 50_000;
+
+   Num_Elements : Integer := 512;
 
    H_A, H_B, H_C : Access_Host_Float_Array;
-   D_A, D_B, D_C : Access_Device_Float_Array;
+   D_A, D_B, D_C : System.Address;
+   Array_Size : CUDA.Crtdefs.Size_T := CUDA.Crtdefs.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
 
    Threads_Per_Block : Integer := 256;
    Blocks_Per_Grid : Integer :=
@@ -24,6 +30,11 @@ procedure Main is
 
    Gen : Generator;
    Err : Error_T;
+
+   Kernel_Name : Interfaces.C.Strings.Chars_Ptr := Interfaces.C.Strings.New_Char_Array("kernel__vector_add");
+
+   Blocks : Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned(Threads_Per_Block), 1, 1);
+   Grids : Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned(Blocks_Per_Grid), Interfaces.C.Unsigned(1), Interfaces.C.Unsigned(1));
 
 begin
    Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
@@ -41,29 +52,26 @@ begin
    H_A.all := (others => Float (Random (Gen)));
    H_B.all := (others => Float (Random (Gen)));
 
-   D_A := new Float_Array (1 .. Num_Elements);
-   D_B := new Float_Array (1 .. Num_Elements);
-   D_C := new Float_Array (1 .. Num_Elements);
+   D_A := Cuda.Runtime_Api.Malloc (Array_Size);
+   D_B := Cuda.Runtime_Api.Malloc (Array_Size);
+   D_C := Cuda.Runtime_Api.Malloc (Array_Size);
 
    Cuda.Runtime_Api.Memcpy
-     (Dst   => D_A.all'Address,
+     (Dst   => D_A,
       Src   => H_A.all'Address,
-      Count => D_A.all'Size / 8,
+      Count => Array_Size,
       Kind  => Memcpy_Host_To_Device);
 
    Cuda.Runtime_Api.Memcpy
-     (Dst   => D_B.all'Address,
+     (Dst   => D_B,
       Src   => H_B.all'Address,
-      Count => D_B.all'Size / 8,
+      Count => Array_Size,
       Kind  => Memcpy_Host_To_Device);
 
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
-   pragma CUDA_Execute
-     (Vector_Add (D_A.all, D_B.all, D_C.all, Num_Elements),
-      (Blocks_Per_Grid, 1, 1),
-      (Threads_Per_Block, 1, 1));
+   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Blocks, Grids);
 
    Err := Get_Last_Error;
 
@@ -77,11 +85,11 @@ begin
 
    Cuda.Runtime_Api.Memcpy
      (Dst   => H_C.all'Address,
-      Src   => D_C.all'Address,
-      Count => D_C.all'Size / 8,
+      Src   => D_C,
+      Count => Array_Size,
       Kind  => Memcpy_Device_To_Host);
 
-   for I in D_A.all'Range loop
+   for I in 1..Num_Elements loop
       if abs (H_A (I) + H_B (I) - H_C (I)) > 1.0E-5 then
          Put_Line ("Result verification failed at element "& I'Img & "!");
 

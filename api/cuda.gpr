@@ -1,9 +1,15 @@
 project CUDA is
 
+   for Create_Missing_Dirs use "True";
    for Source_Dirs use ("cuda_api", "cuda_raw_binding", "cuda_internal");
-
    for Object_Dir use "obj";
 
-   for Languages use ("Ada");
+   package Compiler is
+      for Switches ("Ada") use ("-g", "-gnatp");
+   end Compiler;
+
+   package Linker is
+      for Default_Switches ("ada") use ("-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/local/cuda/targets/x86_64-linux/lib", "-lcudadevrt","-lcudart_static", "-lrt", "-lpthread", "-ldl");
+   end Linker;
 
 end CUDA;
