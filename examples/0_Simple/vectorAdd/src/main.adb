@@ -12,7 +12,7 @@ with System.Storage_Elements;
 with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
 with CUDA.Driver_Types; use CUDA.Driver_Types;
 with CUDA.Vector_Types;
-with CUDA.Crtdefs;
+with CUDA.Corecrt;
 
 with Kernel; use Kernel;
 
@@ -22,7 +22,10 @@ procedure Main is
 
    H_A, H_B, H_C : Access_Host_Float_Array;
    D_A, D_B, D_C : System.Address;
-   Array_Size : CUDA.Crtdefs.Size_T := CUDA.Crtdefs.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
+   pragma Warnings (Off, D_A);
+   pragma Warnings (Off, D_B);
+   pragma Warnings (Off, D_C);
+   Array_Size : CUDA.Corecrt.Size_T := CUDA.Corecrt.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
 
    Threads_Per_Block : Integer := 256;
    Blocks_Per_Grid : Integer :=
@@ -52,9 +55,9 @@ begin
    H_A.all := (others => Float (Random (Gen)));
    H_B.all := (others => Float (Random (Gen)));
 
-   D_A := Cuda.Runtime_Api.Malloc (Array_Size);
-   D_B := Cuda.Runtime_Api.Malloc (Array_Size);
-   D_C := Cuda.Runtime_Api.Malloc (Array_Size);
+   Cuda.Runtime_Api.Malloc (D_A'Address, Array_Size);
+   Cuda.Runtime_Api.Malloc (D_B'Address, Array_Size);
+   Cuda.Runtime_Api.Malloc (D_C'Address, Array_Size);
 
    Cuda.Runtime_Api.Memcpy
      (Dst   => D_A,
@@ -71,7 +74,7 @@ begin
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
-   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Blocks, Grids);
+   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Grids, Blocks);
 
    Err := Get_Last_Error;
 

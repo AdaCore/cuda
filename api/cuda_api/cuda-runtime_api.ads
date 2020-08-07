@@ -16,13 +16,13 @@ with Ada.Exceptions;
 with CUDA;
 
 package CUDA.Runtime_Api is
-   type CUDA_Device_Pool is new System.Storage_Pools.Root_Storage_Pool with null record;
-   overriding procedure Allocate (Self : in out CUDA_Device_Pool; Addr : out System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count);
+   --  type CUDA_Device_Pool is new System.Storage_Pools.Root_Storage_Pool with null record;
+   --  overriding procedure Allocate (Self : in out CUDA_Device_Pool; Addr : out System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count);
    --  overriding procedure Copy_To_Pool (Self : in out CUDA_Device_Pool; Addr : System.Address; Value : aliased System.Storage_Elements.Storage_Array; Size : System.Storage_Elements.Storage_Count);
-   overriding procedure Deallocate (Self : in out CUDA_Device_Pool; Addr : System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count);
-   overriding function Storage_Size (Self : CUDA_Device_Pool) return System.Storage_Elements.Storage_Count is (System.Storage_Elements.Storage_Count'Last) with
-      Inline => True;
-   CUDA_Device : CUDA_Device_Pool;
+   --  overriding procedure Deallocate (Self : in out CUDA_Device_Pool; Addr : System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count);
+   --  overriding function Storage_Size (Self : CUDA_Device_Pool) return System.Storage_Elements.Storage_Count is (System.Storage_Elements.Storage_Count'Last) with
+      --  Inline => True;
+   --  CUDA_Device : CUDA_Device_Pool;
    CUDART_VERSION : constant := 10_020;
    procedure Device_Reset;
    procedure Device_Synchronize;

@@ -2,20 +2,20 @@ with cuda_runtime_api_h; use cuda_runtime_api_h;
 
 package body CUDA.Runtime_Api is
 
-   overriding procedure Allocate (Self : in out CUDA_Device_Pool; Addr : out System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count) is
-   begin
-      Addr := Malloc (CUDA.Crtdefs.Size_T (Size));
-   end Allocate;
+   --  overriding procedure Allocate (Self : in out CUDA_Device_Pool; Addr : out System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count) is
+   --  begin
+   --     Addr := Malloc (CUDA.Crtdefs.Size_T (Size));
+   --  end Allocate;
 
    --  overriding procedure Copy_To_Pool (Self : in out CUDA_Device_Pool; Addr : System.Address; Value : aliased System.Storage_Elements.Storage_Array; Size : System.Storage_Elements.Storage_Count) is
    --  begin
    --     Memcpy (Addr, Value'Address, CUDA.Crtdefs.Size_T (Size), CUDA.Driver_Types.Memcpy_Host_To_Device);
    --  end Copy_To_Pool;
 
-   overriding procedure Deallocate (Self : in out CUDA_Device_Pool; Addr : System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count) is
-   begin
-      Free (Addr);
-   end Deallocate;
+   --  overriding procedure Deallocate (Self : in out CUDA_Device_Pool; Addr : System.Address; Size : System.Storage_Elements.Storage_Count; Alignment : System.Storage_Elements.Storage_Count) is
+   --  begin
+   --     Free (Addr);
+   --  end Deallocate;
 
    procedure Device_Reset is
    begin

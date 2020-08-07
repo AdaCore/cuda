@@ -1,5 +1,4 @@
 with System;
-with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
 
 with Interfaces; use Interfaces;
 with Interfaces.C;            use Interfaces.C;
