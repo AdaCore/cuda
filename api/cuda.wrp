@@ -36,19 +36,20 @@ wrap chars_into_string ();
 match ObjectDecl(child (DefiningName ("^cuda(Error.*)$")))
 wrap error_code_into_exception ("CUDA", "Exception_Registry", "\1"); 
 
-match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) dp
-    match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$")
+match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) do
+    match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$") do
         wrap constant_into_enumeration (
             "Surface_Type", 
             normalize_ada_name ("\1") & "_\2_" & normalize_ada_name ("\3"));
-    else match d ("^cuda(SurfaceType.*)(1D|2D|3D)$")
+    elsmatch d ("^cuda(SurfaceType.*)(1D|2D|3D)$") do
         wrap constant_into_enumeration (
             "Surface_Type", 
             normalize_ada_name ("\1") & "_\2");
-    else match d ("^cuda(SurfaceType.*)$")
+    elsmatch d ("^cuda(SurfaceType.*)$") do
         wrap constant_into_enumeration (
             "Surface_Type", 
             normalize_ada_name ("\1"));
+    end;
 end;
 
 match SubpDecl ()
