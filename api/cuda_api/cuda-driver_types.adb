@@ -1,4 +1,6 @@
-with driver_types_h; use driver_types_h;
+with crtdefs_h;
+with driver_types_h;
+with vector_types_h;
 
 package body CUDA.Driver_Types is
 
