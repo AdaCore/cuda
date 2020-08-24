@@ -4,7 +4,7 @@ import ada.transformations;
 wrap wrap_ada_specs ();
 
 match DefiningName ()
-wrap w_DefiningName (normalize_ada_name (self));
+wrap w_DefiningName (normalize_ada_name (it));
 
 match DefiningName (x"cuda(?<n>.*)")
 wrap w_DefiningName (normalize_ada_name (n));
