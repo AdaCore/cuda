@@ -1,7 +1,7 @@
 with System;
 with Interfaces.C.Strings;
 with CUDA.Vector_Types;
-with CUDA.Crtdefs;
+with CUDA.Stddef;
 with CUDA.Driver_Types;
 
 package CUDA.Internal is
@@ -35,7 +35,7 @@ package CUDA.Internal is
    procedure Push_Call_Configuration
       (Grid_Dim : Vector_Types.Dim3;
        Block_Dim : Vector_Types.Dim3;
-       Shared_Mem : Crtdefs.Size_T;
+       Shared_Mem : Stddef.Size_T;
        Stream : Driver_Types.Stream_T)
        with Import => True,
             Convention => C,

@@ -39,7 +39,6 @@ wrap chars_into_string ();
 match ObjectDecl(child (DefiningName (x"^cuda(Error.*)$")))
 wrap error_code_into_exception ("CUDA", "Exception_Registry", "\1"); 
 
-
 match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) do
     match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$") do
         wrap constant_into_enumeration (
@@ -71,6 +70,9 @@ wrap access_into_return ();
 
 match ParamSpec (x"event.*:.*System.Address")
 wrap address_into_return ("CUDA.Driver_Types.Event_T");
+
+match ParamSpec (x"devPtr") and parent (SubpDecl (x"cudaMalloc"))
+wrap address_into_return ("System.Address");
 
 match PackageDecl (p_defining_name (x"cuda_runtime_api_h"))
 weave w_PackageDecl (

@@ -12,7 +12,7 @@ with System.Storage_Elements;
 with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
 with CUDA.Driver_Types; use CUDA.Driver_Types;
 with CUDA.Vector_Types;
-with CUDA.Crtdefs;
+with CUDA.Stddef;
 
 with Kernel; use Kernel;
 
@@ -22,7 +22,7 @@ procedure Main is
 
    H_A, H_B, H_C : Access_Host_Float_Array;
    D_A, D_B, D_C : System.Address;
-   Array_Size : CUDA.Crtdefs.Size_T := CUDA.Crtdefs.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
+   Array_Size : CUDA.Stddef.Size_T := CUDA.Stddef.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
 
    Threads_Per_Block : Integer := 256;
    Blocks_Per_Grid : Integer :=

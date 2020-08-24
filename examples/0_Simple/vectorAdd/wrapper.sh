@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 # PATH of the example to run. Should be e.g. examples/0_Simple/vectorAdd/
-EXAMPLE_DIRECTORY="/home/lacambre/prog/cuda/examples/0_Simple/vectorAdd"
+EXAMPLE_DIRECTORY="$PWD"
 GNAT_LLVM_SRC_DIR="/home/lacambre/gnat-llvm"
 CUDA_BIN_DIR="/usr/local/cuda/bin/"
 # Min compute capability. E.g. if you're on sm_75, SM_XX should be 75
@@ -25,7 +25,7 @@ KERNEL_FATBINASM_PATH="$SRC/$KERNEL_FATBINASM_NAME"
 mkdir -p "$OBJ"
 
 # FIXME: llvm-gcc doesn't like -o and thus doesn't output to $KERNEL_PTX_PATH
-"$GNAT_LLVM_SRC_DIR/llvm-interface/bin/llvm-gcc" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_api/" -O2 -S -gnatp -gnatn --target=nvptx64 "$KERNEL_SRC_PATH" # -o "$KERNEL_PTX_PATH"
+"$GNAT_LLVM_SRC_DIR/llvm-interface/bin/llvm-gcc" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_api/" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_raw_binding/" -O2 -S -gnatp -gnatn --target=nvptx64 "$KERNEL_SRC_PATH" # -o "$KERNEL_PTX_PATH"
 mv "$KERNEL_PTX_NAME" "$KERNEL_PTX_PATH"
 
 # Massage the created ptx - ultimately gnat-llvm will generate the correct ptx
