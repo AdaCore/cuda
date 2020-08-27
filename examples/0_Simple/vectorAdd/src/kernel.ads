@@ -1,6 +1,5 @@
 with System;
 with Ada.Unchecked_Deallocation;
-with CUDA.Runtime_Api; use CUDA.Runtime_Api;
 
 package Kernel is
 

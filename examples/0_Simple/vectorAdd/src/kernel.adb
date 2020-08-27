@@ -1,4 +1,5 @@
-with Interfaces.C;            use Interfaces.C;
+with CUDA.Runtime_Api; use CUDA.Runtime_Api; -- Block_Dim, Block_IDx, Thread_IDx
+with Interfaces.C;     use Interfaces.C; -- Operators for Block_Dim, Block_IDx, Thread_IDx
 
 package body Kernel is
    
