@@ -1,24 +1,18 @@
-with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
-with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Unchecked_Deallocation;
-
-with Interfaces; use Interfaces;
-with Interfaces.C;            use Interfaces.C;
-with Interfaces.C.Extensions; use Interfaces.C.Extensions;
-with Interfaces.C.Strings;
-
 with System;
-with System.Storage_Elements;
-with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
-with CUDA.Driver_Types; use CUDA.Driver_Types;
-with CUDA.Vector_Types;
+with Interfaces.C;              use Interfaces.C;
+
+with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
+with Ada.Text_IO;               use Ada.Text_IO;
+
+with CUDA.Driver_Types;         use CUDA.Driver_Types;
+with CUDA.Runtime_Api;          use CUDA.Runtime_Api;
 with CUDA.Stddef;
 
 with Kernel; use Kernel;
 
 procedure Main is
 
-   Num_Elements : Integer := 512;
+   Num_Elements : Integer := 4096;
 
    H_A, H_B, H_C : Access_Host_Float_Array;
    D_A, D_B, D_C : System.Address;
@@ -30,11 +24,6 @@ procedure Main is
 
    Gen : Generator;
    Err : Error_T;
-
-   Kernel_Name : Interfaces.C.Strings.Chars_Ptr := Interfaces.C.Strings.New_Char_Array("kernel__vector_add");
-
-   Blocks : Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned(Threads_Per_Block), 1, 1);
-   Grids : Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned(Blocks_Per_Grid), Interfaces.C.Unsigned(1), Interfaces.C.Unsigned(1));
 
 begin
    Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
@@ -71,7 +60,7 @@ begin
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
-   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Blocks, Grids);
+   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Threads_Per_Block, Blocks_Per_Grid);
 
    Err := Get_Last_Error;
 

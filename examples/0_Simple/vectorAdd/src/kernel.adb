@@ -1,10 +1,4 @@
-with Interfaces.C; use Interfaces.C;
-with Interfaces.C.Strings;
-with CUDA.GPU_Api;  use CUDA.GPU_Api;
-with Interfaces; use Interfaces;
 with Interfaces.C;            use Interfaces.C;
-with Interfaces.C.Extensions; use Interfaces.C.Extensions;
-with Interfaces.C.Strings;
 
 package body Kernel is
    
