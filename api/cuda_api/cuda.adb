@@ -1,4 +1,5 @@
 package body CUDA is
+
 begin
    null;
    Exception_Registry.Insert (Integer (1), ErrorInvalidValue'Identity);
@@ -146,4 +147,5 @@ begin
      (Integer (910), ErrorGraphExecUpdateFailure'Identity);
    Exception_Registry.Insert (Integer (999), ErrorUnknown'Identity);
    Exception_Registry.Insert (Integer (10_000), ErrorApiFailureBase'Identity);
+
 end CUDA;

@@ -3,6 +3,7 @@ with Ada.Exceptions;
 
 package CUDA is
    pragma Elaborate_Body;
+
    package Temp_registry_map_1 is new Ada.Containers.Ordered_Maps
      (Integer, Ada.Exceptions.Exception_Id, "<", Ada.Exceptions."=");
    Exception_Registry : Temp_registry_map_1.Map;
@@ -115,4 +116,5 @@ package CUDA is
    ErrorGraphExecUpdateFailure      : exception;
    ErrorUnknown                     : exception;
    ErrorApiFailureBase              : exception;
+
 end CUDA;
