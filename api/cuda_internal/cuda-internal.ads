@@ -1,10 +1,34 @@
 with System;
+with Interfaces.C;
 with Interfaces.C.Strings;
-with CUDA.Vector_Types;
 with CUDA.Stddef;
 with CUDA.Driver_Types;
 
 package CUDA.Internal is
+
+   type Dim3 is record
+      X : Interfaces.C.Unsigned;
+      Y : Interfaces.C.Unsigned;
+      Z : Interfaces.C.Unsigned;
+   end record with Convention => C_Pass_By_Copy;
+
+   type Fatbin_Wrapper is record
+      Magic : Interfaces.C.int;
+      Version : Interfaces.C.int;
+      Data : System.Address;
+      Filename_Or_Fatbins : System.Address;
+   end record;
+
+   procedure Launch_Kernel
+     (Func       : System.Address;
+      Grid_Dim   : Dim3;
+      Block_Dim  : Dim3;
+      Args       : System.Address;
+      Shared_Mem : Interfaces.C.Unsigned_Long;
+      Stream     : CUDA.Driver_Types.Stream_T)
+   with Import => True,
+        Convention => C,
+        External_Name => "cudaLaunchKernel";
 
    procedure Register_Function
       (Fat_Binary_Handle : System.Address;
@@ -33,8 +57,8 @@ package CUDA.Internal is
            External_Name => "__cudaRegisterFatBinaryEnd";
 
    procedure Push_Call_Configuration
-      (Grid_Dim : Vector_Types.Dim3;
-       Block_Dim : Vector_Types.Dim3;
+      (Grid_Dim : Dim3;
+       Block_Dim : Dim3;
        Shared_Mem : Stddef.Size_T;
        Stream : Driver_Types.Stream_T)
        with Import => True,
