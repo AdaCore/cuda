@@ -57,15 +57,15 @@ end;
 
 match SubpDecl ()
    and child (f_subp_kind ("function")) 
-   and p_subp_decl_spec.p_returns (x"driver_types_h.cudaError_t")
-   and not p_defining_name (x"cudaPeekAtLastError|cudaGetLastError")
+   and p_subp_decl_spec ().p_returns ().filter (x"driver_types_h.cudaError_t")
+   and not p_defining_name ().filter (x"cudaPeekAtLastError|cudaGetLastError")
 wrap return_into_exception ("CUDA", "Exception_Registry");
 
 match ParamSpec (x"access .*")
 wrap access_into_out ();
 
 match ParamSpec (not prev (ParamSpec ()) and x"access .*")
-   and parent (SubpDecl (p_defining_name (x".*Get.*")))
+   and parent (SubpDecl (p_defining_name ().filter (x".*Get.*")))
 wrap access_into_return ();
 
 match ParamSpec (x"event.*:.*System.Address")
@@ -74,7 +74,7 @@ wrap address_into_return ("CUDA.Driver_Types.Event_T");
 match ParamSpec (x"devPtr") and parent (SubpDecl (x"cudaMalloc"))
 wrap address_into_return ("System.Address");
 
-match PackageDecl (p_defining_name (x"cuda_runtime_api_h"))
+match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
     spec_content => @ & i"""
         function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
