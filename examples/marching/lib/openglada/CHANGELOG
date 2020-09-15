@@ -1,0 +1,62 @@
+v0.4.1 (upcoming):
+ * Fixed an off-by-one bug in GL.Contexts
+v0.4:
+ * Added packages:
+  - GL.Culling
+  - GL.Framebuffer
+  - GL.Objects.Lists
+  - GL.Rasterization
+ * Renamed packages:
+   - GL.Pixel_Data to GL.Pixels
+   - GL.Objects.Buffer to GL.Objects.Buffers
+ * Added missing functionality in:
+   - GL.Blending (various)
+   - GL.Buffers (various)
+   - GL.Objects.Buffers (various)
+   - GL.Objects.Framebuffers (various)
+   - GL.Objects.Programs:
+     * Attached_Shaders
+     * Get_Program_Stage
+     * Get_Subroutine_Index
+     * Subroutine_Uniform_Locations
+   - GL.Objects.Shaders (Release_Shader_Compiler)
+   - GL.Objects.Textures:
+     * Generate_Mipmap
+     * Invalidate_Image
+     * Invalidate_Sub_Image
+   - GLFW.Windows (Set_Cursor_Mode, Disable_Callback)
+ * GLFW 3: Raise exception if window creation fails
+ * Added LIBRARY_TYPE scenario variable
+ * Various bugfixes
+
+v0.3:
+ * Added packages:
+   - GL.Context
+   - GL.Blending
+   - GL.Raster
+   - GL.Objects.Framebuffers
+   - GL.Objects.Renderbuffers
+   - GL.Objects.Textures.Targets
+ * Overhauled texture API and made it possible to create and load data into
+   all kinds of textures
+ * Made exception raising optional by compile-time switch rather than by
+   setting a flag at runtime (performance increasement). Exposed GL.Errors to
+   manually handle errors if exceptions are disabled.
+ * Added support for GLFW 3
+ * Added support for SOIL
+ * Added support for FTGL
+ * Sanitized and cleaned up build system
+
+v0.2:
+
+ * Added joystick support to GLFW wrapper.
+ * Changed GL.Objects to require explicit initialization so the user
+   can declare variables of derived types at library level.
+   Breaks existing code.
+ * Better handling of texture unit count
+ * Added Makefile
+ * Added proper README
+
+v0.1:
+
+ * Initial release
