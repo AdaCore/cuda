@@ -44,3 +44,4 @@ cd "$(dirname "$KERNEL_FATBIN_PATH")"
 ld -r -b binary "$KERNEL_FATBIN_NAME" -o "$KERNEL_FATBIN_OBJ"
 cd "$CWD_BACKUP"
 
+gprbuild -Pmain -largs kernel.fatbin.o
