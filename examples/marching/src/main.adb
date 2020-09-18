@@ -51,6 +51,7 @@ with Marching_Cubes;           use Marching_Cubes;
 with Data;                     use Data;
 with System; use System;
 with CUDA.Driver_Types; use CUDA.Driver_Types;
+with CUDA.Vector_Types; use CUDA.Vector_Types;
 
 procedure Main is        
 
@@ -177,7 +178,7 @@ procedure Main is
    D_Balls : System.Address;
    D_Triangles : System.Address;
    D_Vertices  : System.Address;      
-   Threads_Per_Block : array (1 .. 3) of Integer := (Samples, Samples, Samples);
+   Threads_Per_Block : Dim3 := (unsigned (Samples), unsigned (Samples), unsigned (Samples));
    Blocks_Per_Grid : Integer := 1;   
    
    procedure Load_Element_Buffer is new
