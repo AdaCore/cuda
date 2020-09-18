@@ -1,0 +1,9 @@
+*.ads text eol=lf
+*.adb text eol=lf
+*.gpr text eol=lf
+*.txt text eol=lf
+*.c text eol=lf
+*.wrp text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.rst text eol=lf
