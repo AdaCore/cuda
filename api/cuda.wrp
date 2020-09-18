@@ -61,7 +61,8 @@ match SubpDecl ()
    and not p_defining_name ().filter (x"cudaPeekAtLastError|cudaGetLastError")
 wrap return_into_exception ("CUDA", "Exception_Registry");
 
-match ParamSpec (x"access .*")
+match ParamSpec (x"access .*") 
+   and not parent (SubpDecl (p_defining_name ().filter (x"atomic")))
 wrap access_into_out ();
 
 match ParamSpec (not prev (ParamSpec ()) and x"access .*")

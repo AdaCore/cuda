@@ -1,7 +1,19 @@
 project CUDA is
 
+   type Execution_Side_Type is ("Host", "Device");
+
+   Execution_Side : Execution_Side_Type := external ("Execution_Side", "Host");
+
    for Create_Missing_Dirs use "True";
-   for Source_Dirs use ("cuda_api", "cuda_raw_binding", "cuda_internal");
+
+   case Execution_Side is
+      when "Host" => 
+         for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal");
+
+      when "Device" =>
+         for Source_Dirs use ("device/cuda_api", "device/cuda_raw_binding", "cuda_internal");
+   end case;
+
    for Object_Dir use "obj";
 
    package Compiler is
