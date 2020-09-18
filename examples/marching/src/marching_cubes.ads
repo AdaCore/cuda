@@ -14,11 +14,9 @@
 
 with Geometry;              use Geometry;
 
-with GL.Types;              use GL.Types;
-with GL.Objects.Buffers;    use GL.Objects.Buffers;
-
 with Interfaces;            use Interfaces;
 with Interfaces.C.Pointers;
+with System; use System;
 
 package Marching_Cubes is
 
@@ -33,14 +31,10 @@ package Marching_Cubes is
    type Triangle_Array is array (Integer range <>) of aliased Triangle;
    package Triangle_Pointers is new Interfaces.C.Pointers
      (Integer, Triangle, Triangle_Array, (others => <>));
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Triangle_Pointers);
 
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
    package Unsigned32_Pointers is new Interfaces.C.Pointers
      (Integer, Unsigned_32, Unsigned32_Array, 0);
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
 
    ------------
    -- Vertex --
@@ -54,22 +48,33 @@ package Marching_Cubes is
    type Vertex_Array is array (Integer range <>) of aliased Vertex;
    package Vertex_Pointers is new Interfaces.C.Pointers
      (Integer, Vertex, Vertex_Array, (others => <>));
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Vertex_Pointers);
 
    ----------
    -- Mesh --
    ----------
 
-   generic
-      with function Density (Position : Point_Real) return Float;
    procedure Mesh
-     (Triangles           : out Triangle_Array;
+     (Balls               : Point_Real_Array;
+      Triangles           : out Triangle_Array;
       Vertices            : out Vertex_Array;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
       Last_Triangle       : out Integer;
       Last_Vertex         : out Integer;
-      Interpolation_Steps : Positive := 4);
+      Interpolation_Steps : Positive := 4;
+      XI, YI, ZI          :     Integer);
+
+   procedure Mesh_CUDA
+     (A_Balls             :     System.Address;
+      A_Triangles         :     System.Address;
+      A_Vertices          :     System.Address;
+      Start               :     Point_Real;
+      Stop                :     Point_Real;
+      Lattice_Size        :     Point_Int;
+      Last_Triangle       : out Integer;
+      Last_Vertex         : out Integer;
+      Interpolation_Steps :     Positive := 4)
+     with CUDA_Global;
+
 end Marching_Cubes;

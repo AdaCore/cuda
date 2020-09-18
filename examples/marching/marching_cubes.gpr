@@ -13,6 +13,7 @@
 ------------------------------------------------------------------------------
 
 with "lib/openglada/opengl-glfw.gpr";
+with "../../api/cuda.gpr";
 
 project Marching_Cubes is
 

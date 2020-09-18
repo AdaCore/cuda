@@ -39,6 +39,8 @@ with GL.Fixed.Lighting;        use GL.Fixed.Lighting;
 with GL.Uniforms;
 with GL.Rasterization;
 
+with CUDA.Runtime_Api; use CUDA.Runtime_Api;
+
 with Maths;                    use Maths.Single_Math_Functions;
 with Program_Loader;           use Program_Loader;
 with Utilities;                use Utilities;
@@ -47,6 +49,8 @@ with Volumes;                  use Volumes;
 with Geometry;                 use Geometry;
 with Marching_Cubes;           use Marching_Cubes;
 with Data;                     use Data;
+with System; use System;
+with CUDA.Driver_Types; use CUDA.Driver_Types;
 
 procedure Main is        
 
@@ -62,7 +66,6 @@ procedure Main is
    type Vertex_Index_Arr_Ptr is access Vertex_Index_Arr;
 
    Edge_Lattice : Vertex_Index_Arr_Ptr := new Vertex_Index_Arr;
-   Balls        : Point_Real_Array :=  (0 => (0.0, 0.0, 0.0), 1 => (0.0, 0.0, 0.0));
 
    -------------------
    -- Index_To_XYZE --
@@ -114,21 +117,21 @@ procedure Main is
    -- Metaballs --
    ---------------
 
-   function Metaballs (Position : Point_Real) return Float is
-      Total : Float := 0.0;
-      Size : constant := 0.10;
-   begin
-        for B of Balls loop
-           Total := @ + Size / ((Position.x - B.x) ** 2
-                             + (Position.y - B.y) ** 2
-                             + (Position.Z - B.z) ** 2);
-        end loop;
-        return Total - 1.0;
-   end Metaballs;
+   --  function Metaballs (Position : Point_Real) return Float is
+   --     Total : Float := 0.0;
+   --     Size : constant := 0.10;
+   --  begin
+   --       for B of Balls loop
+   --          Total := @ + Size / ((Position.x - B.x) ** 2
+   --                            + (Position.y - B.y) ** 2
+   --                            + (Position.Z - B.z) ** 2);
+   --       end loop;
+   --       return Total - 1.0;
+   --  end Metaballs;
 
    --  Marching cubes
 
-   procedure Mesh_Metaballs is new Marching_Cubes.Mesh (Metaballs);
+--   procedure Mesh_Metaballs is new Marching_Cubes.Mesh (Metaballs);
 
    --  Local variables
 
@@ -171,6 +174,18 @@ procedure Main is
 
 --  Start of processing for Main
 
+   D_Balls : System.Address;
+   D_Triangles : System.Address;
+   D_Vertices  : System.Address;      
+   Threads_Per_Block : array (1 .. 3) of Integer := (Samples, Samples, Samples);
+   Blocks_Per_Grid : Integer := 1;   
+   
+   procedure Load_Element_Buffer is new
+     GL.Objects.Buffers.Load_To_Buffer (Triangle_Pointers);
+   procedure Load_Element_Buffer is new
+     GL.Objects.Buffers.Load_To_Buffer (Vertex_Pointers);
+   procedure Load_Element_Buffer is new
+     GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
 begin   
    --  Initialize window
    
@@ -212,19 +227,49 @@ begin
    
    Last_Time       := Clock;
    Last_Clear_Time := Clock;
+   
+   D_Balls := Malloc (Balls'Size);
+   D_Triangles := Malloc (Tris'Size);
+   D_Vertices := Malloc (Verts'Size);
+   
    while Running loop
       Lattice_Size := (Samples, Samples, Samples);
    
       --  Build the shapes
    
-      Mesh_Metaballs (Triangles           => Tris,
-                      Vertices            => Verts,
-                      Start               => (-2.0, -1.0, -1.0),
-                      Stop                => (2.0, 1.0, 1.0),
-                      Lattice_Size        => Lattice_Size,
-                      Last_Triangle       => Last_Triangle,
-                      Last_Vertex         => Last_Vertex,
-                      Interpolation_Steps => 8);
+      -- CUDA program
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => D_Balls,
+         Src   => Balls'Address,
+         Count => Balls'Size,
+         Kind  => Memcpy_Host_To_Device);
+      
+      pragma CUDA_Execute 
+        (Mesh_CUDA
+           (A_Balls             => D_Balls,
+            A_Triangles         => D_Triangles,
+            A_Vertices          => D_Vertices,
+            Start               => (-2.0, -1.0, -1.0),
+            Stop                => (2.0, 1.0, 1.0),
+            Lattice_Size        => Lattice_Size,
+            Last_Triangle       => Last_Triangle,
+            Last_Vertex         => Last_Vertex,
+            Interpolation_Steps => 8),
+         Threads_Per_Block, 
+         Blocks_Per_Grid);
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Tris'Address,
+         Src   => D_Triangles,
+         Count => Tris'Size,
+         Kind  => Memcpy_Device_To_Host);
+
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Verts'Address,
+         Src   => D_Vertices,
+         Count => Verts'Size,
+         Kind  => Memcpy_Device_To_Host);
    
       Edge_Lattice.all := (others => (others => (others => (others => -1))));
    

@@ -12,23 +12,39 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Data;                use Data;
 with Marching_Cubes.Data; use Marching_Cubes.Data;
+with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
 
 package body Marching_Cubes is
+
+   function Metaballs (Position : Point_Real) return Float is
+      Total : Float := 0.0;
+      Size : constant := 0.10;
+   begin
+        for B of Balls loop
+           Total := Total + Size / ((Position.x - B.x) ** 2
+                             + (Position.y - B.y) ** 2
+                             + (Position.Z - B.z) ** 2);
+        end loop;
+        return Total - 1.0;
+   end Metaballs;
 
    ----------
    -- Mesh --
    ----------
 
    procedure Mesh
-     (Triangles           : out Triangle_Array;
+     (Balls               : Point_Real_Array;
+      Triangles           : out Triangle_Array;
       Vertices            : out Vertex_Array;
       Start               :     Point_Real;
       Stop                :     Point_Real;
       Lattice_Size        :     Point_Int;
       Last_Triangle       : out Integer;
       Last_Vertex         : out Integer;
-      Interpolation_Steps :     Positive := 4)
+      Interpolation_Steps :     Positive := 4;
+      XI, YI, ZI          :     Integer)
    is
       --  Local variables
 
@@ -48,7 +64,7 @@ package body Marching_Cubes is
       -------------------
 
       function Density_Index (XI, YI, ZI : Integer) return Integer is
-        (if Density ((Start.X + Float (XI) * Step.X,
+        (if Metaballs ((Start.X + Float (XI) * Step.X,
                       Start.Y + Float (YI) * Step.Y,
                       Start.Z + Float (ZI) * Step.Z)) > 0.0 then 1 else 0);
 
@@ -140,14 +156,14 @@ package body Marching_Cubes is
 
             --  Interpolate
 
-            Intr_Step := (if Density (P1) > 0.0 then -0.25 else 0.25);
+            Intr_Step := (if Metaballs (P1) > 0.0 then -0.25 else 0.25);
             Dir  := P2 - P1;
 
             --  [Q6] This loop is not parallelized in the initial algorithm,
             --  but maybe worth doing?
 
             for I in 1 .. Interpolation_Steps loop
-               if Density (P1 + Dir * Factor) > 0.0 then
+               if Metaballs (P1 + Dir * Factor) > 0.0 then
                   Factor := Factor - Intr_Step;
                else
                   Factor := Factor + Intr_Step;
@@ -162,6 +178,7 @@ package body Marching_Cubes is
       end Record_Edge;
 
    --  Start of processing for Mesh
+
 
    begin
       Last_Triangle := Triangles'First;
@@ -180,9 +197,9 @@ package body Marching_Cubes is
       --  the GPU, then copied back to the CPU after computation. How can
       --  this be specified?
 
-      for XI in 0 .. Lattice_Size.X - 1 loop
-         for YI in 0 .. Lattice_Size.Y - 1 loop
-            for ZI in 0 .. Lattice_Size.Z - 1 loop
+      --for XI in 0 .. Lattice_Size.X - 1 loop
+      --   for YI in 0 .. Lattice_Size.Y - 1 loop
+      --      for ZI in 0 .. Lattice_Size.Z - 1 loop
                Index := ((Density_Index (XI,     YI,     ZI    )      ) +
                          (Density_Index (XI,     YI + 1, ZI    ) *   2) +
                          (Density_Index (XI + 1, YI + 1, ZI    ) *   4) +
@@ -237,11 +254,44 @@ package body Marching_Cubes is
                   Record_Edge (E1, Triangles (Triangle_Index).I2);
                   Record_Edge (E2, Triangles (Triangle_Index).I3);
                end loop;
-            end loop;
-         end loop;
-      end loop;
+      --      end loop;
+      --   end loop;
+      --end loop;
 
       Last_Triangle := Last_Triangle - 1;
       Last_Vertex   := Last_Vertex - 1;
    end Mesh;
+
+   procedure Mesh_CUDA
+     (A_Balls             :     System.Address;
+      A_Triangles         :     System.Address;
+      A_Vertices          :     System.Address;
+      Start               :     Point_Real;
+      Stop                :     Point_Real;
+      Lattice_Size        :     Point_Int;
+      Last_Triangle       : out Integer;
+      Last_Vertex         : out Integer;
+      Interpolation_Steps :     Positive := 4)
+   is
+      --  TODO: This is a temporary hack as we know where the parameters are
+      --  coming from. Next step would be to pass fat pointers instead.
+      D_Balls : Point_Real_Array (Balls'Range) with Address => A_Balls;
+      D_Tris : Triangle_Array (Tris'Range) with Address => A_Triangles;
+      D_Verts : Vertex_Array (Verts'Range) with Address => A_Vertices;
+   begin
+      Mesh
+        (D_Balls,
+         D_Tris,
+         D_Verts,
+         Start,
+         Stop,
+         Lattice_Size,
+         Last_Triangle,
+         Last_Vertex,
+         Interpolation_Steps,
+         Integer (Thread_Idx.X),
+         Integer (Thread_Idx.Y),
+         Integer (Thread_Idx.Z));
+   end Mesh_CUDA;
+
 end Marching_Cubes;

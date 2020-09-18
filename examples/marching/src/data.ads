@@ -13,10 +13,12 @@
 ------------------------------------------------------------------------------
 
 with Marching_Cubes; use Marching_Cubes;
+with Geometry; use Geometry;
 
 package Data is
 
    Tris   : Triangle_Array (0 .. 1_000_000);
    Verts  : Vertex_Array (0 .. Tris'Length * 3 - 1);
+   Balls  : Point_Real_Array :=  (0 => (0.0, 0.0, 0.0), 1 => (0.0, 0.0, 0.0));
 
 end Data;
