@@ -15,6 +15,7 @@
 with Data;                use Data;
 with Marching_Cubes.Data; use Marching_Cubes.Data;
 with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
+with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
 
 package body Marching_Cubes is
 
@@ -38,13 +39,13 @@ package body Marching_Cubes is
      (Balls               : Point_Real_Array;
       Triangles           : out Triangle_Array;
       Vertices            : out Vertex_Array;
-      Start               :     Point_Real;
-      Stop                :     Point_Real;
-      Lattice_Size        :     Point_Int;
-      Last_Triangle       : out Integer;
-      Last_Vertex         : out Integer;
-      Interpolation_Steps :     Positive := 4;
-      XI, YI, ZI          :     Integer)
+      Start               : Point_Real;
+      Stop                : Point_Real;
+      Lattice_Size        : Point_Int;
+      Last_Triangle       : access Interfaces.C.Int;
+      Last_Vertex         : access Interfaces.C.Int;
+      Interpolation_Steps : Positive := 4;
+      XI, YI, ZI          : Integer)
    is
       --  Local variables
 
@@ -142,10 +143,7 @@ package body Marching_Cubes is
            or else V1 (E) = (0, 0, 0)
            or else V2 (E) = (0, 0, 0)
          then
-            --  [Q3] There's a race condition here
-
-            Vertex_Index := Last_Vertex;
-            Last_Vertex  := Last_Vertex + 1;
+            Vertex_Index  := Integer (Atomic_Add (Last_Vertex, 1));
 
             P1 := V0 + (Float (V1 (E).X) * Step.X,
                         Float (V1 (E).Y) * Step.Y,
@@ -181,9 +179,6 @@ package body Marching_Cubes is
 
 
    begin
-      Last_Triangle := Triangles'First;
-      Last_Vertex   := Vertices'First;
-
       --  [Q1] This algorithm uses a lot of locals which would introduce race
       --  conditions when parallelized if globals to the loop, but would be
       --  fine if declared locally. Do we want the language to be smart enough
@@ -223,17 +218,7 @@ package body Marching_Cubes is
                --  algorithm, but maybe worth doing?
 
                for I in 0 .. Case_To_Numpolys (Index) - 1 loop
-                  --  [Q2] There's an interesting problem here. In a fully
-                  --  sequencial case, I would just use triangle index and
-                  --  increment it at the end of the loop. Here, because I
-                  --  know that this is happening in a kernel, I'm using a
-                  --  counter incremented upfront. But that's not enough,
-                  --  I also need this increment to be atomic:
-                  --  (1) can the first problem be automatically detected?
-                  --  (2) how to make the increment and return atomic?
-
-                  Triangle_Index := Last_Triangle;
-                  Last_Triangle  := Last_Triangle + 1;
+                  Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1));
 
                   E0 := Triangle_Table (Index * 15 + I * 3);
                   E1 := Triangle_Table (Index * 15 + I * 3 + 1);
@@ -257,27 +242,26 @@ package body Marching_Cubes is
       --      end loop;
       --   end loop;
       --end loop;
-
-      Last_Triangle := Last_Triangle - 1;
-      Last_Vertex   := Last_Vertex - 1;
    end Mesh;
 
    procedure Mesh_CUDA
-     (A_Balls             :     System.Address;
-      A_Triangles         :     System.Address;
-      A_Vertices          :     System.Address;
-      Start               :     Point_Real;
-      Stop                :     Point_Real;
-      Lattice_Size        :     Point_Int;
-      Last_Triangle       : out Integer;
-      Last_Vertex         : out Integer;
-      Interpolation_Steps :     Positive := 4)
+     (A_Balls             : System.Address;
+      A_Triangles         : System.Address;
+      A_Vertices          : System.Address;
+      Start               : Point_Real;
+      Stop                : Point_Real;
+      Lattice_Size        : Point_Int;
+      Last_Triangle       : System.Address;
+      Last_Vertex         : System.Address;
+      Interpolation_Steps : Positive := 4)
    is
       --  TODO: This is a temporary hack as we know where the parameters are
       --  coming from. Next step would be to pass fat pointers instead.
       D_Balls : Point_Real_Array (Balls'Range) with Address => A_Balls;
       D_Tris : Triangle_Array (Tris'Range) with Address => A_Triangles;
       D_Verts : Vertex_Array (Verts'Range) with Address => A_Vertices;
+      D_Last_Triangle : access Interfaces.C.int with Address => Last_Triangle;
+      D_Last_Vertex : access Interfaces.C.int with Address => Last_Vertex;
    begin
       Mesh
         (D_Balls,

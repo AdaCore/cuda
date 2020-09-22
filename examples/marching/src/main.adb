@@ -168,8 +168,8 @@ procedure Main is
    Current_Time      : Single;
    Time_Factor       : Single;
    --J                 : Integer;
-   Last_Triangle     : Integer;
-   Last_Vertex       : Integer;
+   Last_Triangle : Interfaces.C.int;
+   Last_Vertex : Interfaces.C.int;
    FPS               : Integer := 0;
    Running           : Boolean := True;
 
@@ -187,6 +187,9 @@ procedure Main is
      GL.Objects.Buffers.Load_To_Buffer (Vertex_Pointers);
    procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
+
+   D_Last_Triangle : System.Address;
+   D_Last_Vertex : System.Address;
 begin   
    --  Initialize window
    
@@ -232,6 +235,8 @@ begin
    D_Balls := Malloc (Balls'Size);
    D_Triangles := Malloc (Tris'Size);
    D_Vertices := Malloc (Verts'Size);
+   D_Last_Triangle := Malloc (Interfaces.C.int'size);
+   D_Last_Vertex := Malloc (Interfaces.C.int'size);
    
    while Running loop
       Lattice_Size := (Samples, Samples, Samples);
@@ -246,6 +251,21 @@ begin
          Count => Balls'Size,
          Kind  => Memcpy_Host_To_Device);
       
+      Last_Triangle := Interfaces.C.int (Tris'First) - 1;
+      Last_Vertex := Interfaces.C.int (Verts'First) - 1;
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => D_Last_Triangle,
+         Src   => Last_Triangle'Address,
+         Count => Last_Triangle'Size,
+         Kind  => Memcpy_Host_To_Device);
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => D_Last_Vertex,
+         Src   => Last_Vertex'Address,
+         Count => Last_Vertex'Size,
+         Kind  => Memcpy_Host_To_Device);
+      
       pragma CUDA_Execute 
         (Mesh_CUDA
            (A_Balls             => D_Balls,
@@ -254,8 +274,8 @@ begin
             Start               => (-2.0, -1.0, -1.0),
             Stop                => (2.0, 1.0, 1.0),
             Lattice_Size        => Lattice_Size,
-            Last_Triangle       => Last_Triangle,
-            Last_Vertex         => Last_Vertex,
+            Last_Triangle       => D_Last_Triangle,
+            Last_Vertex         => D_Last_Vertex,
             Interpolation_Steps => 8),
          Threads_Per_Block, 
          Blocks_Per_Grid);
@@ -271,14 +291,26 @@ begin
          Src   => D_Vertices,
          Count => Verts'Size,
          Kind  => Memcpy_Device_To_Host);
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Last_Triangle'Address,
+         Src   => D_Last_Triangle,
+         Count => Last_Triangle'Size,
+         Kind  => Memcpy_Device_To_Host);
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Last_Vertex'Address,
+         Src   => D_Last_Vertex,
+         Count => Last_Vertex'Size,
+         Kind  => Memcpy_Device_To_Host);
    
       Edge_Lattice.all := (others => (others => (others => (others => -1))));
    
-      for V of Verts (Verts'First .. Last_Vertex) loop
+      for V of Verts (Verts'First .. Integer (Last_Vertex - 1)) loop
          Create_Vertex (V.Index, V.Point);
       end loop;
    
-      for T of Tris (Tris'First .. Last_Triangle) loop
+      for T of Tris (Tris'First .. Integer (Last_Triangle - 1)) loop
          Create_Face (Shape,
                       (Get_Vertex_Index (T.i1),
                       Get_Vertex_Index (T.i2),

@@ -8,10 +8,13 @@ project CUDA is
 
    case Execution_Side is
       when "Host" => 
-         for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal");
+         for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "common_static", "host_static");
 
       when "Device" =>
-         for Source_Dirs use ("device/cuda_api", "device/cuda_raw_binding", "cuda_internal");
+         --  ??? It's not clear yet how to generate bindings to the device side
+         --  as they are very C++ specific. work on the host generated files
+         --  for now to ensure at least compilation OK.
+         for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "common_static", "device_static");
    end case;
 
    for Object_Dir use "obj";
