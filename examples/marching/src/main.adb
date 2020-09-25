@@ -187,6 +187,8 @@ procedure Main is
      GL.Objects.Buffers.Load_To_Buffer (Vertex_Pointers);
    procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
+   procedure Load_Element_Buffer is new
+     GL.Objects.Buffers.Load_To_Buffer (Point_Real_Pointers);
 
    D_Last_Triangle : System.Address;
    D_Last_Vertex : System.Address;

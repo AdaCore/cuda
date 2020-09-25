@@ -12,9 +12,6 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with GL.Types;              use GL.Types;
-with GL.Objects.Buffers;    use GL.Objects.Buffers;
-
 with Interfaces;            use Interfaces;
 with Interfaces.C.Pointers;
 
@@ -44,8 +41,6 @@ package Geometry is
 
    package Point_Real_Pointers is new Interfaces.C.Pointers
      (Integer, Point_Real, Point_Real_Array, (others => <>));
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Point_Real_Pointers);
 
    ---------------
    -- Point_Int --

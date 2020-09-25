@@ -257,11 +257,16 @@ package body Marching_Cubes is
    is
       --  TODO: This is a temporary hack as we know where the parameters are
       --  coming from. Next step would be to pass fat pointers instead.
-      D_Balls : Point_Real_Array (Balls'Range) with Address => A_Balls;
-      D_Tris : Triangle_Array (Tris'Range) with Address => A_Triangles;
-      D_Verts : Vertex_Array (Verts'Range) with Address => A_Vertices;
-      D_Last_Triangle : access Interfaces.C.int with Address => Last_Triangle;
-      D_Last_Vertex : access Interfaces.C.int with Address => Last_Vertex;
+      D_Balls : Point_Real_Array (Balls'Range)
+        with Address => A_Balls, Import;
+      D_Tris : Triangle_Array (Tris'Range)
+        with Address => A_Triangles, Import;
+      D_Verts : Vertex_Array (Verts'Range)
+        with Address => A_Vertices, Import;
+      D_Last_Triangle : access Interfaces.C.int
+        with Address => Last_Triangle, Import;
+      D_Last_Vertex : access Interfaces.C.int
+        with Address => Last_Vertex, Import;
    begin
       Mesh
         (D_Balls,
@@ -270,8 +275,8 @@ package body Marching_Cubes is
          Start,
          Stop,
          Lattice_Size,
-         Last_Triangle,
-         Last_Vertex,
+         D_Last_Triangle,
+         D_Last_Vertex,
          Interpolation_Steps,
          Integer (Thread_Idx.X),
          Integer (Thread_Idx.Y),
