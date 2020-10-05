@@ -40,6 +40,7 @@ with GL.Uniforms;
 with GL.Rasterization;
 
 with CUDA.Runtime_Api; use CUDA.Runtime_Api;
+with Interfaces.C.Pointers;
 
 with Maths;                    use Maths.Single_Math_Functions;
 with Program_Loader;           use Program_Loader;
@@ -180,6 +181,15 @@ procedure Main is
    D_Vertices  : System.Address;      
    Threads_Per_Block : Dim3 := (unsigned (Samples), unsigned (Samples), unsigned (Samples));
    Blocks_Per_Grid : Integer := 1;   
+   
+   package Triangle_Pointers is new Interfaces.C.Pointers
+     (Integer, Triangle, Triangle_Array, (others => <>));
+
+   package Unsigned32_Pointers is new Interfaces.C.Pointers
+     (Integer, Unsigned_32, Unsigned32_Array, 0);
+   
+   package Vertex_Pointers is new Interfaces.C.Pointers
+     (Integer, Vertex, Marching_Cubes.Vertex_Array, (others => <>));
    
    procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer (Triangle_Pointers);

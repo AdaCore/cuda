@@ -14,11 +14,13 @@
 
 with Geometry;              use Geometry;
 
-with Interfaces;            use Interfaces;
-with Interfaces.C.Pointers;
+with Interfaces;   use Interfaces;
+with Interfaces.C; use Interfaces.C;
 with System; use System;
 
 package Marching_Cubes is
+
+   type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
    --------------
    -- Triangle --
@@ -29,12 +31,6 @@ package Marching_Cubes is
    end record with Convention => C;
 
    type Triangle_Array is array (Integer range <>) of aliased Triangle;
-   package Triangle_Pointers is new Interfaces.C.Pointers
-     (Integer, Triangle, Triangle_Array, (others => <>));
-
-   type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
-   package Unsigned32_Pointers is new Interfaces.C.Pointers
-     (Integer, Unsigned_32, Unsigned32_Array, 0);
 
    ------------
    -- Vertex --
@@ -46,8 +42,6 @@ package Marching_Cubes is
    end record with Convention => C;
 
    type Vertex_Array is array (Integer range <>) of aliased Vertex;
-   package Vertex_Pointers is new Interfaces.C.Pointers
-     (Integer, Vertex, Vertex_Array, (others => <>));
 
    ----------
    -- Mesh --
