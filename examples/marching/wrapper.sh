@@ -35,7 +35,7 @@ sed -i 's/^.version 3.2$/.version 6.4/' "$KERNEL_PTX_PATH"
 sed -i 's/^.target generic$/.target sm_'"$SM_XX"'/' "$KERNEL_PTX_PATH"
 
 # Create GPU object file
-"$CUDA_BIN_DIR/ptxas" -m64 -g --dont-merge-basicblocks --return-at-end -v --gpu-name sm_"$SM_XX" --output-file "$KERNEL_OBJ_PATH" "$KERNEL_PTX_PATH"
+"$CUDA_BIN_DIR/ptxas" --compile-only -m64 -g --dont-merge-basicblocks --return-at-end -v --gpu-name sm_"$SM_XX" --output-file "$KERNEL_OBJ_PATH" "$KERNEL_PTX_PATH"
 
 # Embed it all in a fat binary
 "$CUDA_BIN_DIR/fatbinary" -64 --create "$KERNEL_FATBIN_PATH" -g --image=profile=sm_"$SM_XX",file="$KERNEL_OBJ_PATH" --image=profile=compute_"$SM_XX",file="$KERNEL_PTX_PATH"
@@ -47,4 +47,4 @@ cd "$(dirname "$KERNEL_FATBIN_PATH")"
 ld -r -b binary "$KERNEL_FATBIN_NAME" -o "$KERNEL_FATBIN_OBJ"
 cd "$CWD_BACKUP"
 
-gprbuild -Pmain -largs marching_cubes.fatbin.o
+gprbuild -Pmarching_cubes -largs marching_cubes.fatbin.o
