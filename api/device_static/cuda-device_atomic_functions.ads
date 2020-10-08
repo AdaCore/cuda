@@ -2,10 +2,10 @@ with Interfaces.C; use Interfaces.C;
 
 package CUDA.Device_Atomic_Functions is
 
-   function Atomic_Add (Address : access int; Value : int) return int
-     with Convention => C,
+   function Atomic_Add (Address : access int; Value : int; Ordering : int := 0) return int
+     with Convention => Intrinsic,
        Import,
-       External_Name => "__iAtomicAdd";
+       External_Name => "__atomic_fetch_add_4";
 
 -- TODO: Manually bind the following:
 --  extern __device__ __device_builtin__ unsigned int __uAtomicAdd(unsigned int *address, unsigned int val);
