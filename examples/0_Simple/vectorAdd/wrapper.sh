@@ -23,13 +23,7 @@ KERNEL_FATBINASM_PATH="$SRC/$KERNEL_FATBINASM_NAME"
 
 mkdir -p "$OBJ"
 
-# FIXME: llvm-gcc doesn't like -o and thus doesn't output to $KERNEL_PTX_PATH
-"llvm-gcc" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_api/" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_raw_binding/" -O2 -S -gnatp -gnatn --target=nvptx64 "$KERNEL_SRC_PATH" # -o "$KERNEL_PTX_PATH"
-mv "$KERNEL_PTX_NAME" "$KERNEL_PTX_PATH"
-
-# Massage the created ptx - ultimately gnat-llvm will generate the correct ptx
-sed -i 's/^.version 3.2$/.version 6.4/' "$KERNEL_PTX_PATH"
-sed -i 's/^.target generic$/.target sm_'"$SM_XX"'/' "$KERNEL_PTX_PATH"
+"llvm-gcc" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_api/" -I"$EXAMPLE_DIRECTORY/../../../api/cuda_raw_binding/" -O2 -S -gnatp -gnatn -mcpu=sm_"$SM_XX" --target=nvptx64 "$KERNEL_SRC_PATH" -o "$KERNEL_PTX_PATH"
 
 # Create GPU object file
 "$CUDA_BIN_DIR/ptxas" -m64 -g --dont-merge-basicblocks --return-at-end -v --gpu-name sm_"$SM_XX" --output-file "$KERNEL_OBJ_PATH" "$KERNEL_PTX_PATH"
