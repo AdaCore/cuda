@@ -23,11 +23,12 @@ KERNEL_FATBINASM_PATH="$SRC/$KERNEL_FATBINASM_NAME"
 
 mkdir -p "$OBJ"
 
-"llvm-gcc" -I"$EXAMPLE_DIRECTORY/../../api/host/cuda_api/" \
+"llvm-gcc" \
    -I"$EXAMPLE_DIRECTORY/../../api/device_static/" \
-   -I"$EXAMPLE_DIRECTORY/../../api/host/cuda_raw_binding/" \
    -O2 -S -gnatp -gnatn -mcpu=sm_"$SM_XX" --target=nvptx64 \
    "$KERNEL_SRC_PATH" -o "$KERNEL_PTX_PATH"
+
+echo "DONE"
 
 # Create GPU object file
 "$CUDA_BIN_DIR/ptxas" -m64 -g --dont-merge-basicblocks --return-at-end -v --gpu-name sm_"$SM_XX" --output-file "$KERNEL_OBJ_PATH" "$KERNEL_PTX_PATH"
