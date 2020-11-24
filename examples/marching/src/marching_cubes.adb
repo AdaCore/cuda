@@ -120,7 +120,8 @@ package body Marching_Cubes is
          end if;
 
          if Edge_Index = -1 then
-            raise Program_Error;
+            --  raise Program_Error;
+            null;
          end if;
 
          --  Values go from 0 to size + 1 (boundary condition)
