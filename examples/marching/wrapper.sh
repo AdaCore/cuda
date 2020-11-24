@@ -21,14 +21,14 @@ KERNEL_FATBIN_OBJ="$OBJ/$KERNEL_FATBIN_NAME.o"
 KERNEL_FATBINASM_NAME="$KERNEL_FATBIN_NAME.s"
 KERNEL_FATBINASM_PATH="$SRC/$KERNEL_FATBINASM_NAME"
 
+Execution_Side=Device gprbuild -P../../api/cuda
+
 mkdir -p "$OBJ"
 
-"llvm-gcc" \
+"llvm-gcc" --RTS="$EXAMPLE_DIRECTORY/../../runtime/" \
    -I"$EXAMPLE_DIRECTORY/../../api/device_static/" \
    -O2 -S -gnatp -gnatn -mcpu=sm_"$SM_XX" --target=nvptx64 \
    "$KERNEL_SRC_PATH" -o "$KERNEL_PTX_PATH"
-
-echo "DONE"
 
 # Create GPU object file
 "$CUDA_BIN_DIR/ptxas" -m64 -g --dont-merge-basicblocks --return-at-end -v --gpu-name sm_"$SM_XX" --output-file "$KERNEL_OBJ_PATH" "$KERNEL_PTX_PATH"
@@ -43,4 +43,4 @@ cd "$(dirname "$KERNEL_FATBIN_PATH")"
 ld -r -b binary "$KERNEL_FATBIN_NAME" -o "$KERNEL_FATBIN_OBJ"
 cd "$CWD_BACKUP"
 
-gprbuild -Pmarching_cubes -largs marching_cubes.fatbin.o
+Execution_Side=Host gprbuild -Pmarching_cubes -largs marching_cubes.fatbin.o
