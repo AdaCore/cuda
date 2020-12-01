@@ -244,11 +244,11 @@ begin
    Last_Time       := Clock;
    Last_Clear_Time := Clock;
    
-   D_Balls := Malloc (Balls'Size);
-   D_Triangles := Malloc (Tris'Size);
-   D_Vertices := Malloc (Verts'Size);
-   D_Last_Triangle := Malloc (Interfaces.C.int'size);
-   D_Last_Vertex := Malloc (Interfaces.C.int'size);
+   D_Balls := Malloc (Balls'Size / 8);
+   D_Triangles := Malloc (Tris'Size / 8);
+   D_Vertices := Malloc (Verts'Size / 8);
+   D_Last_Triangle := Malloc (Interfaces.C.int'size / 8);
+   D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
    
    while Running loop
       Lattice_Size := (Samples, Samples, Samples);
@@ -260,7 +260,7 @@ begin
       Cuda.Runtime_Api.Memcpy
         (Dst   => D_Balls,
          Src   => Balls'Address,
-         Count => Balls'Size,
+         Count => Balls'Size / 8,
          Kind  => Memcpy_Host_To_Device);
       
       Last_Triangle := Interfaces.C.int (Tris'First) - 1;
@@ -269,16 +269,16 @@ begin
       Cuda.Runtime_Api.Memcpy
         (Dst   => D_Last_Triangle,
          Src   => Last_Triangle'Address,
-         Count => Last_Triangle'Size,
+         Count => Last_Triangle'Size / 8,
          Kind  => Memcpy_Host_To_Device);
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => D_Last_Vertex,
          Src   => Last_Vertex'Address,
-         Count => Last_Vertex'Size,
+         Count => Last_Vertex'Size / 8,
          Kind  => Memcpy_Host_To_Device);
       
-      pragma CUDA_Execute 
+      pragma CUDA_Execute
         (Mesh_CUDA
            (A_Balls             => D_Balls,
             A_Triangles         => D_Triangles,
@@ -289,31 +289,31 @@ begin
             Last_Triangle       => D_Last_Triangle,
             Last_Vertex         => D_Last_Vertex,
             Interpolation_Steps => 8),
-         Threads_Per_Block, 
+         Threads_Per_Block,
          Blocks_Per_Grid);
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => Tris'Address,
          Src   => D_Triangles,
-         Count => Tris'Size,
+         Count => Tris'Size / 8,
          Kind  => Memcpy_Device_To_Host);
 
       Cuda.Runtime_Api.Memcpy
         (Dst   => Verts'Address,
          Src   => D_Vertices,
-         Count => Verts'Size,
+         Count => Verts'Size / 8,
          Kind  => Memcpy_Device_To_Host);
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => Last_Triangle'Address,
          Src   => D_Last_Triangle,
-         Count => Last_Triangle'Size,
+         Count => Last_Triangle'Size / 8,
          Kind  => Memcpy_Device_To_Host);
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => Last_Vertex'Address,
          Src   => D_Last_Vertex,
-         Count => Last_Vertex'Size,
+         Count => Last_Vertex'Size / 8,
          Kind  => Memcpy_Device_To_Host);
    
       Edge_Lattice.all := (others => (others => (others => (others => -1))));
@@ -371,7 +371,7 @@ begin
          Model_View_Matrix :=
            Maths.Translation_Matrix ((0.0, 0.0, -6.0)) *
              (Maths.Rotation_Matrix (Maths.Degree (21.0 * Single (Current_Time)), (1.0, 0.0, 0.0))  *
-              Maths.Rotation_Matrix (Maths.Degree (45.0 * Single (Current_Time)), (0.0, 1.0, 0.0)));
+                Maths.Rotation_Matrix (Maths.Degree (45.0 * Single (Current_Time)), (0.0, 1.0, 0.0)));
    
          --  Set shader and clear to blue and the MVP
    
@@ -379,58 +379,62 @@ begin
          GL.Uniforms.Set_Single (Model_View_Location, Model_View_Matrix);
          GL.Uniforms.Set_Single (Projection_Location, Projection_Matrix);
    
-         --  Update verticies
+         if Shape_Verts'Length > 0 and then Shape_Tris'Length > 0 then
+            --  Update verticies
+            
+            Vertex_Buffer.Initialize_Id;
+            Array_Buffer.Bind (Vertex_Buffer);
+            Load_Element_Buffer (Array_Buffer, Shape_Verts, Static_Draw);
+  
+            --  Update indicies
+         
+         
+            Index_Buffer.Initialize_Id;
+            Element_Array_Buffer.Bind (Index_Buffer);
+            Load_Element_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
+
    
-         Vertex_Buffer.Initialize_Id;
-         Array_Buffer.Bind (Vertex_Buffer);
-         Load_Element_Buffer (Array_Buffer, Shape_Verts, Static_Draw);
+            --  Calculate normal
    
-         --  Update indicies
+            --J := Shape_Verts'First + 1;;
+            --for I in Shape_Verts'Range loop
+            --   if j = Shape_Verts'Last then
+            --      j := Shape_Verts'First;
+            --   end if;
+            --   Normal_Vector (X) := Normal_Vector (X) +
+            --                         (((Shape_Verts [faceVertexIndx[i]].z) + (Shape_Verts [faceVertexIndx[j]].z)) *
+            --                          ((Shape_Verts [faceVertexIndx[j]].y) - (Shape_Verts [faceVertexIndx[i]].y)));
+            --   Normal_Vector (Y) := Normal_Vector (Y) +
+            --                         (((Shape_Verts [faceVertexIndx[i]].x) + (Shape_Verts [faceVertexIndx[j]].x)) *
+            --                          ((Shape_Verts [faceVertexIndx[j]].z) - (Shape_Verts [faceVertexIndx[i]].z)));
+            --   Normal_Vector (Z) := Normal_Vector (Z) +
+            --                         (((Shape_Verts [faceVertexIndx[i]].y) + (Shape_Verts [faceVertexIndx[j]].y)) *
+            --                          ((Shape_Verts [faceVertexIndx[j]].x) - (Shape_Verts [faceVertexIndx[i]].x)));
+            --   J := J + 1;
+            --end loop;
    
-         Index_Buffer.Initialize_Id;
-         Element_Array_Buffer.Bind (Index_Buffer);
-         Load_Element_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
+            V1_Vector := (Single (Shape_Verts (Shape_Verts'First).X),
+                          Single (Shape_Verts (Shape_Verts'First).Y),
+                          Single (Shape_Verts (Shape_Verts'First).Z));
+            V2_Vector := (Single (Shape_Verts (Shape_Verts'First + 1).X),
+                          Single (Shape_Verts (Shape_Verts'First + 1).Y),
+                          Single (Shape_Verts (Shape_Verts'First + 1).Z));
+            V3_Vector := (Single (Shape_Verts (Shape_Verts'First + 2).X),
+                          Single (Shape_Verts (Shape_Verts'First + 2).Y),
+                          Single (Shape_Verts (Shape_Verts'First + 2).Z));
+            A_Vector  := V1_Vector - V2_Vector;
+            B_Vector  := V1_Vector - V3_Vector;
+            --GL.Uniforms.Set_Single (Normal_Location, GL.Types.Singles.Cross_Product (A_Vector, B_Vector));
+         
+            --  Render
    
-         --  Calculate normal
-   
-         --J := Shape_Verts'First + 1;;
-         --for I in Shape_Verts'Range loop
-         --   if j = Shape_Verts'Last then
-         --      j := Shape_Verts'First;
-         --   end if;
-         --   Normal_Vector (X) := Normal_Vector (X) +
-         --                         (((Shape_Verts [faceVertexIndx[i]].z) + (Shape_Verts [faceVertexIndx[j]].z)) *
-         --                          ((Shape_Verts [faceVertexIndx[j]].y) - (Shape_Verts [faceVertexIndx[i]].y)));
-         --   Normal_Vector (Y) := Normal_Vector (Y) +
-         --                         (((Shape_Verts [faceVertexIndx[i]].x) + (Shape_Verts [faceVertexIndx[j]].x)) *
-         --                          ((Shape_Verts [faceVertexIndx[j]].z) - (Shape_Verts [faceVertexIndx[i]].z)));
-         --   Normal_Vector (Z) := Normal_Vector (Z) +
-         --                         (((Shape_Verts [faceVertexIndx[i]].y) + (Shape_Verts [faceVertexIndx[j]].y)) *
-         --                          ((Shape_Verts [faceVertexIndx[j]].x) - (Shape_Verts [faceVertexIndx[i]].x)));
-         --   J := J + 1;
-         --end loop;
-   
-         V1_Vector := (Single (Shape_Verts (Shape_Verts'First).X),
-                       Single (Shape_Verts (Shape_Verts'First).Y),
-                       Single (Shape_Verts (Shape_Verts'First).Z));
-         V2_Vector := (Single (Shape_Verts (Shape_Verts'First + 1).X),
-                       Single (Shape_Verts (Shape_Verts'First + 1).Y),
-                       Single (Shape_Verts (Shape_Verts'First + 1).Z));
-         V3_Vector := (Single (Shape_Verts (Shape_Verts'First + 2).X),
-                       Single (Shape_Verts (Shape_Verts'First + 2).Y),
-                       Single (Shape_Verts (Shape_Verts'First + 2).Z));
-         A_Vector  := V1_Vector - V2_Vector;
-         B_Vector  := V1_Vector - V3_Vector;
-         --GL.Uniforms.Set_Single (Normal_Location, GL.Types.Singles.Cross_Product (A_Vector, B_Vector));
-   
-         --  Render
-   
-         GL.Attributes.Enable_Vertex_Attrib_Array (0);
-         GL.Attributes.Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 0, 0);
-         GL.Objects.Buffers.Draw_Elements
-           (Triangles, GL.Types.Int (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3, UInt_Type);
-         GL.Attributes.Disable_Vertex_Attrib_Array (0);
-   
+            GL.Attributes.Enable_Vertex_Attrib_Array (0);
+            GL.Attributes.Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 0, 0);
+            GL.Objects.Buffers.Draw_Elements
+              (Triangles, GL.Types.Int (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3, UInt_Type);
+            GL.Attributes.Disable_Vertex_Attrib_Array (0);
+         end if;
+         
          --  Rotate viewport
    
          Maths.Init_Perspective_Transform (50.0, 720.0, 480.0, 0.1, 1000.0, Projection_Matrix);
