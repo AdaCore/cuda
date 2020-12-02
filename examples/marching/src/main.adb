@@ -179,8 +179,8 @@ procedure Main is
    D_Balls : System.Address;
    D_Triangles : System.Address;
    D_Vertices  : System.Address;      
-   Threads_Per_Block : Dim3 := (unsigned (Samples), unsigned (Samples), unsigned (Samples));
-   Blocks_Per_Grid : Integer := 1;   
+   Blocks_Per_Grid : Dim3 := (unsigned (Samples), unsigned (Samples), unsigned (Samples));
+   Threads_Per_Block : Integer := 1;   
    
    package Triangle_Pointers is new Interfaces.C.Pointers
      (Integer, Triangle, Triangle_Array, (others => <>));
@@ -202,6 +202,9 @@ procedure Main is
 
    D_Last_Triangle : System.Address;
    D_Last_Vertex : System.Address;
+   D_Debug_Value : System.Address;
+   
+   Debug_Value : Integer;
 begin   
    --  Initialize window
    
@@ -249,6 +252,7 @@ begin
    D_Vertices := Malloc (Verts'Size / 8);
    D_Last_Triangle := Malloc (Interfaces.C.int'size / 8);
    D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
+   D_Debug_Value := Malloc (Interfaces.C.int'size / 8);   
    
    while Running loop
       Lattice_Size := (Samples, Samples, Samples);
@@ -278,6 +282,16 @@ begin
          Count => Last_Vertex'Size / 8,
          Kind  => Memcpy_Host_To_Device);
       
+      Debug_Value := 0;
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => D_Debug_Value,
+         Src   => Debug_Value'Address,
+         Count => Debug_Value'Size / 8,
+         Kind  => Memcpy_Host_To_Device);
+      
+      Put_Line ("LAST VERTEX: " & Last_Vertex'Img);
+      
       pragma CUDA_Execute
         (Mesh_CUDA
            (A_Balls             => D_Balls,
@@ -288,9 +302,19 @@ begin
             Lattice_Size        => Lattice_Size,
             Last_Triangle       => D_Last_Triangle,
             Last_Vertex         => D_Last_Vertex,
-            Interpolation_Steps => 8),
-         Threads_Per_Block,
-         Blocks_Per_Grid);
+            Interpolation_Steps => 8, 
+            Debug_Value         => D_Debug_Value),
+         Blocks_Per_Grid,
+         Threads_Per_Block
+        );
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Debug_Value'Address,
+         Src   => D_Debug_Value,
+         Count => Debug_Value'Size / 8,
+         Kind  => Memcpy_Device_To_Host);
+      
+      Put_Line ("DEBUG VALUE: " & Debug_Value'Img);
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => Tris'Address,
@@ -314,8 +338,8 @@ begin
         (Dst   => Last_Vertex'Address,
          Src   => D_Last_Vertex,
          Count => Last_Vertex'Size / 8,
-         Kind  => Memcpy_Device_To_Host);
-   
+         Kind  => Memcpy_Device_To_Host);          
+      
       Edge_Lattice.all := (others => (others => (others => (others => -1))));
    
       for V of Verts (Verts'First .. Integer (Last_Vertex - 1)) loop

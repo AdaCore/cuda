@@ -57,7 +57,8 @@ package Marching_Cubes is
       Last_Triangle       : access Interfaces.C.Int;
       Last_Vertex         : access Interfaces.C.Int;
       Interpolation_Steps : Positive := 4;
-      XI, YI, ZI          : Integer);
+      XI, YI, ZI          : Integer;
+      Debug_Value         : access Interfaces.C.int);
 
    procedure Mesh_CUDA
      (A_Balls             : System.Address;
@@ -68,7 +69,8 @@ package Marching_Cubes is
       Lattice_Size        : Point_Int;
       Last_Triangle       : System.Address;
       Last_Vertex         : System.Address;
-      Interpolation_Steps : Positive := 4)
+      Interpolation_Steps : Positive := 4;
+      Debug_Value         : System.Address)
      with CUDA_Global;
 
 end Marching_Cubes;

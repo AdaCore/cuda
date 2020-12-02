@@ -45,7 +45,8 @@ package body Marching_Cubes is
       Last_Triangle       : access Interfaces.C.Int;
       Last_Vertex         : access Interfaces.C.Int;
       Interpolation_Steps : Positive := 4;
-      XI, YI, ZI          : Integer)
+      XI, YI, ZI          : Integer;
+      Debug_Value         : access Interfaces.C.int)
    is
       --  Local variables
 
@@ -144,7 +145,7 @@ package body Marching_Cubes is
            or else V1 (E) = (0, 0, 0)
            or else V2 (E) = (0, 0, 0)
          then
-            Vertex_Index  := Integer (Atomic_Add (Last_Vertex, 1));
+            Vertex_Index  := Integer (Atomic_Add (Last_Vertex, 1)) + 1;
 
             P1 := V0 + (Float (V1 (E).X) * Step.X,
                         Float (V1 (E).Y) * Step.Y,
@@ -176,8 +177,7 @@ package body Marching_Cubes is
          end if;
       end Record_Edge;
 
-   --  Start of processing for Mesh
-
+      --  Start of processing for Mesh
 
    begin
       --  [Q1] This algorithm uses a lot of locals which would introduce race
@@ -193,56 +193,54 @@ package body Marching_Cubes is
       --  the GPU, then copied back to the CPU after computation. How can
       --  this be specified?
 
-      --for XI in 0 .. Lattice_Size.X - 1 loop
-      --   for YI in 0 .. Lattice_Size.Y - 1 loop
-      --      for ZI in 0 .. Lattice_Size.Z - 1 loop
-               Index := ((Density_Index (XI,     YI,     ZI    )      ) +
-                         (Density_Index (XI,     YI + 1, ZI    ) *   2) +
-                         (Density_Index (XI + 1, YI + 1, ZI    ) *   4) +
-                         (Density_Index (XI + 1, YI,     ZI    ) *   8) +
-                         (Density_Index (XI,     YI,     ZI + 1) *  16) +
-                         (Density_Index (XI,     YI + 1, ZI + 1) *  32) +
-                         (Density_Index (XI + 1, YI + 1, ZI + 1) *  64) +
-                         (Density_Index (XI + 1, YI,     ZI + 1) * 128));
+      Index := ((Density_Index (XI,     YI,     ZI    )      ) +
+                (Density_Index (XI,     YI + 1, ZI    ) *   2) +
+                (Density_Index (XI + 1, YI + 1, ZI    ) *   4) +
+                (Density_Index (XI + 1, YI,     ZI    ) *   8) +
+                (Density_Index (XI,     YI,     ZI + 1) *  16) +
+                (Density_Index (XI,     YI + 1, ZI + 1) *  32) +
+                (Density_Index (XI + 1, YI + 1, ZI + 1) *  64) +
+                (Density_Index (XI + 1, YI,     ZI + 1) * 128));
 
-               --  Set the inital vertex for the benefit of Record_Edges
 
-               V0 := (Start.X + Float (XI) * Step.X,
-                      Start.Y + Float (YI) * Step.Y,
-                      Start.Z + Float (ZI) * Step.Z);
+      --  Set the inital vertex for the benefit of Record_Edges
 
-               Record_All_Vertices := XI = Lattice_Size.X - 1
-                                        or else YI = Lattice_Size.Y - 1
-                                        or else ZI = Lattice_Size.Z - 1;
+      V0 := (Start.X + Float (XI) * Step.X,
+             Start.Y + Float (YI) * Step.Y,
+             Start.Z + Float (ZI) * Step.Z);
 
-               --  [Q5] This loop is not parallelized in the initial
-               --  algorithm, but maybe worth doing?
+      Record_All_Vertices := XI = Lattice_Size.X - 1
+        or else YI = Lattice_Size.Y - 1
+        or else ZI = Lattice_Size.Z - 1;
 
-               for I in 0 .. Case_To_Numpolys (Index) - 1 loop
-                  Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1));
+      --  [Q5] This loop is not parallelized in the initial
+      --  algorithm, but maybe worth doing?
 
-                  E0 := Triangle_Table (Index * 15 + I * 3);
-                  E1 := Triangle_Table (Index * 15 + I * 3 + 1);
-                  E2 := Triangle_Table (Index * 15 + I * 3 + 2);
 
-                  Triangles (Triangle_Index) :=
-                    (I1 => Get_Edge_Index (XI, YI, ZI, V1 (E0), V2 (E0)),
-                     I2 => Get_Edge_Index (XI, YI, ZI, V1 (E1), V2 (E1)),
-                     I3 => Get_Edge_Index (XI, YI, ZI, V1 (E2), V2 (E2)));
 
-                  --  Only record the bottom edge {0, 0, 0}. Others will be
-                  --  recorded by other cubes, unless for the boundary edges
-                  --  (identified by Record_All_Vertices).
+      for I in 0 .. Case_To_Numpolys (Index) - 1 loop
+         Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1)) + 1;
 
-                  --  There may be a bug with which vertices can be recorded?
 
-                  Record_Edge (E0, Triangles (Triangle_Index).I1);
-                  Record_Edge (E1, Triangles (Triangle_Index).I2);
-                  Record_Edge (E2, Triangles (Triangle_Index).I3);
-               end loop;
-      --      end loop;
-      --   end loop;
-      --end loop;
+         E0 := Triangle_Table (Index * 15 + I * 3);
+         E1 := Triangle_Table (Index * 15 + I * 3 + 1);
+         E2 := Triangle_Table (Index * 15 + I * 3 + 2);
+
+         Triangles (Triangle_Index) :=
+           (I1 => Get_Edge_Index (XI, YI, ZI, V1 (E0), V2 (E0)),
+            I2 => Get_Edge_Index (XI, YI, ZI, V1 (E1), V2 (E1)),
+            I3 => Get_Edge_Index (XI, YI, ZI, V1 (E2), V2 (E2)));
+
+         --  Only record the bottom edge {0, 0, 0}. Others will be
+         --  recorded by other cubes, unless for the boundary edges
+         --  (identified by Record_All_Vertices).
+
+         --  There may be a bug with which vertices can be recorded?
+
+         Record_Edge (E0, Triangles (Triangle_Index).I1);
+         Record_Edge (E1, Triangles (Triangle_Index).I2);
+         Record_Edge (E2, Triangles (Triangle_Index).I3);
+      end loop;
    end Mesh;
 
    procedure Mesh_CUDA
@@ -254,7 +252,8 @@ package body Marching_Cubes is
       Lattice_Size        : Point_Int;
       Last_Triangle       : System.Address;
       Last_Vertex         : System.Address;
-      Interpolation_Steps : Positive := 4)
+      Interpolation_Steps : Positive := 4;
+      Debug_Value         : System.Address)
    is
       --  TODO: This is a temporary hack as we know where the parameters are
       --  coming from. Next step would be to pass fat pointers instead.
@@ -265,10 +264,16 @@ package body Marching_Cubes is
       D_Verts : Vertex_Array (Verts'Range)
         with Address => A_Vertices, Import;
       D_Last_Triangle : access Interfaces.C.int
-        with Address => Last_Triangle, Import;
+        with Address => Last_Triangle'Address, Import;
       D_Last_Vertex : access Interfaces.C.int
-        with Address => Last_Vertex, Import;
+        with Address => Last_Vertex'Address, Import;
+      D_Debug_Value : access Interfaces.C.int
+        with Address => Debug_Value'Address, Import;
    begin
+      --  TODO: Transform block_idx into some combination of thread and blocks.
+
+      D_Debug_Value.all := 99;
+
       Mesh
         (D_Balls,
          D_Tris,
@@ -279,9 +284,10 @@ package body Marching_Cubes is
          D_Last_Triangle,
          D_Last_Vertex,
          Interpolation_Steps,
-         Integer (Thread_Idx.X),
-         Integer (Thread_Idx.Y),
-         Integer (Thread_Idx.Z));
+         Integer (Block_Idx.X),
+         Integer (Block_Idx.Y),
+         Integer (Block_Idx.Z),
+         D_Debug_Value);
    end Mesh_CUDA;
 
 end Marching_Cubes;
