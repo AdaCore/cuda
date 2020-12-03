@@ -288,9 +288,7 @@ begin
         (Dst   => D_Debug_Value,
          Src   => Debug_Value'Address,
          Count => Debug_Value'Size / 8,
-         Kind  => Memcpy_Host_To_Device);
-      
-      Put_Line ("LAST VERTEX: " & Last_Vertex'Img);
+         Kind  => Memcpy_Host_To_Device);      
       
       pragma CUDA_Execute
         (Mesh_CUDA
@@ -312,9 +310,7 @@ begin
         (Dst   => Debug_Value'Address,
          Src   => D_Debug_Value,
          Count => Debug_Value'Size / 8,
-         Kind  => Memcpy_Device_To_Host);
-      
-      Put_Line ("DEBUG VALUE: " & Debug_Value'Img);
+         Kind  => Memcpy_Device_To_Host);      
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => Tris'Address,
@@ -342,11 +338,11 @@ begin
       
       Edge_Lattice.all := (others => (others => (others => (others => -1))));
    
-      for V of Verts (Verts'First .. Integer (Last_Vertex - 1)) loop
+      for V of Verts (Verts'First .. Integer (Last_Vertex)) loop
          Create_Vertex (V.Index, V.Point);
       end loop;
    
-      for T of Tris (Tris'First .. Integer (Last_Triangle - 1)) loop
+      for T of Tris (Tris'First .. Integer (Last_Triangle)) loop
          Create_Face (Shape,
                       (Get_Vertex_Index (T.i1),
                       Get_Vertex_Index (T.i2),
