@@ -19,18 +19,6 @@ with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
 
 package body Marching_Cubes is
 
-   function Metaballs (Position : Point_Real) return Float is
-      Total : Float := 0.0;
-      Size : constant := 0.10;
-   begin
-        for B of Balls loop
-           Total := Total + Size / ((Position.x - B.x) ** 2
-                             + (Position.y - B.y) ** 2
-                             + (Position.Z - B.z) ** 2);
-        end loop;
-        return Total - 1.0;
-   end Metaballs;
-
    ----------
    -- Mesh --
    ----------
@@ -60,6 +48,22 @@ package body Marching_Cubes is
       Step : Point_Real := (X => (Stop.X - Start.X) / Float (Lattice_Size.X),
                             Y => (Stop.Y - Start.Y) / Float (Lattice_Size.Y),
                             Z => (Stop.Z - Start.Z) / Float (Lattice_Size.Z));
+
+      ---------------
+      -- Metaballs --
+      ---------------
+
+      function Metaballs (Position : Point_Real) return Float is
+         Total : Float := 0.0;
+         Size : constant := 0.10;
+      begin
+         for B of Balls loop
+            Total := Total + Size / ((Position.x - B.x) ** 2
+                                     + (Position.y - B.y) ** 2
+                                     + (Position.Z - B.z) ** 2);
+         end loop;
+         return Total - 1.0;
+      end Metaballs;
 
       -------------------
       -- Density_Index --
