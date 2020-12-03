@@ -55,7 +55,7 @@ package body Marching_Cubes is
 
       function Metaballs (Position : Point_Real) return Float is
          Total : Float := 0.0;
-         Size : constant := 0.10;
+         Size : constant := 0.05;
       begin
          for B of Balls loop
             Total := Total + Size / ((Position.x - B.x) ** 2
@@ -276,8 +276,6 @@ package body Marching_Cubes is
    begin
       --  TODO: Transform block_idx into some combination of thread and blocks.
 
-      D_Debug_Value.all := 99;
-
       Mesh
         (D_Balls,
          D_Tris,
@@ -288,9 +286,9 @@ package body Marching_Cubes is
          D_Last_Triangle,
          D_Last_Vertex,
          Interpolation_Steps,
-         Integer (Block_Idx.X),
-         Integer (Block_Idx.Y),
-         Integer (Block_Idx.Z),
+         Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X),
+         Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),
+         Integer (Block_Idx.Z * Block_Dim.Z + Thread_Idx.Z),
          D_Debug_Value);
    end Mesh_CUDA;
 

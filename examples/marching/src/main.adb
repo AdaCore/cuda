@@ -15,6 +15,7 @@
 with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Calendar;             use Ada.Calendar;
 with Ada.Directories;          use Ada.Directories;
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 with Interfaces.C;             use Interfaces.C;
 with Interfaces;               use Interfaces;
 
@@ -58,7 +59,7 @@ procedure Main is
 
    --  Settings and constants
 
-   Samples      : Integer := 32;
+   Samples      : Integer := 64;
    Max_Lattice  : constant Integer := 10;
    Scale        : constant Float   := 1.3;
    Shape        : Volume;
@@ -137,7 +138,12 @@ procedure Main is
 
    --  Local variables
 
-   Speeds : array (Balls'Range) of Float := (0.01, -0.02);
+   Speeds : array (Balls'Range) of Point_Real := 
+     ((0.01, 0.0, 0.0), 
+      (0.0, -0.02, 0.0), 
+      (0.0, 0.0, 0.005), 
+      (0.001, 0.002, 0.0), 
+      (0.002, 0.0, 0.01));
 
    Main_Window         : aliased Glfw.Windows.Window;
    Projection_Matrix   : GL.Types.Singles.Matrix4 := (others => (others => <>));
@@ -179,8 +185,11 @@ procedure Main is
    D_Balls : System.Address;
    D_Triangles : System.Address;
    D_Vertices  : System.Address;      
-   Blocks_Per_Grid : Dim3 := (unsigned (Samples), unsigned (Samples), unsigned (Samples));
-   Threads_Per_Block : Integer := 1;   
+   Threads_Per_Block : Dim3 := (8, 4, 4); 
+   Blocks_Per_Grid : Dim3 :=
+     (unsigned (Samples) / Threads_Per_Block.X, 
+      unsigned (Samples) / Threads_Per_Block.Y,
+      unsigned (Samples) / Threads_Per_Block.Z);  
    
    package Triangle_Pointers is new Interfaces.C.Pointers
      (Integer, Triangle, Triangle_Array, (others => <>));
@@ -295,8 +304,8 @@ begin
            (A_Balls             => D_Balls,
             A_Triangles         => D_Triangles,
             A_Vertices          => D_Vertices,
-            Start               => (-2.0, -1.0, -1.0),
-            Stop                => (2.0, 1.0, 1.0),
+            Start               => (-2.0, -2.0, -2.0),
+            Stop                => (2.0, 2.0, 2.0),
             Lattice_Size        => Lattice_Size,
             Last_Triangle       => D_Last_Triangle,
             Last_Vertex         => D_Last_Vertex,
@@ -310,7 +319,7 @@ begin
         (Dst   => Debug_Value'Address,
          Src   => D_Debug_Value,
          Count => Debug_Value'Size / 8,
-         Kind  => Memcpy_Device_To_Host);      
+         Kind  => Memcpy_Device_To_Host);            
       
       Cuda.Runtime_Api.Memcpy
         (Dst   => Tris'Address,
@@ -377,10 +386,29 @@ begin
          --  Move the balls
    
          for I in Balls'Range loop
-            if Balls (I).X + Speeds (I) not in -1.0 .. 1.0 then
-               Speeds (I) := -@;
-            end if;
-            Balls (I).X := @ + Speeds (I);
+            declare
+               New_Position : Point_Real := Balls (I);
+            begin
+               New_Position.X := Balls (I).X + Speeds (I).X;
+               New_Position.Y := Balls (I).Y + Speeds (I).Y;
+               New_Position.Z := Balls (I).Z + Speeds (I).Z;
+               
+               if Sqrt 
+                 (New_Position.X * New_Position.X + 
+                  New_Position.Y * New_Position.Y +
+                  New_Position.Z * New_Position.Z) > 1.0 
+               then
+                  Speeds (I).X := -@;
+                  Speeds (I).Y := -@;
+                  Speeds (I).Z := -@;
+                  
+                  New_Position.X := Balls (I).X + Speeds (I).X;
+                  New_Position.Y := Balls (I).Y + Speeds (I).Y;
+                  New_Position.Z := Balls (I).Z + Speeds (I).Z;
+               end if;
+               
+               Balls (I) := New_Position;
+            end;
          end loop;
    
          --  Rotate the camera
