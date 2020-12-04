@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                       Copyright (C) 2017, AdaCore                        --
+--                    Copyright (C) 2017-2020, AdaCore                      --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 3,  or (at your option) any later ver- --
@@ -184,19 +184,6 @@ package body Marching_Cubes is
       --  Start of processing for Mesh
 
    begin
-      --  [Q1] This algorithm uses a lot of locals which would introduce race
-      --  conditions when parallelized if globals to the loop, but would be
-      --  fine if declared locally. Do we want the language to be smart enough
-      --  to localize them or enforce local scope declaration?
-
-      --  [Q4] The three loops below needs to be parallelized. What's the
-      --  semantics? Do we get maximum of X * Y * Z theads?
-
-      --  [Q7] There is no need to copy the data from Triangles and Vertices
-      --  when entering the loop. However, this data needs to be located on
-      --  the GPU, then copied back to the CPU after computation. How can
-      --  this be specified?
-
       Index := ((Density_Index (XI,     YI,     ZI    )      ) +
                 (Density_Index (XI,     YI + 1, ZI    ) *   2) +
                 (Density_Index (XI + 1, YI + 1, ZI    ) *   4) +
@@ -205,7 +192,6 @@ package body Marching_Cubes is
                 (Density_Index (XI,     YI + 1, ZI + 1) *  32) +
                 (Density_Index (XI + 1, YI + 1, ZI + 1) *  64) +
                 (Density_Index (XI + 1, YI,     ZI + 1) * 128));
-
 
       --  Set the inital vertex for the benefit of Record_Edges
 
@@ -216,11 +202,6 @@ package body Marching_Cubes is
       Record_All_Vertices := XI = Lattice_Size.X - 1
         or else YI = Lattice_Size.Y - 1
         or else ZI = Lattice_Size.Z - 1;
-
-      --  [Q5] This loop is not parallelized in the initial
-      --  algorithm, but maybe worth doing?
-
-
 
       for I in 0 .. Case_To_Numpolys (Index) - 1 loop
          Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1)) + 1;
@@ -274,8 +255,6 @@ package body Marching_Cubes is
       D_Debug_Value : access Interfaces.C.int
         with Address => Debug_Value'Address, Import;
    begin
-      --  TODO: Transform block_idx into some combination of thread and blocks.
-
       Mesh
         (D_Balls,
          D_Tris,

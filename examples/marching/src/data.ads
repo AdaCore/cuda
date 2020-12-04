@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                       Copyright (C) 2020, AdaCore                        --
+--                    Copyright (C) 2017-2020, AdaCore                      --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 3,  or (at your option) any later ver- --

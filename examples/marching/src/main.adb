@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                        Copyright (C) 2017, AdaCore                       --
+--                    Copyright (C) 2017-2020, AdaCore                      --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 3,  or (at your option) any later ver- --
@@ -15,7 +15,8 @@
 with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Calendar;             use Ada.Calendar;
 with Ada.Directories;          use Ada.Directories;
-with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Elementary_Functions; 
+use Ada.Numerics.Elementary_Functions;
 with Interfaces.C;             use Interfaces.C;
 with Interfaces;               use Interfaces;
 
@@ -265,11 +266,7 @@ begin
    
    while Running loop
       Lattice_Size := (Samples, Samples, Samples);
-   
-      --  Build the shapes
-   
-      -- CUDA program
-      
+
       Cuda.Runtime_Api.Memcpy
         (Dst   => D_Balls,
          Src   => Balls'Address,
