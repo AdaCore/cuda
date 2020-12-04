@@ -117,26 +117,6 @@ procedure Main is
       end if;
    end Create_Vertex;
 
-   ---------------
-   -- Metaballs --
-   ---------------
-
-   --  function Metaballs (Position : Point_Real) return Float is
-   --     Total : Float := 0.0;
-   --     Size : constant := 0.10;
-   --  begin
-   --       for B of Balls loop
-   --          Total := @ + Size / ((Position.x - B.x) ** 2
-   --                            + (Position.y - B.y) ** 2
-   --                            + (Position.Z - B.z) ** 2);
-   --       end loop;
-   --       return Total - 1.0;
-   --  end Metaballs;
-
-   --  Marching cubes
-
---   procedure Mesh_Metaballs is new Marching_Cubes.Mesh (Metaballs);
-
    --  Local variables
 
    Speeds : array (Balls'Range) of Point_Real := 
@@ -173,8 +153,6 @@ procedure Main is
    V1_Vector         : Singles.Vector3;
    V2_Vector         : Singles.Vector3;
    V3_Vector         : Singles.Vector3;
-   Current_Time      : Single;
-   Time_Factor       : Single;
    --J                 : Integer;
    Last_Triangle : Interfaces.C.int;
    Last_Vertex : Interfaces.C.int;
@@ -223,6 +201,7 @@ begin
    GL.Window.Set_Viewport (10, 10, 720, 480);
    --GL.Rasterization.Set_Polygon_Mode (GL.Rasterization.Line); -- Render in wireframe
    GL.Toggles.Enable (GL.Toggles.Cull_Face);
+   GL.Toggles.Enable (GL.Toggles.Depth_Test);
    
    --  Load shaders
    
@@ -264,7 +243,7 @@ begin
    D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
    D_Debug_Value := Malloc (Interfaces.C.int'size / 8);   
    
-   while Running loop
+   while Running loop      
       Lattice_Size := (Samples, Samples, Samples);
 
       Cuda.Runtime_Api.Memcpy
@@ -306,7 +285,7 @@ begin
             Lattice_Size        => Lattice_Size,
             Last_Triangle       => D_Last_Triangle,
             Last_Vertex         => D_Last_Vertex,
-            Interpolation_Steps => 8, 
+            Interpolation_Steps => 32, 
             Debug_Value         => D_Debug_Value),
          Blocks_Per_Grid,
          Threads_Per_Block
@@ -406,21 +385,16 @@ begin
                
                Balls (I) := New_Position;
             end;
-         end loop;
+         end loop;                  
    
          --  Rotate the camera
    
-         Current_Time      := 0.0;
-         Current_Time      := Single (Glfw.Time) / 10.0;
-         Time_Factor       := Single (Samples) + 0.3 * Single (Current_Time);
-         Model_View_Matrix :=
-           Maths.Translation_Matrix ((0.0, 0.0, -6.0)) *
-             (Maths.Rotation_Matrix (Maths.Degree (21.0 * Single (Current_Time)), (1.0, 0.0, 0.0))  *
-                Maths.Rotation_Matrix (Maths.Degree (45.0 * Single (Current_Time)), (0.0, 1.0, 0.0)));
+         Model_View_Matrix := Maths.Translation_Matrix ((0.0, 0.0, -6.0));
    
          --  Set shader and clear to blue and the MVP
    
-         Utilities.Clear_Background_Colour ((0.0, 0.0, 0.4, 1.0));
+         Utilities.Clear_Background_Colour ((0.0, 0.0, 0.0, 1.0));
+         GL.Buffers.Clear ((Depth => True, Color => True, others => False));
          GL.Uniforms.Set_Single (Model_View_Location, Model_View_Matrix);
          GL.Uniforms.Set_Single (Projection_Location, Projection_Matrix);
    
@@ -431,13 +405,11 @@ begin
             Array_Buffer.Bind (Vertex_Buffer);
             Load_Element_Buffer (Array_Buffer, Shape_Verts, Static_Draw);
   
-            --  Update indicies
-         
+            --  Update indicies         
          
             Index_Buffer.Initialize_Id;
             Element_Array_Buffer.Bind (Index_Buffer);
             Load_Element_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
-
    
             --  Calculate normal
    
@@ -482,7 +454,14 @@ begin
          
          --  Rotate viewport
    
-         Maths.Init_Perspective_Transform (50.0, 720.0, 480.0, 0.1, 1000.0, Projection_Matrix);
+         declare
+            Width, Height : Glfw.Size;
+         begin
+            Glfw.Windows.Get_Size (Main_Window'Access, Width, Height);
+            
+            GL.Window.Set_Viewport (10, 10, GL.Types.Int (Width), GL.Types.Int (Height));
+            Maths.Init_Perspective_Transform (50.0, Single (Width), Single (Height), 0.1, 1000.0, Projection_Matrix);
+         end;
    
          --  Display FPS timing
    
