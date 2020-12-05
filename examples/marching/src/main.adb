@@ -61,6 +61,7 @@ procedure Main is
    --  Settings and constants
 
    Samples      : Integer := 64;
+   Interpolation_Steps : constant Positive := 128;
    Max_Lattice  : constant Integer := 10;
    Scale        : constant Float   := 1.3;
    Shape        : Volume;
@@ -154,8 +155,8 @@ procedure Main is
    V2_Vector         : Singles.Vector3;
    V3_Vector         : Singles.Vector3;
    --J                 : Integer;
-   Last_Triangle : Interfaces.C.int;
-   Last_Vertex : Interfaces.C.int;
+   Last_Triangle     : aliased Interfaces.C.int;
+   Last_Vertex       : aliased Interfaces.C.int;
    FPS               : Integer := 0;
    Running           : Boolean := True;
 
@@ -192,7 +193,75 @@ procedure Main is
    D_Last_Vertex : System.Address;
    D_Debug_Value : System.Address;
    
-   Debug_Value : Integer;
+   Debug_Value : aliased Interfaces.C.int;  
+   
+   Start : Point_Real := (-2.0, -2.0, -2.0);
+   Stop : Point_Real := (2.0, 2.0, 2.0);
+   
+   task type Compute is
+      entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
+      entry Exit_Loop;
+      entry Finished;
+   end Compute;
+   
+   task body Compute is
+      X1r, X2r, Y1r, Y2r, Z1r, Z2r : Integer;
+      Do_Exit : Boolean := False;
+   begin
+      loop
+         select
+            accept Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer) do
+               X1r := X1;
+               X2r := X2;
+               Y1r := Y1;
+               Y2r := Y2;
+               Z1r := Z1;
+               Z2r := Z2;
+            end;
+         or
+            accept Exit_Loop do
+               Do_Exit := True;
+            end;
+         end select;
+      
+         exit when Do_Exit;
+         
+         begin
+            for XI in X1r .. X2r loop
+               for YI in Y1r .. Y2r loop
+                  for ZI in Z1r .. Z2r loop
+                     Mesh
+                       (Balls               => Balls,
+                        Triangles           => Tris,
+                        Vertices            => Verts,
+                        Start               => Start,
+                        Stop                => Stop,
+                        Lattice_Size        => Lattice_Size,
+                        Last_Triangle       => Last_Triangle'Access,
+                        Last_Vertex         => Last_Vertex'Access,
+                        Interpolation_Steps => Interpolation_Steps,
+                        XI                  => XI, 
+                        YI                  => YI,
+                        ZI                  => ZI,
+                        Debug_Value         => Debug_Value'Access);
+                  end loop;
+               end loop;
+            end loop;
+         exception
+            when others =>
+               Put_Line ("ERROR IN TASK");
+         end;
+         
+         accept Finished;
+      end loop;
+   end Compute;
+   
+   Compute_Tasks : array (0 .. Samples - 1) of Compute;
+   
+   type Mode_Type is (Mode_CUDA, Mode_Tasking, Mode_Sequential);
+   
+   Mode : Mode_Type := Mode_CUDA;
+   
 begin   
    --  Initialize window
    
@@ -243,89 +312,122 @@ begin
    D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
    D_Debug_Value := Malloc (Interfaces.C.int'size / 8);   
    
-   while Running loop      
+   while Running loop            
       Lattice_Size := (Samples, Samples, Samples);
-
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => D_Balls,
-         Src   => Balls'Address,
-         Count => Balls'Size / 8,
-         Kind  => Memcpy_Host_To_Device);
-      
       Last_Triangle := Interfaces.C.int (Tris'First) - 1;
       Last_Vertex := Interfaces.C.int (Verts'First) - 1;
       
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => D_Last_Triangle,
-         Src   => Last_Triangle'Address,
-         Count => Last_Triangle'Size / 8,
-         Kind  => Memcpy_Host_To_Device);
+      if Mode = Mode_CUDA then
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => D_Balls,
+            Src   => Balls'Address,
+            Count => Balls'Size / 8,
+            Kind  => Memcpy_Host_To_Device);     
       
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => D_Last_Vertex,
-         Src   => Last_Vertex'Address,
-         Count => Last_Vertex'Size / 8,
-         Kind  => Memcpy_Host_To_Device);
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => D_Last_Triangle,
+            Src   => Last_Triangle'Address,
+            Count => Last_Triangle'Size / 8,
+            Kind  => Memcpy_Host_To_Device);
       
-      Debug_Value := 0;
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => D_Last_Vertex,
+            Src   => Last_Vertex'Address,
+            Count => Last_Vertex'Size / 8,
+            Kind  => Memcpy_Host_To_Device);
       
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => D_Debug_Value,
-         Src   => Debug_Value'Address,
-         Count => Debug_Value'Size / 8,
-         Kind  => Memcpy_Host_To_Device);      
+         Debug_Value := 0;
       
-      pragma CUDA_Execute
-        (Mesh_CUDA
-           (A_Balls             => D_Balls,
-            A_Triangles         => D_Triangles,
-            A_Vertices          => D_Vertices,
-            Start               => (-2.0, -2.0, -2.0),
-            Stop                => (2.0, 2.0, 2.0),
-            Lattice_Size        => Lattice_Size,
-            Last_Triangle       => D_Last_Triangle,
-            Last_Vertex         => D_Last_Vertex,
-            Interpolation_Steps => 32, 
-            Debug_Value         => D_Debug_Value),
-         Blocks_Per_Grid,
-         Threads_Per_Block
-        );
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => D_Debug_Value,
+            Src   => Debug_Value'Address,
+            Count => Debug_Value'Size / 8,
+            Kind  => Memcpy_Host_To_Device);      
       
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => Debug_Value'Address,
-         Src   => D_Debug_Value,
-         Count => Debug_Value'Size / 8,
-         Kind  => Memcpy_Device_To_Host);            
+         pragma CUDA_Execute
+           (Mesh_CUDA
+              (A_Balls             => D_Balls,
+               A_Triangles         => D_Triangles,
+               A_Vertices          => D_Vertices,
+               Start               => Start,
+               Stop                => Stop,
+               Lattice_Size        => Lattice_Size,
+               Last_Triangle       => D_Last_Triangle,
+               Last_Vertex         => D_Last_Vertex,
+               Interpolation_Steps => Interpolation_Steps, 
+               Debug_Value         => D_Debug_Value),
+            Blocks_Per_Grid,
+            Threads_Per_Block
+           );
       
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => Tris'Address,
-         Src   => D_Triangles,
-         Count => Tris'Size / 8,
-         Kind  => Memcpy_Device_To_Host);
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => Debug_Value'Address,
+            Src   => D_Debug_Value,
+            Count => Debug_Value'Size / 8,
+            Kind  => Memcpy_Device_To_Host);
+            
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => Last_Triangle'Address,
+            Src   => D_Last_Triangle,
+            Count => Last_Triangle'Size / 8,
+            Kind  => Memcpy_Device_To_Host);
+      
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => Last_Vertex'Address,
+            Src   => D_Last_Vertex,
+            Count => Last_Vertex'Size / 8,
+            Kind  => Memcpy_Device_To_Host);               
+      
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => Tris'Address,
+            Src   => D_Triangles,
+            Count => Interfaces.c.unsigned_long ((Last_Triangle + 1) * Tris (1)'Size / 8),
+            Kind  => Memcpy_Device_To_Host);
 
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => Verts'Address,
-         Src   => D_Vertices,
-         Count => Verts'Size / 8,
-         Kind  => Memcpy_Device_To_Host);
-      
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => Last_Triangle'Address,
-         Src   => D_Last_Triangle,
-         Count => Last_Triangle'Size / 8,
-         Kind  => Memcpy_Device_To_Host);
-      
-      Cuda.Runtime_Api.Memcpy
-        (Dst   => Last_Vertex'Address,
-         Src   => D_Last_Vertex,
-         Count => Last_Vertex'Size / 8,
-         Kind  => Memcpy_Device_To_Host);          
+         Cuda.Runtime_Api.Memcpy
+           (Dst   => Verts'Address,
+            Src   => D_Vertices,
+            Count => Interfaces.c.unsigned_long ((Last_Vertex + 1) * Verts (1)'Size / 8),
+            Kind  => Memcpy_Device_To_Host);     
+      elsif Mode = Mode_Sequential then
+         for XI in 0 .. Samples - 1 loop
+            for YI in 0 .. Samples - 1 loop
+               for ZI in 0 .. Samples - 1 loop
+                  Mesh
+                    (Balls               => Balls,
+                     Triangles           => Tris,
+                     Vertices            => Verts,
+                     Start               => Start,
+                     Stop                => Stop,
+                     Lattice_Size        => Lattice_Size,
+                     Last_Triangle       => Last_Triangle'Access,
+                     Last_Vertex         => Last_Vertex'Access,
+                     Interpolation_Steps => Interpolation_Steps,
+                     XI                  => XI, 
+                     YI                  => YI,
+                     ZI                  => ZI,
+                     Debug_Value         => Debug_Value'Access);
+               end loop;
+            end loop;
+         end loop;
+      elsif Mode = Mode_Tasking then         
+         for XI in 0 .. Samples - 1 loop
+            Compute_Tasks (XI).Set_And_Go 
+              (XI, XI, 
+               0, Samples - 1,
+               0, Samples - 1);
+         end loop;         
+         
+         for XI in 0 .. Samples - 1 loop
+            Compute_Tasks (XI).Finished;
+         end loop;    
+      end if;
       
       Edge_Lattice.all := (others => (others => (others => (others => -1))));
-   
+      
       for V of Verts (Verts'First .. Integer (Last_Vertex)) loop
          Create_Vertex (V.Index, V.Point);
-      end loop;
+      end loop;      
    
       for T of Tris (Tris'First .. Integer (Last_Triangle)) loop
          Create_Face (Shape,
@@ -334,8 +436,8 @@ begin
                       Get_Vertex_Index (T.i3)));
       end loop;
    
-      --  Build result data
-   
+      --  Build result data        
+      
       declare
          Vert        : Point_Real;
          Tri         : Volume_Indicies;
@@ -343,8 +445,7 @@ begin
          Shape_Verts : Point_Real_Array (First_Vertex_Index (Shape) .. Last_Vertex_Index (Shape));
    
          It : Integer := 0;
-      begin
-   
+      begin   
          for I in Shape_Verts'Range loop
             Vert := Get_Vertex (Shape, I);
             Shape_Verts (I) := (Vert.X * Scale, Vert.Y * Scale, Vert.Z * Scale);
@@ -497,6 +598,17 @@ begin
    Vertex_Buffer.Delete_Id;
    Render_Program.Delete_Id;
    Glfw.Shutdown;
+   
+   for XI in 0 .. Samples - 1 loop
+      Compute_Tasks (XI).Exit_Loop;
+   end loop;  
+exception
+   when others =>
+      for XI in 0 .. Samples - 1 loop
+         Compute_Tasks (XI).Exit_Loop;
+      end loop;  
+      
+      raise;
 end Main;
 
 

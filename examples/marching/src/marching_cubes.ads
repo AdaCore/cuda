@@ -49,8 +49,8 @@ package Marching_Cubes is
 
    procedure Mesh
      (Balls               : Point_Real_Array;
-      Triangles           : out Triangle_Array;
-      Vertices            : out Vertex_Array;
+      Triangles           : in out Triangle_Array;
+      Vertices            : in out Vertex_Array;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
