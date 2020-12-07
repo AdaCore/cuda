@@ -13,7 +13,7 @@
 ------------------------------------------------------------------------------
 
 with Volumes; use Volumes;
-with Marching_Cubes; use Marching_Cubes;
+with Geometry; use Geometry;
 
 package Shape_Management is
 

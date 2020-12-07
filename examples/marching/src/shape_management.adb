@@ -13,8 +13,6 @@
 ------------------------------------------------------------------------------
 
 with Interfaces; use Interfaces;
-
-with Geometry; use Geometry;
 with Data; use Data;
 
 package body Shape_Management is
@@ -26,9 +24,8 @@ package body Shape_Management is
    -------------------
 
    procedure Index_To_XYZE (I : Integer; X, Y, Z, E : out Integer) is
-      xSize : Integer := Samples + 1;
-      ySize : Integer := Samples + 1;
-      zSize : Integer := Samples + 1;
+      ySize : constant Integer := Samples + 1;
+      zSize : constant Integer := Samples + 1;
    begin
       e := i mod 3;
       z := ((i - e) / 3) mod ySize;
@@ -46,7 +43,7 @@ package body Shape_Management is
       Index_To_XYZE (Integer (i), xi, yi, zi, e);
 
 
-      return R : Volume_Index := Edge_Lattice (xi, yi, zi, e) do
+      return R : constant Volume_Index := Edge_Lattice (xi, yi, zi, e) do
          if R = -1 then
             raise Program_Error;
          end if;
@@ -85,6 +82,8 @@ package body Shape_Management is
                        Get_Vertex_Index (T.i2),
                        Get_Vertex_Index (T.i3)));
       end loop;
+
+      Compute_Normals (Shape);
    end Create_Volume;
 
 end Shape_Management;

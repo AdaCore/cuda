@@ -74,8 +74,6 @@ is
       Last_Vertex         : System.Address;
       Interpolation_Steps : Positive := 4;
       Debug_Value         : System.Address)
-     with SPARK_Mode => Off
-   --, CUDA_Global
-   ;
+     with SPARK_Mode => Off, CUDA_Global;
 
 end Marching_Cubes;

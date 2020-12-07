@@ -28,7 +28,7 @@ with Glfw;                     use Glfw;
 with Glfw.Input;               use Glfw.Input;
 with Glfw.Input.Keys;          use Glfw.Input.Keys;
 with Glfw.Windows.Context;     use Glfw.Windows.Context;
-with GL.Types.Colors;          use GL.Types.Singles;
+   use GL.Types.Singles;
 with GL.Toggles;               use GL.Toggles;
 with GL.Fixed.Lighting;        use GL.Fixed.Lighting;
 with GL.Uniforms;
@@ -54,19 +54,13 @@ package body UI is
    Render_Program      : GL.Objects.Programs.Program;
    Vertex_Array        : GL.Objects.Vertex_Arrays.Vertex_Array_Object;
    Vertex_Buffer       : GL.Objects.Buffers.Buffer;
+   Normal_Buffer       : GL.Objects.Buffers.Buffer;
    Index_Buffer        : GL.Objects.Buffers.Buffer;
    Main_Light          : Light_Object := GL.Fixed.Lighting.Light (0);
 
    Model_View_Matrix : Singles.Matrix4;
    Temp              : Singles.Vector4;
    Temp2             : Singles.Vector3;
-   --Normal_Vector     : Singles.Vector3;
-   A_Vector          : Singles.Vector3;
-   B_Vector          : Singles.Vector3;
-   V1_Vector         : Singles.Vector3;
-   V2_Vector         : Singles.Vector3;
-   V3_Vector         : Singles.Vector3;
-   --J                 : Integer;
 
    Scale        : constant Float   := 1.3;
 
@@ -78,6 +72,10 @@ package body UI is
    procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer (Point_Real_Pointers);
 
+   ----------------
+   -- Initialize --
+   ----------------
+
    procedure Initialize is
    begin
       --  Initialize window
@@ -87,6 +85,8 @@ package body UI is
       GL.Window.Set_Viewport (10, 10, 720, 480);
       GL.Toggles.Enable (GL.Toggles.Cull_Face);
       GL.Toggles.Enable (GL.Toggles.Depth_Test);
+      GL.Toggles.Enable (GL.Toggles.Lighting);
+      GL.Toggles.Enable (GL.Toggles.Ligh0);
 
       --  Load shaders
 
@@ -106,15 +106,19 @@ package body UI is
       Lighting_Shininess  := GL.Objects.Programs.Uniform_Location (Render_Program, "shininess");
       Lighting_Direction  := GL.Objects.Programs.Uniform_Location (Render_Program, "l_dir");
       Temp := (0.8, 0.8,  0.8, 1.0);
-      --GL.Uniforms.Set_Single (Lighting_Diffuse,   Temp);
+      GL.Uniforms.Set_Single (Lighting_Diffuse,   Temp);
       Temp := (0.2, 0.2,  0.2, 1.0);
-      --GL.Uniforms.Set_Single (Lighting_Ambient,   Temp);
+      GL.Uniforms.Set_Single (Lighting_Ambient,   Temp);
       Temp := (0.5, 0.5,  0.5, 1.0);
-      --GL.Uniforms.Set_Single (Lighting_Specular,  Temp);
-      --GL.Uniforms.Set_Single (Lighting_Shininess, 0.2);
+      GL.Uniforms.Set_Single (Lighting_Specular,  Temp);
+      GL.Uniforms.Set_Single (Lighting_Shininess, 0.2);
       Temp2 := (1.0, 1.0, 0.0);
-      --GL.Uniforms.Set_Single (Lighting_Direction, Temp2);
+      GL.Uniforms.Set_Single (Lighting_Direction, Temp2);
    end Initialize;
+
+   --------------
+   -- Finalize --
+   --------------
 
    procedure Finalize is
    begin
@@ -126,17 +130,25 @@ package body UI is
       Glfw.Shutdown;
    end Finalize;
 
+   ----------
+   -- Draw --
+   ----------
+
    procedure Draw (Shape : Volume; Running : out Boolean) is
-      Vert        : Point_Real;
+      Vert, Norm  : Point_Real;
       Tri         : Volume_Indicies;
       Shape_Tris  : Unsigned32_Array (0 .. (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3);
       Shape_Verts : Point_Real_Array (First_Vertex_Index (Shape) .. Last_Vertex_Index (Shape));
+      Shape_Norms : Point_Real_Array (First_Vertex_Index (Shape) .. Last_Vertex_Index (Shape));
 
       It : Integer := 0;
    begin
       for I in Shape_Verts'Range loop
          Vert := Get_Vertex (Shape, I);
+         Norm := Get_Normal (Shape, I);
          Shape_Verts (I) := (Vert.X * Scale, Vert.Y * Scale, Vert.Z * Scale);
+                  Vert := Get_Vertex (Shape, I);
+         Shape_Norms (I) := (Norm.X, Norm.Y, Norm.Z);
       end loop;
 
       for I in First_Face_Index (Shape) .. Last_Face_Index (Shape) loop
@@ -165,6 +177,16 @@ package body UI is
          Vertex_Buffer.Initialize_Id;
          Array_Buffer.Bind (Vertex_Buffer);
          Load_Element_Buffer (Array_Buffer, Shape_Verts, Static_Draw);
+         GL.Attributes.Enable_Vertex_Attrib_Array (0);
+         GL.Attributes.Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 0, 0);
+
+         --  Update normals
+
+         Normal_Buffer.Initialize_Id;
+         Array_Buffer.Bind (Normal_Buffer);
+         Load_Element_Buffer (Array_Buffer, Shape_Norms, Static_Draw);
+         GL.Attributes.Enable_Vertex_Attrib_Array (2);
+         GL.Attributes.Set_Vertex_Attrib_Pointer (2, 3, Single_Type, 0, 0);
 
          --  Update indicies
 
@@ -172,45 +194,15 @@ package body UI is
          Element_Array_Buffer.Bind (Index_Buffer);
          Load_Element_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
 
-         --  Calculate normal
-
-         --J := Shape_Verts'First + 1;;
-         --for I in Shape_Verts'Range loop
-         --   if j = Shape_Verts'Last then
-         --      j := Shape_Verts'First;
-         --   end if;
-         --   Normal_Vector (X) := Normal_Vector (X) +
-         --                         (((Shape_Verts [faceVertexIndx[i]].z) + (Shape_Verts [faceVertexIndx[j]].z)) *
-         --                          ((Shape_Verts [faceVertexIndx[j]].y) - (Shape_Verts [faceVertexIndx[i]].y)));
-         --   Normal_Vector (Y) := Normal_Vector (Y) +
-         --                         (((Shape_Verts [faceVertexIndx[i]].x) + (Shape_Verts [faceVertexIndx[j]].x)) *
-         --                          ((Shape_Verts [faceVertexIndx[j]].z) - (Shape_Verts [faceVertexIndx[i]].z)));
-         --   Normal_Vector (Z) := Normal_Vector (Z) +
-         --                         (((Shape_Verts [faceVertexIndx[i]].y) + (Shape_Verts [faceVertexIndx[j]].y)) *
-         --                          ((Shape_Verts [faceVertexIndx[j]].x) - (Shape_Verts [faceVertexIndx[i]].x)));
-         --   J := J + 1;
-         --end loop;
-
-         V1_Vector := (Single (Shape_Verts (Shape_Verts'First).X),
-                       Single (Shape_Verts (Shape_Verts'First).Y),
-                       Single (Shape_Verts (Shape_Verts'First).Z));
-         V2_Vector := (Single (Shape_Verts (Shape_Verts'First + 1).X),
-                       Single (Shape_Verts (Shape_Verts'First + 1).Y),
-                       Single (Shape_Verts (Shape_Verts'First + 1).Z));
-         V3_Vector := (Single (Shape_Verts (Shape_Verts'First + 2).X),
-                       Single (Shape_Verts (Shape_Verts'First + 2).Y),
-                       Single (Shape_Verts (Shape_Verts'First + 2).Z));
-         A_Vector  := V1_Vector - V2_Vector;
-         B_Vector  := V1_Vector - V3_Vector;
-         --GL.Uniforms.Set_Single (Normal_Location, GL.Types.Singles.Cross_Product (A_Vector, B_Vector));
-
          --  Render
 
-         GL.Attributes.Enable_Vertex_Attrib_Array (0);
-         GL.Attributes.Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 0, 0);
          GL.Objects.Buffers.Draw_Elements
-           (Triangles, GL.Types.Int (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3, UInt_Type);
+           (Triangles,
+            GL.Types.Int (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3,
+            UInt_Type);
+
          GL.Attributes.Disable_Vertex_Attrib_Array (0);
+         GL.Attributes.Disable_Vertex_Attrib_Array (2);
       end if;
 
       --  Rotate viewport

@@ -44,6 +44,9 @@ package Volumes is
    function Last_Vertex_Index      (Shape : Volume) return Volume_Index;
    function Missing_Opposite_Count (Shape : Volume) return Integer;
 
+   procedure Compute_Normals (Shape : in out Volume);
+   function Get_Normal (Shape : Volume; Index : Volume_Index) return Point_Real;
+
 private
 
    type Halfedge is record
@@ -55,7 +58,8 @@ private
    end record;
 
    type Vertex is record
-      Point    : Point_Real   := (others => <>);
+      Point    : Point_Real;
+      Normal   : Point_Real;
       Halfedge : Volume_Index := -1; -- One of the halfedges thats connected
    end record;
 
