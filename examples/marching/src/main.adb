@@ -20,27 +20,6 @@ use Ada.Numerics.Elementary_Functions;
 with Interfaces.C;             use Interfaces.C;
 with Interfaces;               use Interfaces;
 
-with GL.Window;                use GL.Window;
-with GL.API;                   use GL.API;
-with GL.Attributes;            use GL.Attributes;
-with GL.Buffers;               use GL.Buffers;
-with GL.Objects.Buffers;       use GL.Objects.Buffers;
-with GL.Objects.Programs;      use GL.Objects.Programs;
-with GL.Objects.Shaders;       use GL.Objects.Shaders;
-with GL.Objects.Vertex_Arrays; use GL.Objects.Vertex_Arrays;
-with GL.Types;                 use GL.Types;
-with GL.Types.Colors;          use GL.Types.Colors;
-with Glfw;                     use Glfw;
-with Glfw.Input;               use Glfw.Input;
-with Glfw.Input.Keys;          use Glfw.Input.Keys;
-with Glfw.Windows.Context;     use Glfw.Windows.Context;
-with GL.Types;                 use GL.Types;
-with GL.Types.Colors;          use GL.Types.Singles;
-with GL.Toggles;               use GL.Toggles;
-with GL.Fixed.Lighting;        use GL.Fixed.Lighting;
-with GL.Uniforms;
-with GL.Rasterization;
-
 with CUDA.Runtime_Api; use CUDA.Runtime_Api;
 with Interfaces.C.Pointers;
 
@@ -56,6 +35,8 @@ with System; use System;
 with CUDA.Driver_Types; use CUDA.Driver_Types;
 with CUDA.Vector_Types; use CUDA.Vector_Types;
 
+with UI; use UI;
+
 procedure Main is        
 
    --  Settings and constants
@@ -63,9 +44,15 @@ procedure Main is
    Samples      : Integer := 64;
    Interpolation_Steps : constant Positive := 128;
    Max_Lattice  : constant Integer := 10;
-   Scale        : constant Float   := 1.3;
    Shape        : Volume;
    Lattice_Size : Point_Int;
+      
+   Last_Triangle     : aliased Interfaces.C.int;
+   Last_Vertex       : aliased Interfaces.C.int;
+   
+   Last_Time         : Ada.Calendar.Time;
+   
+   FPS               : Integer := 0;
 
    type Vertex_Index_Arr is array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of Volume_Index;
    type Vertex_Index_Arr_Ptr is access Vertex_Index_Arr;
@@ -126,38 +113,7 @@ procedure Main is
       (0.0, 0.0, 0.005), 
       (0.001, 0.002, 0.0), 
       (0.002, 0.0, 0.01));
-
-   Main_Window         : aliased Glfw.Windows.Window;
-   Projection_Matrix   : GL.Types.Singles.Matrix4 := (others => (others => <>));
-   Projection_Location : GL.Uniforms.Uniform;
-   Model_View_Location : GL.Uniforms.Uniform;
-   Normal_Location     : GL.Uniforms.Uniform;
-   Lighting_Diffuse    : GL.Uniforms.Uniform;
-   Lighting_Ambient    : GL.Uniforms.Uniform;
-   Lighting_Specular   : GL.Uniforms.Uniform;
-   Lighting_Shininess  : GL.Uniforms.Uniform;
-   Lighting_Direction  : GL.Uniforms.Uniform;
-   Render_Program      : GL.Objects.Programs.Program;
-   Vertex_Array        : GL.Objects.Vertex_Arrays.Vertex_Array_Object;
-   Vertex_Buffer       : GL.Objects.Buffers.Buffer;
-   Index_Buffer        : GL.Objects.Buffers.Buffer;
-   Main_Light          : Light_Object := GL.Fixed.Lighting.Light (0);
-
-   Last_Time         : Ada.Calendar.Time;
-   Last_Clear_Time   : Ada.Calendar.Time;
-   Model_View_Matrix : Singles.Matrix4;
-   Temp              : Singles.Vector4;
-   Temp2             : Singles.Vector3;
-   --Normal_Vector     : Singles.Vector3;
-   A_Vector          : Singles.Vector3;
-   B_Vector          : Singles.Vector3;
-   V1_Vector         : Singles.Vector3;
-   V2_Vector         : Singles.Vector3;
-   V3_Vector         : Singles.Vector3;
-   --J                 : Integer;
-   Last_Triangle     : aliased Interfaces.C.int;
-   Last_Vertex       : aliased Interfaces.C.int;
-   FPS               : Integer := 0;
+   
    Running           : Boolean := True;
 
 --  Start of processing for Main
@@ -170,24 +126,6 @@ procedure Main is
      (unsigned (Samples) / Threads_Per_Block.X, 
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);  
-   
-   package Triangle_Pointers is new Interfaces.C.Pointers
-     (Integer, Triangle, Triangle_Array, (others => <>));
-
-   package Unsigned32_Pointers is new Interfaces.C.Pointers
-     (Integer, Unsigned_32, Unsigned32_Array, 0);
-   
-   package Vertex_Pointers is new Interfaces.C.Pointers
-     (Integer, Vertex, Marching_Cubes.Vertex_Array, (others => <>));
-   
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Triangle_Pointers);
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Vertex_Pointers);
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Point_Real_Pointers);
 
    D_Last_Triangle : System.Address;
    D_Last_Vertex : System.Address;
@@ -262,48 +200,12 @@ procedure Main is
    
    Mode : Mode_Type := Mode_CUDA;
    
-begin   
-   --  Initialize window
-   
-   Glfw.Init;
-   Main_Window.Init (720, 480, "Marching Cubes");
-   GL.Window.Set_Viewport (10, 10, 720, 480);
-   --GL.Rasterization.Set_Polygon_Mode (GL.Rasterization.Line); -- Render in wireframe
-   GL.Toggles.Enable (GL.Toggles.Cull_Face);
-   GL.Toggles.Enable (GL.Toggles.Depth_Test);
-   
-   --  Load shaders
-   
-   Put_Line (Current_Directory);
-   Render_Program := Program_From
-                       ((Src ("src/shaders/vert.glsl", Vertex_Shader),
-                         Src ("src/shaders/frag.glsl", Fragment_Shader)));
-   GL.Objects.Programs.Use_Program (Render_Program);
-   Model_View_Location := GL.Objects.Programs.Uniform_Location (Render_Program, "m_viewModel");
-   Projection_Location := GL.Objects.Programs.Uniform_Location (Render_Program, "m_pvm");
-   Normal_Location     := GL.Objects.Programs.Uniform_Location (Render_Program, "m_normal");
-   
-   --  Lighting
-   
-   Lighting_Diffuse    := GL.Objects.Programs.Uniform_Location (Render_Program, "diffuse");
-   Lighting_Ambient    := GL.Objects.Programs.Uniform_Location (Render_Program, "ambient");
-   Lighting_Specular   := GL.Objects.Programs.Uniform_Location (Render_Program, "specular");
-   Lighting_Shininess  := GL.Objects.Programs.Uniform_Location (Render_Program, "shininess");
-   Lighting_Direction  := GL.Objects.Programs.Uniform_Location (Render_Program, "l_dir");
-   Temp := (0.8, 0.8,  0.8, 1.0);
-   --GL.Uniforms.Set_Single (Lighting_Diffuse,   Temp);
-   Temp := (0.2, 0.2,  0.2, 1.0);
-   --GL.Uniforms.Set_Single (Lighting_Ambient,   Temp);
-   Temp := (0.5, 0.5,  0.5, 1.0);
-   --GL.Uniforms.Set_Single (Lighting_Specular,  Temp);
-   --GL.Uniforms.Set_Single (Lighting_Shininess, 0.2);
-   Temp2 := (1.0, 1.0, 0.0);
-   --GL.Uniforms.Set_Single (Lighting_Direction, Temp2);
+begin      
+   UI.Initialize;
    
    --  Main loop
    
    Last_Time       := Clock;
-   Last_Clear_Time := Clock;
    
    D_Balls := Malloc (Balls'Size / 8);
    D_Triangles := Malloc (Tris'Size / 8);
@@ -438,166 +340,51 @@ begin
    
       --  Build result data        
       
-      declare
-         Vert        : Point_Real;
-         Tri         : Volume_Indicies;
-         Shape_Tris  : Unsigned32_Array (0 .. (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3);
-         Shape_Verts : Point_Real_Array (First_Vertex_Index (Shape) .. Last_Vertex_Index (Shape));
+      UI.Draw (Shape, Running);      
+      
+      --  Move the balls
    
-         It : Integer := 0;
-      begin   
-         for I in Shape_Verts'Range loop
-            Vert := Get_Vertex (Shape, I);
-            Shape_Verts (I) := (Vert.X * Scale, Vert.Y * Scale, Vert.Z * Scale);
-         end loop;
-   
-         for I in First_Face_Index (Shape) .. Last_Face_Index (Shape) loop
-            Tri := Get_Vertices (Shape, I);
-            Shape_Tris (It) := Unsigned_32 (Tri (1));
-            Shape_Tris (It + 1) := Unsigned_32 (Tri (2));
-            Shape_Tris (It + 2) := Unsigned_32 (Tri (3));
-   
-            It := It + 3;
-         end loop;
-   
-         --  Move the balls
-   
-         for I in Balls'Range loop
-            declare
-               New_Position : Point_Real := Balls (I);
-            begin
+      for I in Balls'Range loop
+         declare
+            New_Position : Point_Real := Balls (I);
+         begin
+            New_Position.X := Balls (I).X + Speeds (I).X;
+            New_Position.Y := Balls (I).Y + Speeds (I).Y;
+            New_Position.Z := Balls (I).Z + Speeds (I).Z;
+               
+            if Sqrt 
+              (New_Position.X * New_Position.X + 
+                 New_Position.Y * New_Position.Y +
+                   New_Position.Z * New_Position.Z) > 1.0 
+            then
+               Speeds (I).X := -@;
+               Speeds (I).Y := -@;
+               Speeds (I).Z := -@;
+                  
                New_Position.X := Balls (I).X + Speeds (I).X;
                New_Position.Y := Balls (I).Y + Speeds (I).Y;
                New_Position.Z := Balls (I).Z + Speeds (I).Z;
+            end if;
                
-               if Sqrt 
-                 (New_Position.X * New_Position.X + 
-                  New_Position.Y * New_Position.Y +
-                  New_Position.Z * New_Position.Z) > 1.0 
-               then
-                  Speeds (I).X := -@;
-                  Speeds (I).Y := -@;
-                  Speeds (I).Z := -@;
-                  
-                  New_Position.X := Balls (I).X + Speeds (I).X;
-                  New_Position.Y := Balls (I).Y + Speeds (I).Y;
-                  New_Position.Z := Balls (I).Z + Speeds (I).Z;
-               end if;
-               
-               Balls (I) := New_Position;
-            end;
-         end loop;                  
-   
-         --  Rotate the camera
-   
-         Model_View_Matrix := Maths.Translation_Matrix ((0.0, 0.0, -6.0));
-   
-         --  Set shader and clear to blue and the MVP
-   
-         Utilities.Clear_Background_Colour ((0.0, 0.0, 0.0, 1.0));
-         GL.Buffers.Clear ((Depth => True, Color => True, others => False));
-         GL.Uniforms.Set_Single (Model_View_Location, Model_View_Matrix);
-         GL.Uniforms.Set_Single (Projection_Location, Projection_Matrix);
-   
-         if Shape_Verts'Length > 0 and then Shape_Tris'Length > 0 then
-            --  Update verticies
-            
-            Vertex_Buffer.Initialize_Id;
-            Array_Buffer.Bind (Vertex_Buffer);
-            Load_Element_Buffer (Array_Buffer, Shape_Verts, Static_Draw);
-  
-            --  Update indicies         
-         
-            Index_Buffer.Initialize_Id;
-            Element_Array_Buffer.Bind (Index_Buffer);
-            Load_Element_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
-   
-            --  Calculate normal
-   
-            --J := Shape_Verts'First + 1;;
-            --for I in Shape_Verts'Range loop
-            --   if j = Shape_Verts'Last then
-            --      j := Shape_Verts'First;
-            --   end if;
-            --   Normal_Vector (X) := Normal_Vector (X) +
-            --                         (((Shape_Verts [faceVertexIndx[i]].z) + (Shape_Verts [faceVertexIndx[j]].z)) *
-            --                          ((Shape_Verts [faceVertexIndx[j]].y) - (Shape_Verts [faceVertexIndx[i]].y)));
-            --   Normal_Vector (Y) := Normal_Vector (Y) +
-            --                         (((Shape_Verts [faceVertexIndx[i]].x) + (Shape_Verts [faceVertexIndx[j]].x)) *
-            --                          ((Shape_Verts [faceVertexIndx[j]].z) - (Shape_Verts [faceVertexIndx[i]].z)));
-            --   Normal_Vector (Z) := Normal_Vector (Z) +
-            --                         (((Shape_Verts [faceVertexIndx[i]].y) + (Shape_Verts [faceVertexIndx[j]].y)) *
-            --                          ((Shape_Verts [faceVertexIndx[j]].x) - (Shape_Verts [faceVertexIndx[i]].x)));
-            --   J := J + 1;
-            --end loop;
-   
-            V1_Vector := (Single (Shape_Verts (Shape_Verts'First).X),
-                          Single (Shape_Verts (Shape_Verts'First).Y),
-                          Single (Shape_Verts (Shape_Verts'First).Z));
-            V2_Vector := (Single (Shape_Verts (Shape_Verts'First + 1).X),
-                          Single (Shape_Verts (Shape_Verts'First + 1).Y),
-                          Single (Shape_Verts (Shape_Verts'First + 1).Z));
-            V3_Vector := (Single (Shape_Verts (Shape_Verts'First + 2).X),
-                          Single (Shape_Verts (Shape_Verts'First + 2).Y),
-                          Single (Shape_Verts (Shape_Verts'First + 2).Z));
-            A_Vector  := V1_Vector - V2_Vector;
-            B_Vector  := V1_Vector - V3_Vector;
-            --GL.Uniforms.Set_Single (Normal_Location, GL.Types.Singles.Cross_Product (A_Vector, B_Vector));
-         
-            --  Render
-   
-            GL.Attributes.Enable_Vertex_Attrib_Array (0);
-            GL.Attributes.Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 0, 0);
-            GL.Objects.Buffers.Draw_Elements
-              (Triangles, GL.Types.Int (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3, UInt_Type);
-            GL.Attributes.Disable_Vertex_Attrib_Array (0);
-         end if;
-         
-         --  Rotate viewport
-   
-         declare
-            Width, Height : Glfw.Size;
-         begin
-            Glfw.Windows.Get_Size (Main_Window'Access, Width, Height);
-            
-            GL.Window.Set_Viewport (10, 10, GL.Types.Int (Width), GL.Types.Int (Height));
-            Maths.Init_Perspective_Transform (50.0, Single (Width), Single (Height), 0.1, 1000.0, Projection_Matrix);
+            Balls (I) := New_Position;
          end;
+      end loop;                  
+                     
+      --  Display FPS timing
    
-         --  Display FPS timing
-   
-         FPS := @ + 1;
-         if Clock - Last_Time >= 1.0 then
-            Put_Line (FPS'Image & " FPS");
-            FPS       := 0;
-            Last_Time := Clock;
-            Last_Clear_Time := Clock;
-         end if;
-   
-         --  Clear the buffer
-   
-         if Clock - Last_Clear_Time >= 0.6 then
-            Last_Clear_Time := Clock;
-         end if;
-   
-         Clear (Shape);
-      end;
-   
-      --  Update window
-   
-      Glfw.Windows.Context.Swap_Buffers (Main_Window'Access);
-      Glfw.Input.Poll_Events;
-      Running := not (Main_Window.Should_Close
-                       or Main_Window.Key_State (Escape) = Pressed);
+      FPS := @ + 1;
+      if Clock - Last_Time >= 1.0 then
+         Put_Line (FPS'Image & " FPS");
+         FPS       := 0;
+         Last_Time := Clock;
+      end if;
+             
+      Clear (Shape);
    end loop;
    
    --  Finalize
    
-   Index_Buffer.Delete_Id;
-   Vertex_Array.Delete_Id;
-   Vertex_Buffer.Delete_Id;
-   Render_Program.Delete_Id;
-   Glfw.Shutdown;
+   UI.Finalize;
    
    for XI in 0 .. Samples - 1 loop
       Compute_Tasks (XI).Exit_Loop;
