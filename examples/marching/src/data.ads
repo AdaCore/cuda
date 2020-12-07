@@ -12,7 +12,6 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Marching_Cubes; use Marching_Cubes;
 with Geometry; use Geometry;
 
 package Data is
@@ -33,9 +32,9 @@ package Data is
       (0.001, 0.002, 0.0),
       (0.002, 0.0, 0.01));
 
-   Start   : Point_Real := (-2.0, -2.0, -2.0);
-   Stop    : Point_Real := (2.0, 2.0, 2.0);
-   Samples : Integer := 64;
+   Start   : constant Point_Real := (-2.0, -2.0, -2.0);
+   Stop    : constant Point_Real := (2.0, 2.0, 2.0);
+   Samples : constant Integer := 64;
    --  Number of division for each dimensison of the space described above.
 
 

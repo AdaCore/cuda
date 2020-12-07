@@ -17,7 +17,9 @@ with Marching_Cubes.Data; use Marching_Cubes.Data;
 with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
 with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
 
-package body Marching_Cubes is
+package body Marching_Cubes
+with SPARK_Mode => On
+is
 
    ----------
    -- Mesh --
@@ -30,20 +32,21 @@ package body Marching_Cubes is
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : access Interfaces.C.Int;
-      Last_Vertex         : access Interfaces.C.Int;
+      Last_Triangle       : not null access Interfaces.C.Int;
+      Last_Vertex         : not null access Interfaces.C.Int;
       Interpolation_Steps : Positive := 4;
       XI, YI, ZI          : Integer;
-      Debug_Value         : access Interfaces.C.int)
+      Debug_Value         : not null access Interfaces.C.int)
+     with SPARK_Mode => On
    is
       --  Local variables
 
-      V0                  : Point_Real := (others => <>);
-      E0, E1, E2          : Integer    := 0;
-      Triangle_Index      : Integer    := 0;
-      Vertex_Index        : Integer    := 0;
-      Index               : Integer    := 0;
-      Record_All_Vertices : Boolean    := False;
+      V0                  : Point_Real;
+      E0, E1, E2          : Integer;
+      Triangle_Index      : Integer;
+      Vertex_Index        : Integer;
+      Index               : Integer;
+      Record_All_Vertices : Boolean;
 
       Step : constant Point_Real :=
         (X => (Stop.X - Start.X) / Float (Lattice_Size.X),
@@ -142,8 +145,8 @@ package body Marching_Cubes is
 
       procedure Record_Edge (E : Integer; TI : Unsigned_32) is
          Factor      : Float      := 0.5;
-         Intr_Step   : Float      := 0.0;
-         Dir, P1, P2 : Point_Real := (others => <>);
+         Intr_Step   : Float;
+         Dir, P1, P2 : Point_Real;
       begin
          if Record_All_Vertices
            or else V1 (E) = (0, 0, 0)
@@ -206,7 +209,6 @@ package body Marching_Cubes is
       for I in 0 .. Case_To_Numpolys (Index) - 1 loop
          Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1)) + 1;
 
-
          E0 := Triangle_Table (Index * 15 + I * 3);
          E1 := Triangle_Table (Index * 15 + I * 3 + 1);
          E2 := Triangle_Table (Index * 15 + I * 3 + 2);
@@ -242,6 +244,7 @@ package body Marching_Cubes is
       Last_Vertex         : System.Address;
       Interpolation_Steps : Positive := 4;
       Debug_Value         : System.Address)
+     with SPARK_Mode => Off
    is
       --  TODO: This is a temporary hack as we know where the parameters are
       --  coming from. Next step would be to pass fat pointers instead.

@@ -50,4 +50,25 @@ package Geometry is
       X, Y, Z : Integer := 0;
    end record;
 
+   --------------
+   -- Triangle --
+   --------------
+
+   type Triangle is record
+      I1, I2, I3 : Unsigned_32 := 0;
+   end record with Convention => C;
+
+   type Triangle_Array is array (Integer range <>) of aliased Triangle;
+
+   ------------
+   -- Vertex --
+   ------------
+
+   type Vertex is record
+      Point : Point_Real := (others => 0.0);
+      Index : Integer    := 0;
+   end record with Convention => C;
+
+   type Vertex_Array is array (Integer range <>) of aliased Vertex;
+
 end Geometry;
