@@ -86,7 +86,7 @@ package body UI is
       GL.Toggles.Enable (GL.Toggles.Cull_Face);
       GL.Toggles.Enable (GL.Toggles.Depth_Test);
       GL.Toggles.Enable (GL.Toggles.Lighting);
-      GL.Toggles.Enable (GL.Toggles.Ligh0);
+      GL.Toggles.Enable (GL.Toggles.Light0);
 
       --  Load shaders
 
