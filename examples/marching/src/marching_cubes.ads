@@ -64,6 +64,9 @@ package Marching_Cubes is
      (A_Balls             : System.Address;
       A_Triangles         : System.Address;
       A_Vertices          : System.Address;
+      Ball_Size           : Integer;
+      Triangles_Size      : Integer;
+      Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;

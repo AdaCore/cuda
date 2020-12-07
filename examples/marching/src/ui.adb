@@ -1,12 +1,22 @@
-with Ada.Text_IO;             use Ada.Text_IO;
-with Ada.Directories;         use Ada.Directories;
+------------------------------------------------------------------------------
+--                    Copyright (C) 2017-2020, AdaCore                      --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.  You should have  received  a copy of the GNU --
+-- General  Public  License  distributed  with  this  software;   see  file --
+-- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
+-- of the license.                                                          --
+------------------------------------------------------------------------------
 
 with Interfaces;               use Interfaces;
 with Interfaces.C;             use Interfaces.C;
 with Interfaces.C.Pointers;
 
 with GL.Window;                use GL.Window;
-with GL.API;                   use GL.API;
 with GL.Attributes;            use GL.Attributes;
 with GL.Buffers;               use GL.Buffers;
 with GL.Objects.Buffers;       use GL.Objects.Buffers;
@@ -14,22 +24,18 @@ with GL.Objects.Programs;      use GL.Objects.Programs;
 with GL.Objects.Shaders;       use GL.Objects.Shaders;
 with GL.Objects.Vertex_Arrays; use GL.Objects.Vertex_Arrays;
 with GL.Types;                 use GL.Types;
-with GL.Types.Colors;          use GL.Types.Colors;
 with Glfw;                     use Glfw;
 with Glfw.Input;               use Glfw.Input;
 with Glfw.Input.Keys;          use Glfw.Input.Keys;
 with Glfw.Windows.Context;     use Glfw.Windows.Context;
-with GL.Types;                 use GL.Types;
 with GL.Types.Colors;          use GL.Types.Singles;
 with GL.Toggles;               use GL.Toggles;
 with GL.Fixed.Lighting;        use GL.Fixed.Lighting;
 with GL.Uniforms;
-with GL.Rasterization;
 
 with Program_Loader; use Program_Loader;
 with Geometry;       use Geometry;
 with Marching_Cubes; use Marching_Cubes;
-with Data;           use Data;
 with Maths;          use Maths;
 with Utilities;      use Utilities;
 
@@ -64,19 +70,9 @@ package body UI is
 
    Scale        : constant Float   := 1.3;
 
-   package Triangle_Pointers is new Interfaces.C.Pointers
-     (Integer, Triangle, Triangle_Array, (others => <>));
-
    package Unsigned32_Pointers is new Interfaces.C.Pointers
      (Integer, Unsigned_32, Unsigned32_Array, 0);
 
-   package Vertex_Pointers is new Interfaces.C.Pointers
-     (Integer, Vertex, Marching_Cubes.Vertex_Array, (others => <>));
-
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Triangle_Pointers);
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Vertex_Pointers);
    procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
    procedure Load_Element_Buffer is new
@@ -94,7 +90,6 @@ package body UI is
 
       --  Load shaders
 
-      Put_Line (Current_Directory);
       Render_Program := Program_From
         ((Src ("src/shaders/vert.glsl", Vertex_Shader),
          Src ("src/shaders/frag.glsl", Fragment_Shader)));

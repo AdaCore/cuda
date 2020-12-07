@@ -12,6 +12,7 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Command_Line;         use Ada.Command_Line;
 with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Calendar;             use Ada.Calendar;
 with Ada.Directories;          use Ada.Directories;
@@ -36,16 +37,11 @@ with CUDA.Driver_Types; use CUDA.Driver_Types;
 with CUDA.Vector_Types; use CUDA.Vector_Types;
 
 with UI; use UI;
+with Shape_Management; use Shape_Management;
 
 procedure Main is        
-
-   --  Settings and constants
-
-   Samples      : Integer := 64;
    Interpolation_Steps : constant Positive := 128;
-   Max_Lattice  : constant Integer := 10;
-   Shape        : Volume;
-   Lattice_Size : Point_Int;
+   Shape               : Volume;
       
    Last_Triangle     : aliased Interfaces.C.int;
    Last_Vertex       : aliased Interfaces.C.int;
@@ -53,76 +49,14 @@ procedure Main is
    Last_Time         : Ada.Calendar.Time;
    
    FPS               : Integer := 0;
-
-   type Vertex_Index_Arr is array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of Volume_Index;
-   type Vertex_Index_Arr_Ptr is access Vertex_Index_Arr;
-
-   Edge_Lattice : Vertex_Index_Arr_Ptr := new Vertex_Index_Arr;
-
-   -------------------
-   -- Index_To_XYZE --
-   -------------------
-
-   procedure Index_To_XYZE (I : Integer; X, Y, Z, E : out Integer) is
-       xSize : Integer := Lattice_Size.X + 1;
-       ySize : Integer := Lattice_Size.Y + 1;
-       zSize : Integer := Lattice_Size.Z + 1;
-   begin
-      e := i mod 3;
-      z := ((i - e) / 3) mod ySize;
-      y := ((i - e - z * 3) / (3 * zSize)) mod ySize;
-      x := (i - e - z * 3 - y * (3 * zSize)) / (3 * zSize * ySize);
-   end Index_To_XYZE;
-
-   ----------------------
-   -- Get_Vertex_Index --
-   ----------------------
-
-   function Get_Vertex_Index (I : Unsigned_32) return Volume_Index is
-      e, zi, yi, xi : Integer;
-   begin
-      Index_To_XYZE (Integer (i), xi, yi, zi, e);
-
-
-      return R : Volume_Index := Edge_Lattice (xi, yi, zi, e) do
-         if R = -1 then
-            raise Program_Error;
-         end if;
-      end return;
-   end Get_Vertex_Index;
-
-   -------------------
-   -- Create_Vertex --
-   -------------------
-
-   procedure Create_Vertex (I : Integer; P : Point_Real) is
-      E, zi, yi, xi : Integer;
-   begin
-      Index_To_XYZE (i, xi, yi, zi, e);
-
-      if Edge_Lattice (xi, yi, zi, e) = -1 then
-         Edge_Lattice (xi, yi, zi, e) := Create_Vertex (Shape, P);
-      end if;
-   end Create_Vertex;
-
-   --  Local variables
-
-   Speeds : array (Balls'Range) of Point_Real := 
-     ((0.01, 0.0, 0.0), 
-      (0.0, -0.02, 0.0), 
-      (0.0, 0.0, 0.005), 
-      (0.001, 0.002, 0.0), 
-      (0.002, 0.0, 0.01));
    
    Running           : Boolean := True;
-
---  Start of processing for Main
 
    D_Balls : System.Address;
    D_Triangles : System.Address;
    D_Vertices  : System.Address;      
-   Threads_Per_Block : Dim3 := (8, 4, 4); 
-   Blocks_Per_Grid : Dim3 :=
+   Threads_Per_Block : constant Dim3 := (8, 4, 4); 
+   Blocks_Per_Grid : constant Dim3 :=
      (unsigned (Samples) / Threads_Per_Block.X, 
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);  
@@ -132,10 +66,7 @@ procedure Main is
    D_Debug_Value : System.Address;
    
    Debug_Value : aliased Interfaces.C.int;  
-   
-   Start : Point_Real := (-2.0, -2.0, -2.0);
-   Stop : Point_Real := (2.0, 2.0, 2.0);
-   
+      
    task type Compute is
       entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
       entry Exit_Loop;
@@ -174,7 +105,7 @@ procedure Main is
                         Vertices            => Verts,
                         Start               => Start,
                         Stop                => Stop,
-                        Lattice_Size        => Lattice_Size,
+                        Lattice_Size        => (Samples, Samples, Samples),
                         Last_Triangle       => Last_Triangle'Access,
                         Last_Vertex         => Last_Vertex'Access,
                         Interpolation_Steps => Interpolation_Steps,
@@ -201,21 +132,30 @@ procedure Main is
    Mode : Mode_Type := Mode_CUDA;
    
 begin      
+   if Argument_Count >= 1 then
+      if Ada.Command_Line.Argument (1) = "1" then
+         Mode := Mode_CUDA;
+      elsif Ada.Command_Line.Argument (1) = "2" then
+         Mode := Mode_Tasking;
+      elsif Ada.Command_Line.Argument (1) = "3" then
+         Mode := Mode_Sequential;
+      end if;
+   end if;        
+        
    UI.Initialize;
+      
+   Last_Time := Clock;
    
-   --  Main loop
-   
-   Last_Time       := Clock;
-   
-   D_Balls := Malloc (Balls'Size / 8);
-   D_Triangles := Malloc (Tris'Size / 8);
-   D_Vertices := Malloc (Verts'Size / 8);
-   D_Last_Triangle := Malloc (Interfaces.C.int'size / 8);
-   D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
-   D_Debug_Value := Malloc (Interfaces.C.int'size / 8);   
+   if Mode = Mode_CUDA then
+      D_Balls := Malloc (Balls'Size / 8);
+      D_Triangles := Malloc (Tris'Size / 8);
+      D_Vertices := Malloc (Verts'Size / 8);
+      D_Last_Triangle := Malloc (Interfaces.C.int'size / 8);
+      D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
+      D_Debug_Value := Malloc (Interfaces.C.int'size / 8);      
+   end if;
    
    while Running loop            
-      Lattice_Size := (Samples, Samples, Samples);
       Last_Triangle := Interfaces.C.int (Tris'First) - 1;
       Last_Vertex := Interfaces.C.int (Verts'First) - 1;
       
@@ -251,9 +191,12 @@ begin
               (A_Balls             => D_Balls,
                A_Triangles         => D_Triangles,
                A_Vertices          => D_Vertices,
+               Ball_Size           => Balls'Length,
+               Triangles_Size      => Tris'Length,
+               Vertices_Size       => Verts'Length,
                Start               => Start,
                Stop                => Stop,
-               Lattice_Size        => Lattice_Size,
+               Lattice_Size        => (Samples, Samples, Samples),
                Last_Triangle       => D_Last_Triangle,
                Last_Vertex         => D_Last_Vertex,
                Interpolation_Steps => Interpolation_Steps, 
@@ -283,13 +226,13 @@ begin
          Cuda.Runtime_Api.Memcpy
            (Dst   => Tris'Address,
             Src   => D_Triangles,
-            Count => Interfaces.c.unsigned_long ((Last_Triangle + 1) * Tris (1)'Size / 8),
+            Count => unsigned_long ((Last_Triangle + 1) * Tris (1)'Size / 8),
             Kind  => Memcpy_Device_To_Host);
 
          Cuda.Runtime_Api.Memcpy
            (Dst   => Verts'Address,
             Src   => D_Vertices,
-            Count => Interfaces.c.unsigned_long ((Last_Vertex + 1) * Verts (1)'Size / 8),
+            Count => unsigned_long ((Last_Vertex + 1) * Verts (1)'Size / 8),
             Kind  => Memcpy_Device_To_Host);     
       elsif Mode = Mode_Sequential then
          for XI in 0 .. Samples - 1 loop
@@ -301,7 +244,7 @@ begin
                      Vertices            => Verts,
                      Start               => Start,
                      Stop                => Stop,
-                     Lattice_Size        => Lattice_Size,
+                     Lattice_Size        => (Samples, Samples, Samples),
                      Last_Triangle       => Last_Triangle'Access,
                      Last_Vertex         => Last_Vertex'Access,
                      Interpolation_Steps => Interpolation_Steps,
@@ -325,19 +268,11 @@ begin
          end loop;    
       end if;
       
-      Edge_Lattice.all := (others => (others => (others => (others => -1))));
+      Shape_Management.Create_Volume 
+        (Shape,
+         Verts (0 .. Integer (Last_Vertex)), 
+         Tris (0 .. Integer (Last_Triangle)));
       
-      for V of Verts (Verts'First .. Integer (Last_Vertex)) loop
-         Create_Vertex (V.Index, V.Point);
-      end loop;      
-   
-      for T of Tris (Tris'First .. Integer (Last_Triangle)) loop
-         Create_Face (Shape,
-                      (Get_Vertex_Index (T.i1),
-                      Get_Vertex_Index (T.i2),
-                      Get_Vertex_Index (T.i3)));
-      end loop;
-   
       --  Build result data        
       
       UI.Draw (Shape, Running);      

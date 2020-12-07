@@ -12,7 +12,7 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Data;                use Data;
+
 with Marching_Cubes.Data; use Marching_Cubes.Data;
 with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
 with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
@@ -45,9 +45,10 @@ package body Marching_Cubes is
       Index               : Integer    := 0;
       Record_All_Vertices : Boolean    := False;
 
-      Step : Point_Real := (X => (Stop.X - Start.X) / Float (Lattice_Size.X),
-                            Y => (Stop.Y - Start.Y) / Float (Lattice_Size.Y),
-                            Z => (Stop.Z - Start.Z) / Float (Lattice_Size.Z));
+      Step : constant Point_Real :=
+        (X => (Stop.X - Start.X) / Float (Lattice_Size.X),
+         Y => (Stop.Y - Start.Y) / Float (Lattice_Size.Y),
+         Z => (Stop.Z - Start.Z) / Float (Lattice_Size.Z));
 
       ---------------
       -- Metaballs --
@@ -91,8 +92,8 @@ package body Marching_Cubes is
 
          Temp       : Integer := 0;
          Edge_Index : Integer := -1;
-         Y_Size     : Integer := Lattice_Size.Y + 1;
-         Z_Size     : Integer := Lattice_Size.Z + 1;
+         Y_Size     : constant Integer := Lattice_Size.Y + 1;
+         Z_Size     : constant Integer := Lattice_Size.Z + 1;
       begin
          --  Swap larger values into *2
 
@@ -125,8 +126,7 @@ package body Marching_Cubes is
          end if;
 
          if Edge_Index = -1 then
-            --  raise Program_Error;
-            null;
+            raise Program_Error;
          end if;
 
          --  Values go from 0 to size + 1 (boundary condition)
@@ -232,6 +232,9 @@ package body Marching_Cubes is
      (A_Balls             : System.Address;
       A_Triangles         : System.Address;
       A_Vertices          : System.Address;
+      Ball_Size           : Integer;
+      Triangles_Size      : Integer;
+      Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
@@ -242,11 +245,11 @@ package body Marching_Cubes is
    is
       --  TODO: This is a temporary hack as we know where the parameters are
       --  coming from. Next step would be to pass fat pointers instead.
-      D_Balls : Point_Real_Array (Balls'Range)
+      D_Balls : Point_Real_Array (0 .. Ball_Size - 1)
         with Address => A_Balls, Import;
-      D_Tris : Triangle_Array (Tris'Range)
+      D_Tris : Triangle_Array (0 .. Triangles_Size - 1)
         with Address => A_Triangles, Import;
-      D_Verts : Vertex_Array (Verts'Range)
+      D_Verts : Vertex_Array (0 .. Vertices_Size - 1)
         with Address => A_Vertices, Import;
       D_Last_Triangle : access Interfaces.C.int
         with Address => Last_Triangle'Address, Import;
