@@ -21,7 +21,6 @@ with System; use System;
 package Marching_Cubes
 with SPARK_Mode => On
 is
-
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
    ----------
@@ -38,27 +37,33 @@ is
       Last_Triangle       : not null access Interfaces.C.Int;
       Last_Vertex         : not null access Interfaces.C.Int;
       Interpolation_Steps : Positive := 4;
-      XI, YI, ZI          : Integer;
-      Debug_Value         : not null access Interfaces.C.int)
+      XI, YI, ZI          : Integer)
      with Pre =>
-       Start.X in - 2.0 ** 16 .. 2.0 ** 16
-       and Start.Y in - 2.0 ** 16 .. 2.0 ** 16
-       and Start.Z in - 2.0 ** 16 .. 2.0 ** 16
-       and Stop.X in - 2.0 ** 16 .. 2.0 ** 16
-       and Stop.Y in - 2.0 ** 16 .. 2.0 ** 16
-       and Stop.Z in - 2.0 ** 16 .. 2.0 ** 16
-       and Lattice_Size.X in 1 .. 2 ** 16
-       and Lattice_Size.Y in 1 .. 2 ** 16
-       and Lattice_Size.Z in 1 .. 2 ** 16
-       and Last_Triangle.all >= -1
-       and Last_Vertex.all >= -1
-       and Triangles'First = 0
-       and Vertices'First = 0
-       and Triangles'Last > 0
-       and Vertices'Last > 0
-       and XI in 0 .. Lattice_Size.X - 1
-       and YI in 0 .. Lattice_Size.Y - 1
-       and ZI in 0 .. Lattice_Size.Z - 1;
+       Start.X in -2.0 ** 16 .. 2.0 ** 16
+       and then Start.Y in -2.0 ** 16 .. 2.0 ** 16
+       and then Start.Z in -2.0 ** 16 .. 2.0 ** 16
+       and then Stop.X in -2.0 ** 16 .. 2.0 ** 16
+       and then Stop.Y in -2.0 ** 16 .. 2.0 ** 16
+       and then Stop.Z in -2.0 ** 16 .. 2.0 ** 16
+       and then Stop.X - Start.X >= 1.0
+       and then Stop.Y - Start.X >= 1.0
+       and then Stop.Z - Start.X >= 1.0
+       and then Lattice_Size.X in 1 .. 2 ** 8
+       and then Lattice_Size.Y in 1 .. 2 ** 8
+       and then Lattice_Size.Z in 1 .. 2 ** 8
+       and then Last_Triangle.all >= -1
+       and then Last_Vertex.all >= -1
+       and then Triangles'First = 0
+       and then Vertices'First = 0
+       and then Triangles'Last > 0
+       and then Vertices'Last > 0
+       and then XI in 0 .. Lattice_Size.X - 1
+       and then YI in 0 .. Lattice_Size.Y - 1
+       and then ZI in 0 .. Lattice_Size.Z - 1
+       and then
+         (for all B of Balls => B.X in -2.0 ** 16 .. 2.0 ** 16
+          and then B.X in -2.0 ** 16 .. 2.0 ** 16
+          and then B.Z in -2.0 ** 16 .. 2.0 ** 16);
 
    procedure Mesh_CUDA
      (A_Balls             : System.Address;
@@ -74,6 +79,8 @@ is
       Last_Vertex         : System.Address;
       Interpolation_Steps : Positive := 4;
       Debug_Value         : System.Address)
-     with SPARK_Mode => Off, CUDA_Global;
+     with SPARK_Mode => Off
+   --, CUDA_Global
+   ;
 
 end Marching_Cubes;
