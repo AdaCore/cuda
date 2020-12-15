@@ -12,30 +12,11 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Volumes; use Volumes;
 with Geometry; use Geometry;
 
-package Data is
+package Shape_Management is
 
-   Tris   : Triangle_Array (0 .. 1_000_000);
-   Verts  : Vertex_Array (0 .. Tris'Length * 3 - 1);
-   Balls  : Point_Real_Array :=
-     (0 => (0.0, 0.0, 0.0),
-      1 => (0.0, 0.0, 0.0),
-      2 => (0.0, 0.0, 0.0),
-      3 => (0.0, 0.0, 0.0),
-      4 => (0.0, 0.0, 0.0));
+   procedure Create_Volume (Shape : in out Volume; Verts : Vertex_Array; Tris : Triangle_Array);
 
-   Speeds : array (Balls'Range) of Point_Real :=
-     ((0.01, 0.0, 0.0),
-      (0.0, -0.02, 0.0),
-      (0.01, 0.00, 0.005),
-      (0.001, 0.002, 0.0),
-      (0.002, 0.0, 0.01));
-
-   Start   : constant Point_Real := (-2.0, -2.0, -2.0);
-   Stop    : constant Point_Real := (2.0, 2.0, 2.0);
-   Samples : constant Integer := 64;
-   --  Number of division for each dimensison of the space described above.
-
-
-end Data;
+end Shape_Management;

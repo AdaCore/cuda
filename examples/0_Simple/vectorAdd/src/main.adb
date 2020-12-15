@@ -10,6 +10,8 @@ with CUDA.Stddef;
 
 with Kernel; use Kernel;
 
+with Ada.Unchecked_Deallocation;
+
 procedure Main is
 
    Num_Elements : Integer := 4096;
@@ -24,6 +26,9 @@ procedure Main is
 
    Gen : Generator;
    Err : Error_T;
+
+   procedure Free is new
+     Ada.Unchecked_Deallocation (Float_Array, Access_Host_Float_Array);
 
 begin
    Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");

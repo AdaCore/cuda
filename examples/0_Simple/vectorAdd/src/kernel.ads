@@ -1,14 +1,10 @@
 with System;
-with Ada.Unchecked_Deallocation;
 
 package Kernel is
 
    type Float_Array is array (Integer range <>) of Float;
 
    type Access_Host_Float_Array is access all Float_Array;
-
-   procedure Free is new
-     Ada.Unchecked_Deallocation (Float_Array, Access_Host_Float_Array);
 
    procedure Vector_Add
      (A_Addr : System.Address;

@@ -13,6 +13,7 @@
 ------------------------------------------------------------------------------
 
 with "lib/openglada/opengl-glfw.gpr";
+with "../../api/cuda.gpr";
 
 project Marching_Cubes is
 
@@ -23,11 +24,11 @@ project Marching_Cubes is
    for Main        use ("main.adb");
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-g");
+      for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use ("-g");
+      for Default_Switches ("ada") use ("-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/local/cuda/targets/x86_64-linux/lib", "-lcudadevrt","-lcudart_static", "-lrt", "-lpthread", "-ldl", "-Wl,--unresolved-symbols=ignore-all");
    end Linker;
 
 end Marching_Cubes;

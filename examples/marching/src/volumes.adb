@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                       Copyright (C) 2017, AdaCore                        --
+--                    Copyright (C) 2017-2020, AdaCore                      --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 3,  or (at your option) any later ver- --
@@ -110,4 +110,39 @@ package body Volumes is
          end if;
       end loop;
    end Create_Face;
+
+   procedure Compute_Normals (Shape : in out Volume) is
+      Average : Point_Real;
+      Number  : Integer;
+      Cur     : Integer;
+      Next    : Integer := -1;
+   begin
+      for V of Shape.Vertices loop
+         Average := (0.0, 0.0, 0.0);
+         Number := 0;
+         Cur := V.Halfedge;
+
+         loop
+            Number := Number + 1;
+            Next := Element (Shape.Halfedges, Cur).Next;
+
+            Average := Average +
+              Cross (Element (Shape.Vertices, Element (Shape.Halfedges, Cur).Vertex).Point,
+                     Element (Shape.Vertices, Element (Shape.Halfedges, Next).Vertex).Point);
+
+            Cur := Next;
+
+            exit when Cur = V.Halfedge;
+         end loop;
+
+         V.Normal := Average / Float (Number);
+         V.Normal := V.Normal / Length (V.Normal);
+      end loop;
+   end Compute_Normals;
+
+   function Get_Normal (Shape : Volume; Index : Volume_Index) return Point_Real is
+   begin
+      return Element (Shape.Vertices, Index).Normal;
+   end Get_Normal;
+
 end Volumes;

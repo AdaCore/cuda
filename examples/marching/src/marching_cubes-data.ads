@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                       Copyright (C) 2017, AdaCore                        --
+--                    Copyright (C) 2017-2020, AdaCore                      --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
 -- ware  Foundation;  either version 3,  or (at your option) any later ver- --
@@ -12,35 +12,63 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-package Marching_Cubes.Data is
+package Marching_Cubes.Data
+with SPARK_Mode => On
+is
 
-   V1 : constant array (Integer range 0 .. 11) of Point_Int := ((0, 0, 0),
-                                                                (0, 1, 0),
-                                                                (1, 0, 0),
-                                                                (0, 0, 0),
-                                                                (0, 0, 1),
-                                                                (0, 1, 1),
-                                                                (1, 0, 1),
-                                                                (0, 0, 1),
-                                                                (0, 0, 0),
-                                                                (0, 1, 0),
-                                                                (1, 1, 0),
-                                                                (1, 0, 0));
+   subtype Point_Int_01 is Point_Int
+     with Predicate =>
+       Point_Int_01.X in 0 .. 1
+       and then Point_Int_01.Y in 0 .. 1
+       and then Point_Int_01.Z in 0 .. 1
+       and then Float (Point_Int_01.X) in 0.0 .. 1.0
+       and then Float (Point_Int_01.Y) in 0.0 .. 1.0
+       and then Float (Point_Int_01.Z) in 0.0 .. 1.0;
 
-   V2 : constant array (Integer range 0 .. 11) of Point_Int := ((0, 1, 0),
-                                                                (1, 1, 0),
-                                                                (1, 1, 0),
-                                                                (1, 0, 0),
-                                                                (0, 1, 1),
-                                                                (1, 1, 1),
-                                                                (1, 1, 1),
-                                                                (1, 0, 1),
-                                                                (0, 0, 1),
-                                                                (0, 1, 1),
-                                                                (1, 1, 1),
-                                                                (1, 0, 1));
 
-   Case_To_Numpolys : constant array (0 .. 255) of Integer :=
+   type V_Array is array (Integer range 0 .. 11) of Point_Int_01;
+   type Case_To_Numpolys_Array is array (Integer range 0 .. 255) of Integer range 0 .. 5;
+   type Triangle_Table_Array is array (Integer range 0 .. 256 * 5 * 3 - 1) of Integer range -1 .. 11;
+
+   V1 : constant V_Array;
+   V2 : constant V_Array;
+
+   Case_To_Numpolys : constant Case_To_Numpolys_Array;
+
+   Triangle_Table : constant Triangle_Table_Array;
+
+private
+   pragma SPARK_Mode (Off);
+
+   V1 : constant V_Array :=
+     ((0, 0, 0),
+      (0, 1, 0),
+      (1, 0, 0),
+      (0, 0, 0),
+      (0, 0, 1),
+      (0, 1, 1),
+      (1, 0, 1),
+      (0, 0, 1),
+      (0, 0, 0),
+      (0, 1, 0),
+      (1, 1, 0),
+      (1, 0, 0));
+
+   V2 : constant V_Array :=
+     ((0, 1, 0),
+      (1, 1, 0),
+      (1, 1, 0),
+      (1, 0, 0),
+      (0, 1, 1),
+      (1, 1, 1),
+      (1, 1, 1),
+      (1, 0, 1),
+      (0, 0, 1),
+      (0, 1, 1),
+      (1, 1, 1),
+      (1, 0, 1));
+
+   Case_To_Numpolys : constant Case_To_Numpolys_Array :=
      (0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 2, 1, 2, 2, 3, 2, 3, 3, 4,
       2, 3, 3, 4, 3, 4, 4, 3, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3,
       2, 3, 3, 2, 3, 4, 4, 3, 3, 4, 4, 3, 4, 5, 5, 2, 1, 2, 2, 3, 2, 3, 3, 4,
@@ -53,7 +81,7 @@ package Marching_Cubes.Data is
       4, 3, 5, 4, 3, 2, 4, 1, 3, 4, 4, 5, 4, 5, 3, 4, 4, 5, 5, 2, 3, 4, 2, 1,
       2, 3, 3, 2, 3, 4, 2, 1, 3, 2, 4, 1, 2, 1, 1, 0);
 
-   Triangle_Table : constant array (0 .. 256 * 5 * 3 - 1) of Integer :=
+   Triangle_Table : constant Triangle_Table_Array :=
      (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
       0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
       0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

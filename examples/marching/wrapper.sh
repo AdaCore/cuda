@@ -9,22 +9,24 @@ SM_XX="75"
 OBJ="$EXAMPLE_DIRECTORY/obj"
 SRC="$EXAMPLE_DIRECTORY/src"
 
-KERNEL_SRC_NAME="kernel.adb"
+KERNEL_SRC_NAME="marching_cubes.adb"
 KERNEL_SRC_PATH="$SRC/$KERNEL_SRC_NAME"
 KERNEL_PTX_NAME="${KERNEL_SRC_NAME%.*}.s"
 KERNEL_PTX_PATH="$OBJ/$KERNEL_PTX_NAME"
 KERNEL_OBJ_NAME="${KERNEL_SRC_NAME%.*}.o"
 KERNEL_OBJ_PATH="$OBJ/$KERNEL_OBJ_NAME"
-KERNEL_FATBIN_NAME="kernel.fatbin"
+KERNEL_FATBIN_NAME="marching_cubes.fatbin"
 KERNEL_FATBIN_PATH="$OBJ/$KERNEL_FATBIN_NAME"
 KERNEL_FATBIN_OBJ="$OBJ/$KERNEL_FATBIN_NAME.o"
 KERNEL_FATBINASM_NAME="$KERNEL_FATBIN_NAME.s"
 KERNEL_FATBINASM_PATH="$SRC/$KERNEL_FATBINASM_NAME"
 
+Execution_Side=Device gprbuild -P../../api/cuda
+
 mkdir -p "$OBJ"
 
-"llvm-gcc" --RTS="$EXAMPLE_DIRECTORY/../../../runtime/" \
-   -I"$EXAMPLE_DIRECTORY/../../../api/device_static/" \
+"llvm-gcc" --RTS="$EXAMPLE_DIRECTORY/../../runtime/" \
+   -I"$EXAMPLE_DIRECTORY/../../api/device_static/" \
    -O2 -S -gnatp -gnatn -mcpu=sm_"$SM_XX" --target=nvptx64 \
    "$KERNEL_SRC_PATH" -o "$KERNEL_PTX_PATH"
 
@@ -41,4 +43,4 @@ cd "$(dirname "$KERNEL_FATBIN_PATH")"
 ld -r -b binary "$KERNEL_FATBIN_NAME" -o "$KERNEL_FATBIN_OBJ"
 cd "$CWD_BACKUP"
 
-gprbuild -Pmain -largs kernel.fatbin.o
+Execution_Side=Host gprbuild -Pmarching_cubes -largs marching_cubes.fatbin.o
