@@ -111,8 +111,7 @@ procedure Main is
                         Interpolation_Steps => Interpolation_Steps,
                         XI                  => XI, 
                         YI                  => YI,
-                        ZI                  => ZI,
-                        Debug_Value         => Debug_Value'Access);
+                        ZI                  => ZI);
                   end loop;
                end loop;
             end loop;
@@ -250,8 +249,7 @@ begin
                      Interpolation_Steps => Interpolation_Steps,
                      XI                  => XI, 
                      YI                  => YI,
-                     ZI                  => ZI,
-                     Debug_Value         => Debug_Value'Access);
+                     ZI                  => ZI);
                end loop;
             end loop;
          end loop;

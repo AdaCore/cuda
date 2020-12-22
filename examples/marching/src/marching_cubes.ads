@@ -79,8 +79,11 @@ is
       Last_Vertex         : System.Address;
       Interpolation_Steps : Positive := 4;
       Debug_Value         : System.Address)
-     with SPARK_Mode => Off
-   --, CUDA_Global
-   ;
+     with SPARK_Mode => Off, CUDA_Global;
+
+   procedure Last_Chance_Handler is null;
+   pragma Export (C,
+               Last_Chance_Handler,
+               "__gnat_last_chance_handler");
 
 end Marching_Cubes;

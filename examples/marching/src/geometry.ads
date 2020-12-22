@@ -15,8 +15,6 @@
 with Interfaces;            use Interfaces;
 with Interfaces.C.Pointers;
 
-with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
-
 package Geometry is
 
    ----------------
@@ -44,10 +42,6 @@ package Geometry is
         (Left.Y * Right.Z - Left.Z * Right.Y,
          Left.Z * Right.X - Left.X * Right.Z,
          Left.X * Right.Y - Left.Y * Right.X));
-
-   function Length (R : Point_Real) return Float is
-      (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
-
 
    type Point_Real_Array is array (Integer range <>) of aliased Point_Real;
 

@@ -12,6 +12,8 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+
 package body Volumes is
 
    -----------
@@ -110,6 +112,9 @@ package body Volumes is
          end if;
       end loop;
    end Create_Face;
+
+   function Length (R : Point_Real) return Float is
+     (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
 
    procedure Compute_Normals (Shape : in out Volume) is
       Average : Point_Real;
