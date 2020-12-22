@@ -211,7 +211,7 @@ is
          then
             SPARK_Atomic_Add (Last_Vertex, 1, int (Vertex_Index));
 
-            if Vertex_Index not in Vertices'First .. Vertices'Last - 1 then
+            if Vertex_Index not in Vertices'First - 1 .. Vertices'Last - 1 then
                return;
             end if;
 
