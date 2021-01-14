@@ -45,9 +45,6 @@ package Geometry is
 
    type Point_Real_Array is array (Integer range <>) of aliased Point_Real;
 
-   package Point_Real_Pointers is new Interfaces.C.Pointers
-     (Integer, Point_Real, Point_Real_Array, (others => <>));
-
    ---------------
    -- Point_Int --
    ---------------

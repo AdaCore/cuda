@@ -41,6 +41,9 @@ with Utilities;      use Utilities;
 
 package body UI is
 
+   package Point_Real_Pointers is new Interfaces.C.Pointers
+     (Integer, Point_Real, Point_Real_Array, (others => <>));
+
    Main_Window         : aliased Glfw.Windows.Window;
    Projection_Matrix   : GL.Types.Singles.Matrix4 := (others => (others => <>));
    Projection_Location : GL.Uniforms.Uniform;

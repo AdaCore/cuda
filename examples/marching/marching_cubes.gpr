@@ -24,11 +24,21 @@ project Marching_Cubes is
    for Main        use ("main.adb");
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
+      case CUDA.Execution_Side is
+         when "Host" =>
+            for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
+         when "Device" =>
+            for Switches ("ada") use ("-gnatX", "-O2", "-gnatp", "-gnatn", "-v");
+      end case;
    end Compiler;
 
    package Linker is
-      for Default_Switches ("ada") use ("-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/local/cuda/targets/x86_64-linux/lib", "-lcudadevrt","-lcudart_static", "-lrt", "-lpthread", "-ldl", "-Wl,--unresolved-symbols=ignore-all");
+      case CUDA.Execution_Side is
+         when "Host" =>
+            for Default_Switches ("ada") use ("-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/local/cuda/targets/x86_64-linux/lib", "-lcudadevrt","-lcudart_static", "-lrt", "-lpthread", "-ldl", "-Wl,--unresolved-symbols=ignore-all");
+         when "Device" =>
+            for Switches ("ada") use ("-v");
+      end case;
    end Linker;
 
 end Marching_Cubes;

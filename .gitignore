@@ -2,3 +2,9 @@
 */api/cuda_api/*
 */obj
 */*/*/obj
+install/
+.#*
+*.ali
+*.obj
+*.s
+*.o
