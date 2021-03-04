@@ -39,7 +39,10 @@ with CUDA.Vector_Types; use CUDA.Vector_Types;
 with UI; use UI;
 with Shape_Management; use Shape_Management;
 
-procedure Main is        
+with CUDA_Wrapper;
+
+procedure Main is         
+   
    Interpolation_Steps : constant Positive := 128;
    Shape               : Volume;
       
@@ -51,19 +54,20 @@ procedure Main is
    FPS               : Integer := 0;
    
    Running           : Boolean := True;
-
-   D_Balls : System.Address;
-   D_Triangles : System.Address;
-   D_Vertices  : System.Address;      
+   
+   W_Balls             : Point_Real_Wrappers.Array_Wrapper;   
+   W_Triangles         : Triangle_Wrappers.Array_Wrapper;
+   W_Vertices          : Vertex_Wrappers.Array_Wrapper;
+   
    Threads_Per_Block : constant Dim3 := (8, 4, 4); 
    Blocks_Per_Grid : constant Dim3 :=
      (unsigned (Samples) / Threads_Per_Block.X, 
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);  
 
-   D_Last_Triangle : System.Address;
-   D_Last_Vertex : System.Address;
-   D_Debug_Value : System.Address;
+   W_Last_Triangle  : W_Int.Wrapper; 
+   W_Last_Vertex  : W_Int.Wrapper;
+   W_Debug_Value  : W_Int.Wrapper;
    
    Debug_Value : aliased Interfaces.C.int;  
       
@@ -145,13 +149,9 @@ begin
       
    Last_Time := Clock;
    
-   if Mode = Mode_CUDA then
-      D_Balls := Malloc (Balls'Size / 8);
-      D_Triangles := Malloc (Tris'Size / 8);
-      D_Vertices := Malloc (Verts'Size / 8);
-      D_Last_Triangle := Malloc (Interfaces.C.int'size / 8);
-      D_Last_Vertex := Malloc (Interfaces.C.int'size / 8);
-      D_Debug_Value := Malloc (Interfaces.C.int'size / 8);      
+   if Mode = Mode_CUDA then      
+      W_Triangles.Reserve (Tris'Length);
+      W_Vertices.Reserve (Verts'Length);     
    end if;
    
    while Running loop            
@@ -159,80 +159,39 @@ begin
       Last_Vertex := Interfaces.C.int (Verts'First) - 1;
       
       if Mode = Mode_CUDA then
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => D_Balls,
-            Src   => Balls'Address,
-            Count => Balls'Size / 8,
-            Kind  => Memcpy_Host_To_Device);     
-      
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => D_Last_Triangle,
-            Src   => Last_Triangle'Address,
-            Count => Last_Triangle'Size / 8,
-            Kind  => Memcpy_Host_To_Device);
-      
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => D_Last_Vertex,
-            Src   => Last_Vertex'Address,
-            Count => Last_Vertex'Size / 8,
-            Kind  => Memcpy_Host_To_Device);
-      
-         Debug_Value := 0;
-      
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => D_Debug_Value,
-            Src   => Debug_Value'Address,
-            Count => Debug_Value'Size / 8,
-            Kind  => Memcpy_Host_To_Device);      
-      
+         
+         W_Balls := Point_Real_Wrappers.From (Balls);
+         W_Last_Triangle := W_Int.From (Last_Triangle);
+         W_Last_Vertex := W_Int.From (Last_Vertex);
+         W_Debug_Value := W_Int.From (0);
+         
          pragma CUDA_Execute
            (Mesh_CUDA
-              (A_Balls             => D_Balls,
-               A_Triangles         => D_Triangles,
-               A_Vertices          => D_Vertices,
+              (D_Balls             => W_Balls.Device,
+               D_Triangles         => W_Triangles.Device,  
+               D_Vertices          => W_Vertices.Device, 
                Ball_Size           => Balls'Length,
                Triangles_Size      => Tris'Length,
                Vertices_Size       => Verts'Length,
                Start               => Start,
                Stop                => Stop,
                Lattice_Size        => (Samples, Samples, Samples),
-               Last_Triangle       => D_Last_Triangle,
-               Last_Vertex         => D_Last_Vertex,
+               Last_Triangle       => W_Last_Triangle.Device,
+               Last_Vertex         => W_Last_Vertex.Device, 
                Interpolation_Steps => Interpolation_Steps, 
-               Debug_Value         => D_Debug_Value),
+               Debug_Value         => W_Debug_Value.Device),
             Blocks_Per_Grid,
             Threads_Per_Block
            );
-      
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => Debug_Value'Address,
-            Src   => D_Debug_Value,
-            Count => Debug_Value'Size / 8,
-            Kind  => Memcpy_Device_To_Host);
-            
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => Last_Triangle'Address,
-            Src   => D_Last_Triangle,
-            Count => Last_Triangle'Size / 8,
-            Kind  => Memcpy_Device_To_Host);
-      
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => Last_Vertex'Address,
-            Src   => D_Last_Vertex,
-            Count => Last_Vertex'Size / 8,
-            Kind  => Memcpy_Device_To_Host);               
-      
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => Tris'Address,
-            Src   => D_Triangles,
-            Count => unsigned_long ((Last_Triangle + 1) * Tris (1)'Size / 8),
-            Kind  => Memcpy_Device_To_Host);
-
-         Cuda.Runtime_Api.Memcpy
-           (Dst   => Verts'Address,
-            Src   => D_Vertices,
-            Count => unsigned_long ((Last_Vertex + 1) * Verts (1)'Size / 8),
-            Kind  => Memcpy_Device_To_Host);     
+         
+         --  Copy back data
+         
+         Debug_Value := W_Debug_Value.Get;
+         Last_Triangle := W_Last_Triangle.Get;
+         Last_Vertex := W_Last_Vertex.Get;
+         W_Triangles.To (Tris);        
+         W_Vertices.To (Verts);
+         
       elsif Mode = Mode_Sequential then
          for XI in 0 .. Samples - 1 loop
             for YI in 0 .. Samples - 1 loop

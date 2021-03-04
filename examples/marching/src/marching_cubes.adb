@@ -323,45 +323,31 @@ is
    end Mesh;
 
    procedure Mesh_CUDA
-     (A_Balls             : System.Address;
-      A_Triangles         : System.Address;
-      A_Vertices          : System.Address;
+     (D_Balls             : Point_Real_Wrappers.Array_Access;
+      D_Triangles         : Triangle_Wrappers.Array_Access;
+      D_Vertices          : Vertex_Wrappers.Array_Access;
       Ball_Size           : Integer;
       Triangles_Size      : Integer;
       Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : System.Address;
-      Last_Vertex         : System.Address;
+      Last_Triangle       : W_Int.T_Access;
+      Last_Vertex         : W_Int.T_Access;
       Interpolation_Steps : Positive := 4;
-      Debug_Value         : System.Address)
+      Debug_Value         : W_Int.T_Access)
      with SPARK_Mode => Off
    is
-      --  TODO: This is a temporary hack as we know where the parameters are
-      --  coming from. Next step would be to pass fat pointers instead.
-      D_Balls : Point_Real_Array (0 .. Ball_Size - 1)
-        with Address => A_Balls, Import;
-      D_Tris : Triangle_Array (0 .. Triangles_Size - 1)
-        with Address => A_Triangles, Import;
-      D_Verts : Vertex_Array (0 .. Vertices_Size - 1)
-        with Address => A_Vertices, Import;
-      D_Last_Triangle : access Interfaces.C.int
-        with Address => Last_Triangle'Address, Import;
-      D_Last_Vertex : access Interfaces.C.int
-        with Address => Last_Vertex'Address, Import;
-      D_Debug_Value : access Interfaces.C.int
-        with Address => Debug_Value'Address, Import;
    begin
       Mesh
-        (D_Balls,
-         D_Tris,
-         D_Verts,
+        (D_Balls.all,
+         D_Triangles.all,
+         D_Vertices.all,
          Start,
          Stop,
          Lattice_Size,
-         D_Last_Triangle,
-         D_Last_Vertex,
+         Last_Triangle,
+          Last_Vertex,
          Interpolation_Steps,
          Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X),
          Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),
