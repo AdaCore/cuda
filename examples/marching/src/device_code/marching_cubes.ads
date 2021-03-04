@@ -17,11 +17,14 @@ with Geometry;              use Geometry;
 with Interfaces;   use Interfaces;
 with Interfaces.C; use Interfaces.C;
 with System; use System;
+with CUDA_Wrapper;
 
 package Marching_Cubes
 with SPARK_Mode => On
 is
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
+
+   package W_Int is new CUDA_Wrapper (Interfaces.C.int);
 
    ----------
    -- Mesh --
@@ -66,19 +69,19 @@ is
           and then B.Z in -2.0 ** 16 .. 2.0 ** 16);
 
    procedure Mesh_CUDA
-     (A_Balls             : System.Address;
-      A_Triangles         : System.Address;
-      A_Vertices          : System.Address;
+     (D_Balls             : Point_Real_Wrappers.Array_Access;
+      D_Triangles         : Triangle_Wrappers.Array_Access;
+      D_Vertices          : Vertex_Wrappers.Array_Access;
       Ball_Size           : Integer;
       Triangles_Size      : Integer;
       Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : System.Address;
-      Last_Vertex         : System.Address;
+      Last_Triangle       : W_Int.T_Access;
+      Last_Vertex         : W_Int.T_Access;
       Interpolation_Steps : Positive := 4;
-      Debug_Value         : System.Address)
+      Debug_Value         : W_Int.T_Access)
      with SPARK_Mode => Off, CUDA_Global;
 
    procedure Last_Chance_Handler is null;
