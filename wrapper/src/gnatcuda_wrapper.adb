@@ -173,16 +173,7 @@ function GNATCUDA_Wrapper return Integer is
    Verbose   : Boolean := False;
    
    Prefix_LLVM_ARGS : constant Argument_List := 
-     (new String'
-        ("--RTS=" 
-         & Executable_Location 
-         & Dir_Separator
-         & "lib" 
-         & Dir_Separator 
-         & "gnat"
-         & Dir_Separator
-         & "cuda-full"),      
-      new String'("--target=nvptx64"),
+     (new String'("--target=nvptx64"),
       new String'("-S"));
         
    Status    : Integer;
@@ -233,6 +224,10 @@ begin
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-v" then
+            Put_Line ("Target: cuda");
+            --  ??? temporary hard coded version numbers
+            Put_Line ("cuda-gcc version 22.0 (for GNAT Pro 22.0w (20210315))");
+
             Verbose := True;               
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
