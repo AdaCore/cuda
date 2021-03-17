@@ -1,10 +1,6 @@
-*/api/cuda_raw_binding/*
-*/api/cuda_api/*
-*/obj
-*/*/*/obj
+obj/
+lib/
+api/device
+api/host
 install/
 .#*
-*.ali
-*.obj
-*.s
-*.o
