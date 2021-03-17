@@ -79,14 +79,14 @@ package body CUDA.Runtime_Api is
       return (Tid_X, Tid_Y, Tid_Z);
    end Thread_Idx;
 
-   function Wrap_Size return Interfaces.C.int is
-      function Wrapsize return Interfaces.C.int with
+   function Warp_Size return Interfaces.C.int is
+      function warpsize return Interfaces.C.int with
          Inline,
          Import,
          Convention    => C,
-         External_Name => "*llvm.nvvm.read.ptx.sreg.wrapsize";
+         External_Name => "*llvm.nvvm.read.ptx.sreg.warpsize";
    begin
-      return Wrapsize;
-   end Wrap_Size;
+      return warpsize;
+   end Warp_Size;
 
 end CUDA.Runtime_Api;

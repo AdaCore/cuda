@@ -11,7 +11,7 @@ package CUDA.Runtime_Api is
       Inline;
    function Thread_Idx return CUDA.Vector_Types.Uint3 with
       Inline;
-   function Wrap_Size return Interfaces.C.int with
+   function Warp_Size return Interfaces.C.int with
       Inline;
 
 end CUDA.Runtime_Api;

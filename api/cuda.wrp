@@ -82,7 +82,7 @@ weave w_PackageDecl (
         function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
         function Block_Dim return CUDA.Vector_Types.Dim3  with Inline;
         function Thread_Idx return CUDA.Vector_Types.Uint3 with Inline;
-        function Wrap_Size return Interfaces.C.Int with Inline;""",
+        function Warp_Size return Interfaces.C.Int with Inline;""",
 
     body_content => @ & i"""
         function Grid_Dim return CUDA.Vector_Types.Dim3 is
@@ -129,10 +129,10 @@ weave w_PackageDecl (
             return (Tid_X, Tid_Y, Tid_Z);
         end Thread_Idx;
 
-        function Wrap_Size return Interfaces.C.Int is
-            function Wrapsize return Interfaces.C.Int
-                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.wrapsize";
+        function Warp_Size return Interfaces.C.Int is
+            function warpsize return Interfaces.C.Int
+                with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.warpsize";
         begin
-            return Wrapsize;
-        end Wrap_Size;"""
+            return warpsize;
+        end Warp_Size;"""
 );
