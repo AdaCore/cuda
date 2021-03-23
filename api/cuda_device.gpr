@@ -1,0 +1,26 @@
+--  Uncomment these if its decided to include the CUDA headers in the runtime:
+
+--  with "runtime_build";
+--  with "target_options";
+
+project CUDA_Device is
+
+   --  ??? It's not clear yet how to generate bindings to the device side
+   --  as they are very C++ specific. work on the host generated files
+   --  for now to ensure at least compilation OK.
+   for Source_Dirs use ("device_static");
+
+   for Object_Dir use "obj";
+
+   --  Uncomment this line if its decided to include the CUDA headers in the
+   --  runtime:
+
+   --  package Compiler renames Target_Options.Compiler;
+
+   --  Remove these lines if its decided to include the CUDA headers in the
+   --  runtime:
+
+   for Target use "cuda";
+   for Runtime ("ada") use "device-cuda";
+
+end CUDA_Device;
