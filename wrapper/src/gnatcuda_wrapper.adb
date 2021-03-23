@@ -260,7 +260,6 @@ begin
 
          PTXAS_Args : constant Argument_List :=
            (new String'("-m64"),
-            new String'("-g"),
             new String'("--dont-merge-basicblocks"),
             new String'("--return-at-end"),
             new String'("-v"),
@@ -277,7 +276,6 @@ begin
            (new String'("-64"),
             new String'("--create"),
             new String'(Kernel_Fat),
-            new String'("-g"),
             new String'("--image=profile=sm_"
               & GPU_Name.all & ",file=" & Obj_Name),
             new String'("--image=profile=compute_"
