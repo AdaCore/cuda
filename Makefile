@@ -11,7 +11,7 @@ llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 
 main: install/bin
 	@echo $(PATH)
-	gprbuild -P wrapper/wrapper.gpr
+	gprbuild -p -P wrapper/wrapper.gpr
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
 	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
 	./gen-rts-sources.py --bb-dir $(BB_SRC) --gnat $(GNAT_SRC) --rts-profile=zfp
