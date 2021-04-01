@@ -19,7 +19,7 @@ package CUDA_Wrapper is
    type Array_Access is access all Array_T;
    type Array_Wrapper is tagged private; 
 
-   procedure Reserve (Self : in out Array_Wrapper; Nb_Elements : Positive);
+   procedure Reserve (Self : in out Array_Wrapper; First, Last : Natural);
    function From (From_Val : Array_T) return Array_Wrapper;
    procedure To (Self : Array_Wrapper; Dest : in out Array_T);
    function Device (Self : Array_Wrapper) return Array_Access;

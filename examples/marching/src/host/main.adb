@@ -18,6 +18,7 @@ with Ada.Calendar;             use Ada.Calendar;
 with Ada.Directories;          use Ada.Directories;
 with Ada.Numerics.Elementary_Functions; 
 use Ada.Numerics.Elementary_Functions;
+with Ada.Exceptions; use Ada.Exceptions;
 with Interfaces.C;             use Interfaces.C;
 with Interfaces;               use Interfaces;
 
@@ -144,22 +145,23 @@ begin
          Mode := Mode_Sequential;
       end if;
    end if;        
-        
+   
+   if Mode = Mode_CUDA then
+      W_Triangles.Reserve (Tris'First, Tris'Last);
+      W_Vertices.Reserve (Verts'First, Verts'Last);
+   end if;
+   
    UI.Initialize;
       
-   Last_Time := Clock;
-   
-   if Mode = Mode_CUDA then      
-      W_Triangles.Reserve (Tris'Length);
-      W_Vertices.Reserve (Verts'Length);     
-   end if;
+   Last_Time := Clock;  
    
    while Running loop            
       Last_Triangle := Interfaces.C.int (Tris'First) - 1;
       Last_Vertex := Interfaces.C.int (Verts'First) - 1;
       
-      if Mode = Mode_CUDA then
-         
+      if Mode = Mode_CUDA then         
+         --  TODO: These call create data, they shouldn't!!!!
+         --  Use reserve instead, provide first and last
          W_Balls := Point_Real_Wrappers.From (Balls);
          W_Last_Triangle := W_Int.From (Last_Triangle);
          W_Last_Vertex := W_Int.From (Last_Vertex);
@@ -168,8 +170,8 @@ begin
          pragma CUDA_Execute
            (Mesh_CUDA
               (D_Balls             => W_Balls.Device,
-               D_Triangles         => W_Triangles.Device,  
-               D_Vertices          => W_Vertices.Device, 
+               D_Triangles         => W_Triangles.Device,
+               D_Vertices          => W_Vertices.Device,
                Ball_Size           => Balls'Length,
                Triangles_Size      => Tris'Length,
                Vertices_Size       => Verts'Length,
@@ -177,8 +179,8 @@ begin
                Stop                => Stop,
                Lattice_Size        => (Samples, Samples, Samples),
                Last_Triangle       => W_Last_Triangle.Device,
-               Last_Vertex         => W_Last_Vertex.Device, 
-               Interpolation_Steps => Interpolation_Steps, 
+               Last_Vertex         => W_Last_Vertex.Device,
+               Interpolation_Steps => Interpolation_Steps,
                Debug_Value         => W_Debug_Value.Device),
             Blocks_Per_Grid,
             Threads_Per_Block
@@ -189,9 +191,10 @@ begin
          Debug_Value := W_Debug_Value.Get;
          Last_Triangle := W_Last_Triangle.Get;
          Last_Vertex := W_Last_Vertex.Get;
-         W_Triangles.To (Tris);        
-         W_Vertices.To (Verts);
          
+         -- TODO: need to copy only a slice
+         W_Triangles.To (Tris);
+         W_Vertices.To (Verts);
       elsif Mode = Mode_Sequential then
          for XI in 0 .. Samples - 1 loop
             for YI in 0 .. Samples - 1 loop
@@ -282,7 +285,9 @@ begin
       Compute_Tasks (XI).Exit_Loop;
    end loop;  
 exception
-   when others =>
+   when E : others =>
+      Put_Line (Ada.Exceptions.Exception_Information (E));
+      
       for XI in 0 .. Samples - 1 loop
          Compute_Tasks (XI).Exit_Loop;
       end loop;  

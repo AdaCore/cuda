@@ -10,15 +10,16 @@ package body CUDA_Wrapper is
 
    overriding procedure Finalize (Self : in out Array_Wrapper) is 
    begin
-      Free (Self.Device_Ptr.Data);
-      Free (Self.Device_Ptr.Bounds);
+      null;
+      --  Free (Self.Device_Ptr.Data);
+      --  Free (Self.Device_Ptr.Bounds);
    end Finalize;
    
    ----------
    -- From --
    ----------
 
-   function From (From_Val : Array_T) return Array_Wrapper is   
+   function From (From_Val : Array_T) return Array_Wrapper is         
       Ret : Array_Wrapper;
       From_Bounds : aliased T_Bounds := (From_Val'First, From_Val'Last);
    begin      
@@ -27,7 +28,7 @@ package body CUDA_Wrapper is
 
       Cuda.Runtime_Api.Memcpy
         (Dst   => Ret.Device_Ptr.Data,
-         Src   => From_Val'Address,
+         Src   => From_Val (From_Val'First)'Address,
          Count => From_Val'Size / 8,
          Kind  => Memcpy_Host_To_Device);
       
@@ -81,12 +82,14 @@ package body CUDA_Wrapper is
    function From (From_Val : T) return Wrapper is
       Ret : Wrapper;
    begin
-      Ret.Device_Ptr := Malloc (unsigned_long (T'Size / 8)); 
+      Ret.Device_Ptr := Malloc (T'Size / 8); 
+      
       Cuda.Runtime_Api.Memcpy
         (Dst   => Ret.Device_Ptr,
          Src   => From_Val'Address,
          Count => T'Size / 8, 
          Kind  => Memcpy_Host_To_Device);
+      
       return Ret;
    end From;
    
@@ -108,8 +111,14 @@ package body CUDA_Wrapper is
    ---------
    
    function Get (Self : Wrapper) return T is
-      Result : T with Address => Self.Device_Ptr, Import;
+      Result : aliased T;
    begin
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Result'Address,
+         Src   => Self.Device_Ptr,
+         Count => T'Size / 8,
+         Kind  => Memcpy_Device_To_Host);
+      
       return Result;
    end Get;
    
@@ -118,7 +127,7 @@ package body CUDA_Wrapper is
    ------------
 
    function Device (Self : Wrapper) return T_Access is
-      Ret : T_Access with Address => Self.Device_Ptr, Import;
+      Ret : T_Access with Address => Self.Device_Ptr'Address, Import;
    begin
       return Ret;
    end Device;
@@ -129,17 +138,25 @@ package body CUDA_Wrapper is
 
    overriding procedure Finalize (Self : in out Wrapper) is
    begin
-      Free (Self.Device_Ptr);
+      null;
+      --Free (Self.Device_Ptr);
    end Finalize;
    
    -----------
    -- Alloc --
    ----------- 
 
-   procedure Reserve (Self : in out Array_Wrapper; Nb_Elements : Positive) is
-   begin
-      Self.Device_Ptr.Data := Malloc (unsigned_long (Nb_Elements) * T'Size / 8); 
+   procedure Reserve (Self : in out Array_Wrapper; First, Last : Natural) is     
+      Bounds : aliased T_Bounds := (First, Last);
+   begin      
+      Self.Device_Ptr.Data := Malloc (unsigned_long (Last - First + 1) * T'Size / 8); 
       Self.Device_Ptr.Bounds := Malloc (T_Bounds'Size / 8);      
+      
+      Cuda.Runtime_Api.Memcpy
+        (Dst   => Self.Device_Ptr.Bounds,
+         Src   => Bounds'Address,
+         Count => T_Bounds'Size / 8,
+         Kind  => Memcpy_Host_To_Device);
    end Reserve;
    
 end CUDA_Wrapper;
