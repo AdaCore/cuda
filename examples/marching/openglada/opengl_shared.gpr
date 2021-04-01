@@ -51,5 +51,5 @@ project OpenGL_Shared is
                                               "-fstack-check");
       end case;
    end Compiler;
-  
+
 end OpenGL_Shared;

@@ -7,7 +7,6 @@ library project OpenGL.Glfw is
    for Library_Name use "GlfwAda";
    for Library_Kind use OpenGL_Shared'Library_Kind;
 
-
    type GLFW_Version_Type is ("2", "3");
    GLFW_Version : GLFW_Version_Type := "3"; -- external ("GLFW_Version");
 

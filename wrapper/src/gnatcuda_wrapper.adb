@@ -139,18 +139,18 @@ function GNATCUDA_Wrapper return Integer is
    end Is_Directory_Separator;
 
    --  Libexec : constant String := Executable_Location & "libexec/gnat_ccg/bin";
-   --  
+   --
    --  -----------------
    --  -- Locate_Exec --
    --  -----------------
-   --  
+   --
    --  function Locate_Exec (Exec : String) return String is
    --     Exe : constant String_Access := Get_Target_Executable_Suffix;
    --     --  Note: the leak on Exe does not matter since this function is called
    --     --  only once.
-   --  
+   --
    --     Result : constant String := Libexec & "/" & Exec;
-   --  
+   --
    --  begin
    --     if Is_Executable_File (Result & Exe.all) then
    --        return Result;
@@ -159,9 +159,9 @@ function GNATCUDA_Wrapper return Integer is
    --        OS_Exit (1);
    --     end if;
    --  end Locate_Exec;
-         
+
    --  Local variables
-   
+
    --  GPU_Name : constant String := "75"; -- TODO we should have switches for This
 
    GPU_Name   : String_Access;
@@ -171,16 +171,16 @@ function GNATCUDA_Wrapper return Integer is
    LLVM_Arg_Number : Integer := 0;
    Compile   : Boolean := False;
    Verbose   : Boolean := False;
-   
-   Prefix_LLVM_ARGS : constant Argument_List := 
+
+   Prefix_LLVM_ARGS : constant Argument_List :=
      (new String'("--target=nvptx64"),
       new String'("-S"));
-        
+
    Status    : Integer;
-   
+
    Input_File_Number : Integer := 0;
    Input_Files : String_List (1 .. Argument_Count);
-   
+
    function Spawn (S : String; Args : Argument_List) return Integer;
    --  Call GNAT.OS_Lib.Spawn and take Verbose into account
 
@@ -204,19 +204,19 @@ function GNATCUDA_Wrapper return Integer is
    end Spawn;
 
    --  Start of processing for GNATCCG_Wrapper
-   
-begin   
+
+begin
    for J in 1 .. Argument_Count loop
       declare
          Arg  : constant String := Argument (J);
       begin
-         if Arg'Length > 0 and then Arg (1) /= '-' 
-           and then 
+         if Arg'Length > 0 and then Arg (1) /= '-'
+           and then
              (J = 1 or else Argument (J - 1) /= "-x")
          then
             Input_File_Number := Input_File_Number + 1;
             Input_Files (Input_File_Number) := new String'(Arg);
-            
+
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-c" or else Arg = "-S" then
@@ -228,7 +228,7 @@ begin
             --  ??? temporary hard coded version numbers
             Put_Line ("cuda-gcc version 22.0 (for GNAT Pro 22.0w (20210315))");
 
-            Verbose := True;               
+            Verbose := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
          elsif Arg'Length > 9 and then Arg (1 .. 9) = "-mcpu=sm_" then
@@ -239,28 +239,27 @@ begin
          end if;
       end;
    end loop;
-   
+
    if GPU_Name = null then
       GPU_Name := new String'("75");
    end if;
-   
+
    if Compile then
       if Input_File_Number /= 1 then
-         Put_Line ("error: expected one compilation file, got" 
+         Put_Line ("error: expected one compilation file, got"
                    & Input_File_Number'Img);
          return 1;
       end if;
-      
+
       declare
-         File_Name : constant String := 
-           Base_Name 
+         File_Name : constant String :=
+           Base_Name
              (Input_Files (1).all, File_Extension (Input_Files (1).all));
          PTX_Name : aliased String := File_Name & ".s";
          Obj_Name : aliased String := File_Name & ".o";
-         
-         PTXAS_Args : constant Argument_List := 
+
+         PTXAS_Args : constant Argument_List :=
            (new String'("-m64"),
-            new String'("-g"),
             new String'("--dont-merge-basicblocks"),
             new String'("--return-at-end"),
             new String'("-v"),
@@ -269,59 +268,58 @@ begin
             new String'("--output-file"),
             Obj_Name'Unchecked_Access,
             PTX_Name'Unchecked_Access);
-         
+
          Kernel_Fat : constant String := File_Name & ".fatbin";
          Kernel_Object : constant String := File_Name & ".fatbin.o";
-         
+
          Fatbinary_Args : constant Argument_List :=
            (new String'("-64"),
             new String'("--create"),
             new String'(Kernel_Fat),
-            new String'("-g"),
-            new String'("--image=profile=sm_" 
+            new String'("--image=profile=sm_"
               & GPU_Name.all & ",file=" & Obj_Name),
-            new String'("--image=profile=compute_" 
+            new String'("--image=profile=compute_"
               & GPU_Name.all & ",file=" & PTX_Name));
-         
-         Ld_Args : constant Argument_List := 
+
+         Ld_Args : constant Argument_List :=
            (new String'("-r"),
             new String'("-b"),
             new String'("binary"),
             new String'(Kernel_Fat),
             new String'("-o"),
             new String'(Kernel_Object));
-      begin                           
-         Status := Spawn 
-           (Locate_Exec_On_Path ("llvm-gcc").all, 
-            Prefix_LLVM_ARGS & 
+      begin
+         Status := Spawn
+           (Locate_Exec_On_Path ("llvm-gcc").all,
+            Prefix_LLVM_ARGS &
               new String'("-mcpu=sm_" & GPU_Name.all) &
               LLVM_Args (1 .. LLVM_Arg_Number));
-   
+
          if Status /= 0 then
             return Status;
          end if;
-      
+
          Status := Spawn
-           (Locate_Exec_On_Path ("ptxas").all, 
+           (Locate_Exec_On_Path ("ptxas").all,
             PTXAS_Args);
-      
+
          if Status /= 0 then
             return Status;
          end if;
-         
+
          Status := Spawn
-           (Locate_Exec_On_Path ("fatbinary").all, 
+           (Locate_Exec_On_Path ("fatbinary").all,
             Fatbinary_Args);
-   
+
          if Status /= 0 then
             return Status;
          end if;
-           
+
          Status := Spawn (Locate_Exec_On_Path ("ld").all, Ld_Args);
-      
+
          return Status;
       end;
-   end if;   
-   
+   end if;
+
    return 1;
 end GNATCUDA_Wrapper;

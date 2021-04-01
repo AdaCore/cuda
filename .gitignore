@@ -3,4 +3,5 @@ lib/
 api/device
 api/host
 install/
+__pycache__/
 .#*
