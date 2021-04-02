@@ -19,9 +19,7 @@ with Interfaces.C; use Interfaces.C;
 with System; use System;
 with CUDA_Wrapper;
 
-package Marching_Cubes
-with SPARK_Mode => On
-is
+package Marching_Cubes is
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
    package W_Int is new CUDA_Wrapper (Interfaces.C.int);
@@ -40,33 +38,7 @@ is
       Last_Triangle       : not null access Interfaces.C.Int;
       Last_Vertex         : not null access Interfaces.C.Int;
       Interpolation_Steps : Positive := 4;
-      XI, YI, ZI          : Integer)
-     with Pre =>
-       Start.X in -2.0 ** 16 .. 2.0 ** 16
-       and then Start.Y in -2.0 ** 16 .. 2.0 ** 16
-       and then Start.Z in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.X in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.Y in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.Z in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.X - Start.X >= 1.0
-       and then Stop.Y - Start.X >= 1.0
-       and then Stop.Z - Start.X >= 1.0
-       and then Lattice_Size.X in 1 .. 2 ** 8
-       and then Lattice_Size.Y in 1 .. 2 ** 8
-       and then Lattice_Size.Z in 1 .. 2 ** 8
-       and then Last_Triangle.all >= -1
-       and then Last_Vertex.all >= -1
-       and then Triangles'First = 0
-       and then Vertices'First = 0
-       and then Triangles'Last > 0
-       and then Vertices'Last > 0
-       and then XI in 0 .. Lattice_Size.X - 1
-       and then YI in 0 .. Lattice_Size.Y - 1
-       and then ZI in 0 .. Lattice_Size.Z - 1
-       and then
-         (for all B of Balls => B.X in -2.0 ** 16 .. 2.0 ** 16
-          and then B.X in -2.0 ** 16 .. 2.0 ** 16
-          and then B.Z in -2.0 ** 16 .. 2.0 ** 16);
+      XI, YI, ZI          : Integer);
 
    procedure Mesh_CUDA
      (D_Balls             : Point_Real_Wrappers.Array_Access;
@@ -82,7 +54,7 @@ is
       Last_Vertex         : W_Int.T_Access;
       Interpolation_Steps : Positive := 4;
       Debug_Value         : W_Int.T_Access)
-     with SPARK_Mode => Off, CUDA_Global;
+     with CUDA_Global;
 
    procedure Last_Chance_Handler is null;
    pragma Export (C,
