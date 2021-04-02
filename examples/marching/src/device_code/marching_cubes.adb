@@ -250,19 +250,19 @@ is
    end Mesh;
 
    procedure Mesh_CUDA
-     (D_Balls             : Point_Real_Wrappers.Array_Access;
-      D_Triangles         : Triangle_Wrappers.Array_Access;
-      D_Vertices          : Vertex_Wrappers.Array_Access;
+     (D_Balls             : Point_Real_Array_Access;
+      D_Triangles         : Triangle_Array_Access;
+      D_Vertices          : Vertex_Array_Access;
       Ball_Size           : Integer;
       Triangles_Size      : Integer;
       Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : W_Int.T_Access;
-      Last_Vertex         : W_Int.T_Access;
+      Last_Triangle       : Int_Access;
+      Last_Vertex         : Int_Access;
       Interpolation_Steps : Positive := 4;
-      Debug_Value         : W_Int.T_Access)
+      Debug_Value         : Int_Access)
    is
    begin
       Mesh

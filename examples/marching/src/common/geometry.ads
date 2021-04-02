@@ -14,7 +14,6 @@
 
 with Interfaces;            use Interfaces;
 with Interfaces.C.Pointers;
-with CUDA_Wrapper;
 
 package Geometry is
 
@@ -44,9 +43,8 @@ package Geometry is
          Left.Z * Right.X - Left.X * Right.Z,
          Left.X * Right.Y - Left.Y * Right.X));
 
-   package Point_Real_Wrappers is new CUDA_Wrapper (Point_Real);
-
-   subtype Point_Real_Array is Point_Real_Wrappers.Array_T;
+   type Point_Real_Array is array (Natural range <>) of aliased Point_Real;
+   type Point_Real_Array_Access is access all Point_Real_Array;
 
    ---------------
    -- Point_Int --
@@ -64,8 +62,9 @@ package Geometry is
       I1, I2, I3 : Unsigned_32 := 0;
    end record with Convention => C;
 
-   package Triangle_Wrappers is new CUDA_Wrapper (Triangle);
-   subtype Triangle_Array is Triangle_Wrappers.Array_T;
+   type Triangle_Array is array (Natural range <>) of aliased Triangle;
+   type Triangle_Array_Access is access all Triangle_Array;
+
    ------------
    -- Vertex --
    ------------
@@ -75,7 +74,7 @@ package Geometry is
       Index : Integer    := 0;
    end record with Convention => C;
 
-   package Vertex_Wrappers is new CUDA_Wrapper (Vertex);
-   subtype Vertex_Array is Vertex_Wrappers.Array_T;
+   type Vertex_Array is array (Natural range <>) of aliased Vertex;
+   type Vertex_Array_Access is access all Vertex_Array;
 
 end Geometry;
