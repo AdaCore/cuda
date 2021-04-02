@@ -8,4 +8,10 @@ package CUDA.Device_Atomic_Functions is
      Import,
      External_Name => "__atomic_fetch_add_4";
 
+   function Atomic_Add
+     (Address : access Integer; Value : Integer; Ordering : Integer := 0) return Integer with
+     Convention => Intrinsic,
+     Import,
+     External_Name => "__atomic_fetch_add_4";
+
 end CUDA.Device_Atomic_Functions;

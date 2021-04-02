@@ -6,6 +6,12 @@ package CUDA.Device_Atomic_Functions is
      (Address : access int; Value : int; Ordering : int := 0) return int with
       Convention => Intrinsic,
       Import,
+     External_Name => "__atomic_fetch_add_4";
+
+   function Atomic_Add
+     (Address : Integer Value : Integer; Ordering : Integer := 0) return Integer with
+      Convention => Intrinsic,
+      Import,
       External_Name => "__atomic_fetch_add_4";
 
 --  TODO: Manually bind the following:
