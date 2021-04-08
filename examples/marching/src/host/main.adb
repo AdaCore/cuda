@@ -86,7 +86,7 @@ procedure Main is
    W_Last_Vertex  : W_Int.CUDA_Access := Allocate;
    W_Debug_Value  : W_Int.CUDA_Access := Allocate;
    
-   Debug_Value : aliased Integer := 0; 
+   Debug_Value : aliased Integer := 0;
       
    task type Compute is
       entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
@@ -207,7 +207,6 @@ begin
          Assign (Last_Triangle, W_Last_Triangle);
          Assign (Last_Vertex, W_Last_Vertex);
          
-         -- TODO: need to copy only a slice
          Assign (Tris (0 .. Last_Triangle), W_Triangles, 0, Last_Triangle);
          Assign (Verts (0 .. Last_Vertex), W_Vertices, 0, Last_Vertex);
       elsif Mode = Mode_Sequential then
