@@ -85,8 +85,8 @@ procedure Main is
    W_Last_Triangle  : W_Int.CUDA_Access := Allocate; 
    W_Last_Vertex  : W_Int.CUDA_Access := Allocate;
    W_Debug_Value  : W_Int.CUDA_Access := Allocate;
-   
-   Debug_Value : aliased Integer := 0;
+
+   Debug_Value : aliased Integer := 0; 
       
    task type Compute is
       entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
