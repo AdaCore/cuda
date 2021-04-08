@@ -79,14 +79,22 @@ procedure Main is
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);  
 
+<<<<<<< HEAD
    package W_Int is new CUDA_Objects (Integer, Int_Access);
+=======
+   package W_Int is new CUDA_Objects (Interfaces.C.int, Int_Access);
+>>>>>>> 88dfd625f3ae500cc5cb810753c8c3f05c437920
    use W_Int;
    
    W_Last_Triangle  : W_Int.CUDA_Access := Allocate; 
    W_Last_Vertex  : W_Int.CUDA_Access := Allocate;
    W_Debug_Value  : W_Int.CUDA_Access := Allocate;
    
+<<<<<<< HEAD
    Debug_Value : aliased Integer := 0; 
+=======
+   Debug_Value : aliased Interfaces.C.int := 0; 
+>>>>>>> 88dfd625f3ae500cc5cb810753c8c3f05c437920
       
    task type Compute is
       entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
@@ -207,7 +215,6 @@ begin
          Assign (Last_Triangle, W_Last_Triangle);
          Assign (Last_Vertex, W_Last_Vertex);
          
-         -- TODO: need to copy only a slice
          Assign (Tris (0 .. Last_Triangle), W_Triangles, 0, Last_Triangle);
          Assign (Verts (0 .. Last_Vertex), W_Vertices, 0, Last_Vertex);
       elsif Mode = Mode_Sequential then
