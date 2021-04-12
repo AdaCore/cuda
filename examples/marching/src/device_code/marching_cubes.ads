@@ -17,14 +17,11 @@ with Geometry;              use Geometry;
 with Interfaces;   use Interfaces;
 with Interfaces.C; use Interfaces.C;
 with System; use System;
-with CUDA_Wrapper;
 
-package Marching_Cubes
-with SPARK_Mode => On
-is
+package Marching_Cubes is
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
-   package W_Int is new CUDA_Wrapper (Interfaces.C.int);
+   type Int_Access is access all Integer;
 
    ----------
    -- Mesh --
@@ -37,52 +34,26 @@ is
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : not null access Interfaces.C.Int;
-      Last_Vertex         : not null access Interfaces.C.Int;
+      Last_Triangle       : not null access Integer;
+      Last_Vertex         : not null access Integer;
       Interpolation_Steps : Positive := 4;
-      XI, YI, ZI          : Integer)
-     with Pre =>
-       Start.X in -2.0 ** 16 .. 2.0 ** 16
-       and then Start.Y in -2.0 ** 16 .. 2.0 ** 16
-       and then Start.Z in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.X in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.Y in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.Z in -2.0 ** 16 .. 2.0 ** 16
-       and then Stop.X - Start.X >= 1.0
-       and then Stop.Y - Start.X >= 1.0
-       and then Stop.Z - Start.X >= 1.0
-       and then Lattice_Size.X in 1 .. 2 ** 8
-       and then Lattice_Size.Y in 1 .. 2 ** 8
-       and then Lattice_Size.Z in 1 .. 2 ** 8
-       and then Last_Triangle.all >= -1
-       and then Last_Vertex.all >= -1
-       and then Triangles'First = 0
-       and then Vertices'First = 0
-       and then Triangles'Last > 0
-       and then Vertices'Last > 0
-       and then XI in 0 .. Lattice_Size.X - 1
-       and then YI in 0 .. Lattice_Size.Y - 1
-       and then ZI in 0 .. Lattice_Size.Z - 1
-       and then
-         (for all B of Balls => B.X in -2.0 ** 16 .. 2.0 ** 16
-          and then B.X in -2.0 ** 16 .. 2.0 ** 16
-          and then B.Z in -2.0 ** 16 .. 2.0 ** 16);
+      XI, YI, ZI          : Integer);
 
    procedure Mesh_CUDA
-     (D_Balls             : Point_Real_Wrappers.Array_Access;
-      D_Triangles         : Triangle_Wrappers.Array_Access;
-      D_Vertices          : Vertex_Wrappers.Array_Access;
+     (D_Balls             : Point_Real_Array_Access;
+      D_Triangles         : Triangle_Array_Access;
+      D_Vertices          : Vertex_Array_Access;
       Ball_Size           : Integer;
       Triangles_Size      : Integer;
       Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : W_Int.T_Access;
-      Last_Vertex         : W_Int.T_Access;
+      Last_Triangle       : Int_Access;
+      Last_Vertex         : Int_Access;
       Interpolation_Steps : Positive := 4;
-      Debug_Value         : W_Int.T_Access)
-     with SPARK_Mode => Off, CUDA_Global;
+      Debug_Value         : Int_Access)
+     with CUDA_Global;
 
    procedure Last_Chance_Handler is null;
    pragma Export (C,

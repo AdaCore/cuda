@@ -40,15 +40,16 @@ with CUDA.Vector_Types; use CUDA.Vector_Types;
 with UI; use UI;
 with Shape_Management; use Shape_Management;
 
-with CUDA_Wrapper;
+with CUDA_Objects;
+with CUDA_Arrays;
 
 procedure Main is         
    
    Interpolation_Steps : constant Positive := 128;
    Shape               : Volume;
       
-   Last_Triangle     : aliased Interfaces.C.int;
-   Last_Vertex       : aliased Interfaces.C.int;
+   Last_Triangle     : aliased Integer;
+   Last_Vertex       : aliased Integer;
    
    Last_Time         : Ada.Calendar.Time;
    
@@ -56,9 +57,21 @@ procedure Main is
    
    Running           : Boolean := True;
    
-   W_Balls             : Point_Real_Wrappers.Array_Wrapper;   
-   W_Triangles         : Triangle_Wrappers.Array_Wrapper;
-   W_Vertices          : Vertex_Wrappers.Array_Wrapper;
+   package Point_Real_Wrappers is new CUDA_Arrays 
+     (Point_Real, Natural, Point_Real_Array, Point_Real_Array_Access);
+   package Triangle_Wrappers is new CUDA_Arrays 
+     (Triangle, Natural, Triangle_Array, Triangle_Array_Access);
+   package Vertex_Wrappers is new CUDA_Arrays 
+     (Vertex, Natural, Vertex_Array, Vertex_Array_Access);
+   
+   
+   W_Balls             : Point_Real_Wrappers.CUDA_Array_Access;   
+   W_Triangles         : Triangle_Wrappers.CUDA_Array_Access;
+   W_Vertices          : Vertex_Wrappers.CUDA_Array_Access;
+  
+   use Point_Real_Wrappers;
+   use Triangle_Wrappers;
+   use Vertex_Wrappers;
    
    Threads_Per_Block : constant Dim3 := (8, 4, 4); 
    Blocks_Per_Grid : constant Dim3 :=
@@ -66,11 +79,14 @@ procedure Main is
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);  
 
-   W_Last_Triangle  : W_Int.Wrapper; 
-   W_Last_Vertex  : W_Int.Wrapper;
-   W_Debug_Value  : W_Int.Wrapper;
+   package W_Int is new CUDA_Objects (Integer, Int_Access);
+   use W_Int;
    
-   Debug_Value : aliased Interfaces.C.int;  
+   W_Last_Triangle  : W_Int.CUDA_Access := Allocate; 
+   W_Last_Vertex  : W_Int.CUDA_Access := Allocate;
+   W_Debug_Value  : W_Int.CUDA_Access := Allocate;
+
+   Debug_Value : aliased Integer := 0; 
       
    task type Compute is
       entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
@@ -147,8 +163,9 @@ begin
    end if;        
    
    if Mode = Mode_CUDA then
-      W_Triangles.Reserve (Tris'First, Tris'Last);
-      W_Vertices.Reserve (Verts'First, Verts'Last);
+      W_Triangles := Allocate (Tris'First, Tris'Last);
+      W_Vertices := Allocate (Verts'First, Verts'Last);
+      W_Balls := Allocate (Balls'First, Balls'Last);
    end if;
    
    UI.Initialize;
@@ -156,45 +173,42 @@ begin
    Last_Time := Clock;  
    
    while Running loop            
-      Last_Triangle := Interfaces.C.int (Tris'First) - 1;
-      Last_Vertex := Interfaces.C.int (Verts'First) - 1;
+      Last_Triangle := Tris'First - 1;
+      Last_Vertex := Verts'First - 1;
       
       if Mode = Mode_CUDA then         
-         --  TODO: These call create data, they shouldn't!!!!
-         --  Use reserve instead, provide first and last
-         W_Balls := Point_Real_Wrappers.From (Balls);
-         W_Last_Triangle := W_Int.From (Last_Triangle);
-         W_Last_Vertex := W_Int.From (Last_Vertex);
-         W_Debug_Value := W_Int.From (0);
+         Assign (W_Balls, Balls);
+         Assign (W_Last_Triangle, 0);
+         Assign (W_Last_Vertex, 0);
+         Assign (W_Debug_Value, 0);
          
          pragma CUDA_Execute
            (Mesh_CUDA
-              (D_Balls             => W_Balls.Device,
-               D_Triangles         => W_Triangles.Device,
-               D_Vertices          => W_Vertices.Device,
+              (D_Balls             => Device (W_Balls),
+               D_Triangles         => Device (W_Triangles),
+               D_Vertices          => Device (W_Vertices),
                Ball_Size           => Balls'Length,
                Triangles_Size      => Tris'Length,
                Vertices_Size       => Verts'Length,
                Start               => Start,
                Stop                => Stop,
                Lattice_Size        => (Samples, Samples, Samples),
-               Last_Triangle       => W_Last_Triangle.Device,
-               Last_Vertex         => W_Last_Vertex.Device,
+               Last_Triangle       => Device (W_Last_Triangle),
+               Last_Vertex         => Device (W_Last_Vertex),
                Interpolation_Steps => Interpolation_Steps,
-               Debug_Value         => W_Debug_Value.Device),
+               Debug_Value         => Device (W_Debug_Value)),
             Blocks_Per_Grid,
             Threads_Per_Block
            );
          
          --  Copy back data
          
-         Debug_Value := W_Debug_Value.Get;
-         Last_Triangle := W_Last_Triangle.Get;
-         Last_Vertex := W_Last_Vertex.Get;
+         Assign (Debug_Value, W_Debug_Value);
+         Assign (Last_Triangle, W_Last_Triangle);
+         Assign (Last_Vertex, W_Last_Vertex);
          
-         -- TODO: need to copy only a slice
-         W_Triangles.To (Tris);
-         W_Vertices.To (Verts);
+         Assign (Tris (0 .. Last_Triangle), W_Triangles, 0, Last_Triangle);
+         Assign (Verts (0 .. Last_Vertex), W_Vertices, 0, Last_Vertex);
       elsif Mode = Mode_Sequential then
          for XI in 0 .. Samples - 1 loop
             for YI in 0 .. Samples - 1 loop
@@ -283,7 +297,16 @@ begin
    
    for XI in 0 .. Samples - 1 loop
       Compute_Tasks (XI).Exit_Loop;
-   end loop;  
+   end loop;
+   
+   if Mode = Mode_CUDA then 
+      Deallocate (W_Balls);
+      Deallocate (W_Vertices);
+      Deallocate (W_Triangles);
+      Deallocate (W_Last_Vertex);
+      Deallocate (W_Last_Triangle);
+      Deallocate (W_Debug_Value);
+   end if;
 exception
    when E : others =>
       Put_Line (Ada.Exceptions.Exception_Information (E));

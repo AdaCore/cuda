@@ -16,15 +16,7 @@ package Marching_Cubes.Data
 with SPARK_Mode => On
 is
 
-   subtype Point_Int_01 is Point_Int
-     with Predicate =>
-       Point_Int_01.X in 0 .. 1
-       and then Point_Int_01.Y in 0 .. 1
-       and then Point_Int_01.Z in 0 .. 1
-       and then Float (Point_Int_01.X) in 0.0 .. 1.0
-       and then Float (Point_Int_01.Y) in 0.0 .. 1.0
-       and then Float (Point_Int_01.Z) in 0.0 .. 1.0;
-
+   subtype Point_Int_01 is Point_Int;
 
    type V_Array is array (Integer range 0 .. 11) of Point_Int_01;
    type Case_To_Numpolys_Array is array (Integer range 0 .. 255) of Integer range 0 .. 5;
