@@ -18,6 +18,7 @@ with Ada.Calendar;             use Ada.Calendar;
 with Ada.Directories;          use Ada.Directories;
 with Ada.Numerics.Elementary_Functions; 
 use Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 with Ada.Exceptions; use Ada.Exceptions;
 with Interfaces.C;             use Interfaces.C;
 with Interfaces;               use Interfaces;
@@ -43,9 +44,12 @@ with Shape_Management; use Shape_Management;
 with CUDA_Objects;
 with CUDA_Arrays;
 
+
 procedure Main is         
    
-   Interpolation_Steps : constant Positive := 128;
+   Seed : Generator;
+   
+   Interpolation_Steps : constant Positive := 64;
    Shape               : Volume;
       
    Last_Triangle     : aliased Integer;
@@ -168,7 +172,7 @@ begin
       W_Balls := Allocate (Balls'First, Balls'Last);
    end if;
    
-   UI.Initialize;
+   Initialize;
       
    Last_Time := Clock;  
    
@@ -176,12 +180,12 @@ begin
       Last_Triangle := Tris'First - 1;
       Last_Vertex := Verts'First - 1;
       
-      if Mode = Mode_CUDA then         
+      if Mode = Mode_CUDA then
          Assign (W_Balls, Balls);
          Assign (W_Last_Triangle, 0);
          Assign (W_Last_Vertex, 0);
          Assign (W_Debug_Value, 0);
-         
+      
          pragma CUDA_Execute
            (Mesh_CUDA
               (D_Balls             => Device (W_Balls),
@@ -200,13 +204,13 @@ begin
             Blocks_Per_Grid,
             Threads_Per_Block
            );
-         
+      
          --  Copy back data
-         
+      
          Assign (Debug_Value, W_Debug_Value);
          Assign (Last_Triangle, W_Last_Triangle);
          Assign (Last_Vertex, W_Last_Vertex);
-         
+      
          Assign (Tris (0 .. Last_Triangle), W_Triangles, 0, Last_Triangle);
          Assign (Verts (0 .. Last_Vertex), W_Vertices, 0, Last_Vertex);
       elsif Mode = Mode_Sequential then
@@ -223,77 +227,72 @@ begin
                      Last_Triangle       => Last_Triangle'Access,
                      Last_Vertex         => Last_Vertex'Access,
                      Interpolation_Steps => Interpolation_Steps,
-                     XI                  => XI, 
+                     XI                  => XI,
                      YI                  => YI,
                      ZI                  => ZI);
                end loop;
             end loop;
          end loop;
-      elsif Mode = Mode_Tasking then         
+      elsif Mode = Mode_Tasking then
          for XI in 0 .. Samples - 1 loop
-            Compute_Tasks (XI).Set_And_Go 
-              (XI, XI, 
+            Compute_Tasks (XI).Set_And_Go
+              (XI, XI,
                0, Samples - 1,
                0, Samples - 1);
-         end loop;         
-         
+         end loop;
+      
          for XI in 0 .. Samples - 1 loop
             Compute_Tasks (XI).Finished;
-         end loop;    
+         end loop;
       end if;
       
-      Shape_Management.Create_Volume 
+      Shape_Management.Create_Volume
         (Shape,
-         Verts (0 .. Integer (Last_Vertex)), 
+         Verts (0 .. Integer (Last_Vertex)),
          Tris (0 .. Integer (Last_Triangle)));
       
       --  Build result data        
       
-      UI.Draw (Shape, Running);      
+      Draw (Shape, Running);      
       
       --  Move the balls
    
       for I in Balls'Range loop
          declare
             New_Position : Point_Real := Balls (I);
+            Speed : constant := 0.01;
          begin
             New_Position.X := Balls (I).X + Speeds (I).X;
             New_Position.Y := Balls (I).Y + Speeds (I).Y;
             New_Position.Z := Balls (I).Z + Speeds (I).Z;
+      
+            if Length (New_Position) > 1.0 then
+               Speeds (I).X := -@ + (Random (Seed) - 0.5) * Speed * 0.2;
+               Speeds (I).Y := -@ + (Random (Seed) - 0.5) * Speed * 0.2;
+               Speeds (I).Z := -@ + (Random (Seed) - 0.5) * Speed * 0.2;      
                
-            if Sqrt 
-              (New_Position.X * New_Position.X + 
-                 New_Position.Y * New_Position.Y +
-                   New_Position.Z * New_Position.Z) > 1.0 
-            then
-               Speeds (I).X := -@;
-               Speeds (I).Y := -@;
-               Speeds (I).Z := -@;
-                  
-               New_Position.X := Balls (I).X + Speeds (I).X;
-               New_Position.Y := Balls (I).Y + Speeds (I).Y;
-               New_Position.Z := Balls (I).Z + Speeds (I).Z;
+               Speeds (I) := Normalize (Speeds (I)) * Speed;
             end if;
-               
+      
             Balls (I) := New_Position;
          end;
-      end loop;                  
-                     
+      end loop;
+      
       --  Display FPS timing
-   
+      
       FPS := @ + 1;
       if Clock - Last_Time >= 1.0 then
          Put_Line (FPS'Image & " FPS");
          FPS       := 0;
          Last_Time := Clock;
       end if;
-             
+      
       Clear (Shape);
    end loop;
    
    --  Finalize
    
-   UI.Finalize;
+   Finalize;
    
    for XI in 0 .. Samples - 1 loop
       Compute_Tasks (XI).Exit_Loop;

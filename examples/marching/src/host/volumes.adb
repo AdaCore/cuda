@@ -113,35 +113,115 @@ package body Volumes is
       end loop;
    end Create_Face;
 
-   function Length (R : Point_Real) return Float is
-     (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
+
+   type Operation_T is access procedure (Vert : Vertex; Forward : Boolean);
+
+   procedure Apply_To_Vertex_Ring (Shape : in out Volume; Center : Halfedge; Operation : Operation_T) is
+      Start_H : Halfedge := Center;
+      It_H : Halfedge := Start_H;
+
+      H : Halfedge_Vectors.Vector renames Shape.Halfedges;
+      V : Vertex_Vectors.Vector renames Shape.Vertices;
+   begin
+      loop
+         It_H := H (It_H.Next);
+         Operation (V (It_H.Vertex), True);
+
+         if It_H.Opposite = -1 then
+            exit;
+         end if;
+
+         It_H := H (It_H.Opposite);
+
+         if It_H = Start_H then
+            --  The ring has been fully operated
+            return;
+         end if;
+      end loop;
+
+      -- The ring could not be completed,
+      -- because of opposites missing.
+      -- retreive the other side of the ring
+
+      It_H := Start_H;
+
+      if It_H.Prev = -1 then
+         return;
+      end if;
+
+      It_H := H (It_H.Prev);
+
+      loop
+         Operation (V (It_H.Vertex), False);
+
+         It_H := H (It_H.Next);
+
+         if It_H.Opposite = -1 then
+            exit;
+         end if;
+
+         It_H := H (It_H.Opposite);
+
+         It_H := H (It_H.Next);
+
+         if It_H = Start_H then
+            raise Program_Error with "INCONISTENCY, COULD ITERATE ON PREV BUT NOT NEXT";
+         end if;
+      end loop;
+
+   end Apply_To_Vertex_Ring;
 
    procedure Compute_Normals (Shape : in out Volume) is
-      Average : Point_Real;
-      Number  : Integer;
-      Cur     : Integer;
-      Next    : Integer := -1;
+      Normal : Point_Real := (0.0, 0.0, 0.0);
+
+      V_Prev : Point_Real;
+      V_Center : Point_Real;
+
+      First_Forward : Boolean := True;
+      First_Backward : Boolean := True;
+
+      V_First : Point_Real;
+
+      procedure Compute (Vert : Vertex; Forward : Boolean) is
+         V_Cur : Point_Real;
+      begin
+         if Forward and then First_Forward then
+            First_Forward := False;
+            V_First := Vert.Point - V_Center;
+            V_Prev := V_First;
+         else
+            if not Forward and then First_Backward then
+               if First_Forward then
+                  First_Forward := False;
+                  V_First := Vert.Point - V_Center;
+               end if;
+
+               First_Backward := False;
+               V_Prev := V_First;
+            end if;
+
+            V_Cur := Vert.Point - V_Center;
+
+            if Forward then
+               Normal := @ + Cross (V_Cur, V_Prev);
+            else
+               Normal := @ + Cross (V_Prev, V_Cur);
+            end if;
+
+            V_Prev := V_Cur;
+         end if;
+      end Compute;
+
    begin
       for V of Shape.Vertices loop
-         Average := (0.0, 0.0, 0.0);
-         Number := 0;
-         Cur := V.Halfedge;
+         Normal := (0.0, 0.0, 0.0);
+         First_Forward := True;
+         First_Backward := True;
+         V_Center := V.Point;
 
-         loop
-            Number := Number + 1;
-            Next := Element (Shape.Halfedges, Cur).Next;
+         Apply_To_Vertex_Ring (Shape, Shape.Halfedges (V.Halfedge), Compute'Unrestricted_Access);
 
-            Average := Average +
-              Cross (Element (Shape.Vertices, Element (Shape.Halfedges, Cur).Vertex).Point,
-                     Element (Shape.Vertices, Element (Shape.Halfedges, Next).Vertex).Point);
-
-            Cur := Next;
-
-            exit when Cur = V.Halfedge;
-         end loop;
-
-         V.Normal := Average / Float (Number);
-         V.Normal := V.Normal / Length (V.Normal);
+         V.Normal := Normalize (Normal);
       end loop;
    end Compute_Normals;
 

@@ -14,6 +14,7 @@
 
 with Interfaces;            use Interfaces;
 with Interfaces.C.Pointers;
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 
 package Geometry is
 
@@ -45,6 +46,18 @@ package Geometry is
 
    type Point_Real_Array is array (Natural range <>) of aliased Point_Real;
    type Point_Real_Array_Access is access all Point_Real_Array;
+
+   function Length (R : Point_Real) return Float is
+     (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
+
+   function Normalize (R : Point_Real) return Point_Real is
+     (declare
+         L : constant Float := Length (R);
+      begin
+         (if L = 0.0 then
+            (0.0, 0.0, 0.0)
+         else
+            R / L));
 
    ---------------
    -- Point_Int --

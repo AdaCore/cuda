@@ -8,5 +8,4 @@ package UI is
 
    procedure Draw (Shape : Volume; Running : out Boolean);
 
-
 end UI;
