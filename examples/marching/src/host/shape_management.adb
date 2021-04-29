@@ -54,13 +54,13 @@ package body Shape_Management is
    -- Create_Vertex --
    -------------------
 
-   procedure Create_Vertex (Shape : in out Volume; I : Integer; P : Point_Real) is
+   procedure Create_Vertex (Shape : in out Volume; I : Integer; P : Point_Real; N : Point_Real) is
       E, zi, yi, xi : Integer;
    begin
       Index_To_XYZE (i, xi, yi, zi, e);
 
       if Edge_Lattice (xi, yi, zi, e) = -1 then
-         Edge_Lattice (xi, yi, zi, e) := Create_Vertex (Shape, P);
+         Edge_Lattice (xi, yi, zi, e) := Create_Vertex (Shape, P, N);
       end if;
    end Create_Vertex;
 
@@ -73,7 +73,8 @@ package body Shape_Management is
       Edge_Lattice := (others => (others => (others => (others => -1))));
 
       for V of Verts loop
-         Create_Vertex (Shape, V.Index, V.Point);
+         -- TODO: Remove normalize when done in the CUDA kernel
+         Create_Vertex (Shape, V.Index, V.Point, Normalize (V.Normal));
       end loop;
 
       for T of Tris loop
@@ -83,7 +84,7 @@ package body Shape_Management is
                        Get_Vertex_Index (T.i3)));
       end loop;
 
-      Compute_Normals (Shape);
+      --  Compute_Normals (Shape);
    end Create_Volume;
 
 end Shape_Management;

@@ -34,10 +34,11 @@ package body Volumes is
 
    function Create_Vertex
      (Shape : in out Volume;
-      Point : Point_Real) return Volume_Index
+      Point : Point_Real;
+      Normal : Point_Real) return Volume_Index
    is
    begin
-      Shape.Vertices.Append (Vertex'(Point => Point, others => <>));
+      Shape.Vertices.Append (Vertex'(Point => Point, Normal => Normal, others => <>));
       Shape.Missing_Opposites.Append (Halfedge_Index_Vectors.Empty_Vector);
       return Volume_Index (Shape.Vertices.Length - 1);
    end Create_Vertex;

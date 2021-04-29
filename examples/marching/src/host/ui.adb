@@ -34,8 +34,6 @@ with Maths; use Maths;
 use Maths.Single_Math_Functions;
 
 with Cameras; use Cameras;
--- This is a transcription of
--- https://learnopengl.com/code_viewer_gh.php?code=src/6.pbr/1.1.lighting/lighting.cpp
 
 with Geometry; use Geometry;
 with Marching_Cubes; use Marching_Cubes;
@@ -138,18 +136,14 @@ package body UI is
    Shader : GL.Objects.Programs.Program;
    Light_Positions : Vector3_Array (0 .. 3) :=
      ((10.0,  10.0, 10.0),
-      (10.0,  10.0, 10.0),
-      (10.0,  10.0, 10.0),
-      (10.0,  10.0, 10.0));
+      (10.0,  -10.0, 10.0),
+      (10.0,  10.0, -10.0),
+      (-10.0,  10.0, -10.0));
    Light_Colors :Vector3_Array (0 .. 3) :=
-     ((300.0, 300.0, 300.0),
-      (300.0, 300.0, 300.0),
+     ((0.0, 300.0, 0.0),
+      (0.0, 300.0, 0.0),
       (300.0, 300.0, 300.0),
       (300.0, 300.0, 300.0));
-
-   Nr_Rows : constant := 7;
-   Nr_Columns : constant := 7;
-   Spacing : constant := 2.5;
 
    procedure Put_Line (M : Matrix4) is
    begin
@@ -207,7 +201,7 @@ package body UI is
          Albedo : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "albedo");
          Ao : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "ao");
       begin
-         GL.Uniforms.Set_Single (Albedo, 0.9, 0.0, 0.0);
+         GL.Uniforms.Set_Single (Albedo, 1.0, 1.0, 1.0);
          GL.Uniforms.Set_Single (Ao, 1.0);
       end;
    end Initialize;
@@ -238,7 +232,7 @@ package body UI is
       Camera.Pitch := Angle + 270.0;
       Update_Camera_Vectors (Camera);
 
-      Angle := Angle + 0.5;
+      Angle := Angle + 0.1;
 
       Current_Frame := Glfw.Time;
 
@@ -270,7 +264,7 @@ package body UI is
            (0.0, 0.0, 1.0, 0.0),
            (0.0, 0.0, 0.0, 1.0)));
 
-      GL.Uniforms.Set_Single (S_Metallic, 0.2);
+      GL.Uniforms.Set_Single (S_Metallic, 0.9);
       GL.Uniforms.Set_Single (S_Roughtness, 0.5);
       Render_Shape (Shape);
 
@@ -293,44 +287,12 @@ package body UI is
                       or My_Window.Key_State (Escape) = Pressed);
    end Draw;
 
-   subtype Nat is GL.Types.Int range 0 .. GL.Types.Int'Last;
-   package Vector_Vector3 is new Ada.Containers.Vectors (Nat, Vector3);
-   use Vector_Vector3;
-
-   package Vector_Vector2 is new Ada.Containers.Vectors (Nat, Vector2);
-   use Vector_Vector2;
-
-   type Int_Array_Ptr is access all Int_Array;
-
    procedure Load_To_Int_Buffer is new Load_To_Buffer (Int_Pointers);
-
-   type Single_Array_Ptr is access all Single_Array;
-
    procedure Load_To_Single_Buffer is new Load_To_Buffer (Single_Pointers);
 
-   type Buffers_T is record
-      Sphere_VAO : Vertex_Array_Object;
-      Vbo, Ebo : Buffer;
-   end record;
-
-   type Buffers_Ptr is access all Buffers_T;
-
    Scale        : constant Float   := 1.3;
-
-   Vertex_Buffer       : GL.Objects.Buffers.Buffer;
-   Normal_Buffer       : GL.Objects.Buffers.Buffer;
-   Index_Buffer        : GL.Objects.Buffers.Buffer;
-
-   package Point_Real_Pointers is new Interfaces.C.Pointers
-     (Natural, Point_Real, Point_Real_Array, (others => <>));
-
-   package Unsigned32_Pointers is new Interfaces.C.Pointers
-     (Integer, Unsigned_32, Unsigned32_Array, 0);
-
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Unsigned32_Pointers);
-   procedure Load_Element_Buffer is new
-     GL.Objects.Buffers.Load_To_Buffer (Point_Real_Pointers);
+   Sphere_VAO : Vertex_Array_Object;
+   Vbo, Ebo : Buffer;
 
    procedure Render_Shape (Shape : Volume) is
       Vert, Norm  : Point_Real;
@@ -344,28 +306,28 @@ package body UI is
       It : GL.Types.Int := 0;
       Stride : GL.Types.Int := (3 * 2 * 3) * (Single'Size / 8);
 
-      New_Buffer : Buffers_Ptr := new Buffers_T;
-      Data : Single_Array_Ptr;
+      Data : Single_Array(0 .. Vert_Count * 6 - 1);
 
       Triangles_Number : GL.Types.Size :=
         GL.Types.Size (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1);
-
-      Buffers : Buffers_Ptr;
    begin
-      Buffers := new Buffers_T;
-      Data := new Single_Array (0 .. Vert_Count * 6 - 1);
+      if not Sphere_VAO.Initialized then
+         Sphere_VAO.Initialize_Id;
+         Vbo.Initialize_Id;
+         Ebo.Initialize_Id;
+      end if;
 
       for I in 0 .. Vert_Count - 1 loop
          Vert := Get_Vertex (Shape, First_Vertex_Index (Shape) + Integer (I));
          Norm := Get_Normal (Shape, First_Vertex_Index (Shape) + Integer (I));
          Vert := Get_Vertex (Shape, First_Vertex_Index (Shape) + Integer (I));
 
-         Data.all (GL.Types.Int (I) * 6) := Single(Vert.X * Scale);
-         Data.all (GL.Types.Int (I) * 6 + 1) := Single(Vert.Y * Scale);
-         Data.all (GL.Types.Int (I) * 6 + 2) := Single(Vert.Z * Scale);
-         Data.all (GL.Types.Int (I) * 6 + 3) := Single(Norm.X);
-         Data.all (GL.Types.Int (I) * 6 + 4) := Single(Norm.Y);
-         Data.all (GL.Types.Int (I) * 6 + 5) := Single(Norm.Z);
+         Data (GL.Types.Int (I) * 6) := Single(Vert.X * Scale);
+         Data (GL.Types.Int (I) * 6 + 1) := Single(Vert.Y * Scale);
+         Data (GL.Types.Int (I) * 6 + 2) := Single(Vert.Z * Scale);
+         Data (GL.Types.Int (I) * 6 + 3) := Single(Norm.X);
+         Data (GL.Types.Int (I) * 6 + 4) := Single(Norm.Y);
+         Data (GL.Types.Int (I) * 6 + 5) := Single(Norm.Z);
       end loop;
 
       for I in First_Face_Index (Shape) .. Last_Face_Index (Shape) loop
@@ -377,16 +339,13 @@ package body UI is
          It := It + 3;
       end loop;
 
-      if Data.all'Length > 0 and then Shape_Tris'Length > 0 then
-         Buffers.Sphere_VAO.Initialize_Id;
-         Buffers.Sphere_VAO.Bind;
+      if Data'Length > 0 and then Shape_Tris'Length > 0 then
+         Sphere_VAO.Bind;
 
-         Buffers.Vbo.Initialize_Id;
-         Bind (Array_Buffer, Buffers.Vbo);
-         Load_To_Single_Buffer (Array_Buffer, Data.all, Static_Draw);
+         Bind (Array_Buffer, Vbo);
+         Load_To_Single_Buffer (Array_Buffer, Data, Static_Draw);
 
-         Buffers.Ebo.Initialize_Id;
-         Bind (Element_Array_Buffer, Buffers.Ebo);
+         Bind (Element_Array_Buffer, Ebo);
          Load_To_Int_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
 
          Enable_Vertex_Attrib_Array (0);

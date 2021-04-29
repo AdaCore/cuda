@@ -12,7 +12,6 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-
 with Marching_Cubes.Data; use Marching_Cubes.Data;
 with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
 with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
@@ -36,8 +35,6 @@ is
       Interpolation_Steps : Positive := 4;
       XI, YI, ZI          : Integer)
    is
-      --  Local variables
-
       V0                  : Point_Real;
       E0, E1, E2          : Integer;
       Triangle_Index      : Integer;
@@ -77,7 +74,14 @@ is
          return Total - 1.0;
       end Metaballs;
 
-      -------------------
+      -------------
+      -- Density --
+      -------------
+
+      function Density (P : Point_Real) return Float is
+        (Metaballs (P));
+
+         -------------------
       -- Density_Index --
       -------------------
 
@@ -157,6 +161,7 @@ is
          Factor      : Float      := 0.5;
          Intr_Step   : Float;
          Dir, P1, P2 : Point_Real;
+         Point : Point_Real;
       begin
          if Record_All_Vertices
            or else V1 (E) = (0, 0, 0)
@@ -196,8 +201,24 @@ is
                Intr_Step := Intr_Step / 2.0;
             end loop;
 
-            Vertices (Vertex_Index) := (Index => Integer (TI),
-                                        Point => P1 + Dir * Factor);
+            Point := P1 + Dir * Factor;
+
+            declare
+               D : Float := 1.0 / 10.0;
+               Grad : Point_Real;
+            begin
+               Grad.X := Density (Point + (D, 0.0, 0.0))
+                 -Density (Point + (-D, 0.0, 0.0));
+               Grad.Y := Density (Point + (0.0, D, 0.0))
+                 -Density (Point + (0.0, -D, 0.0));
+               Grad.Z := Density (Point + (0.0, D, 0.0))
+                 -Density (Point + (0.0, -D, 0.0));
+
+               Vertices (Vertex_Index) := (Index => Integer (TI),
+                                           Point => Point,
+                                           Normal => -Grad);
+               --  TODO: Normalize Grad once we have a math run-time
+            end;
          end if;
       end Record_Edge;
 

@@ -32,6 +32,9 @@ package Geometry is
    function "-" (Left, Right : Point_Real) return Point_Real is
      (Left.X - Right.X, Left.Y - Right.Y, Left.Z - Right.Z);
 
+   function "-" (Right : Point_Real) return Point_Real is
+     (-Right.X, -Right.Y, -Right.Z);
+
    function "*" (Left : Point_Real; Right : Float) return Point_Real is
      (Left.X * Right, Left.Y * Right, Left.Z * Right);
 
@@ -75,7 +78,7 @@ package Geometry is
       I1, I2, I3 : Unsigned_32 := 0;
    end record with Convention => C;
 
-   type Triangle_Array is array (Natural range <>) of aliased Triangle;
+   type Triangle_Array is array (Natural range 0 .. <>) of aliased Triangle;
    type Triangle_Array_Access is access all Triangle_Array;
 
    ------------
@@ -83,11 +86,12 @@ package Geometry is
    ------------
 
    type Vertex is record
-      Point : Point_Real := (others => 0.0);
+         Point : Point_Real := (others => 0.0);
+         Normal : Point_Real := (others => 0.0);
       Index : Integer    := 0;
    end record with Convention => C;
 
-   type Vertex_Array is array (Natural range <>) of aliased Vertex;
+   type Vertex_Array is array (Natural range 0 .. <>) of aliased Vertex;
    type Vertex_Array_Access is access all Vertex_Array;
 
 end Geometry;

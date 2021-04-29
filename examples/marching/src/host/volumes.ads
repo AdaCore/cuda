@@ -25,8 +25,9 @@ package Volumes is
    procedure Clear (Shape : in out Volume);
 
    function Create_Vertex
-     (Shape : in out Volume;
-      Point :        Point_Real) return Volume_Index;
+     (Shape  : in out Volume;
+      Point  : Point_Real;
+      Normal : Point_Real) return Volume_Index;
    procedure Create_Face
      (Shape    : in out Volume;
       Indicies :        Volume_Indicies);
