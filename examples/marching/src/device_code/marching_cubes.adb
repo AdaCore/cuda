@@ -40,13 +40,15 @@ is
 
    Edge_Lattice : array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of aliased Integer with Volatile;
 
-   procedure Clear_Lattice
-     (XI, YI, ZI : Integer)
-   is
+   procedure Clear_Lattice (XI : Integer) is
    begin
-      Edge_Lattice (XI, YI, ZI, 0) := -1;
-      Edge_Lattice (XI, YI, ZI, 1) := -1;
-      Edge_Lattice (XI, YI, ZI, 2) := -1;
+      for YI in Edge_Lattice'Range (2) loop
+         for ZI in Edge_Lattice'Range (3) loop
+            Edge_Lattice (XI, YI, ZI, 0) := -1;
+            Edge_Lattice (XI, YI, ZI, 1) := -1;
+            Edge_Lattice (XI, YI, ZI, 2) := -1;
+         end loop;
+      end loop;
    end Clear_Lattice;
 
    ----------
@@ -406,10 +408,7 @@ is
    procedure Clear_Lattice_CUDA
    is
    begin
-      Clear_Lattice
-        (Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X),
-         Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),
-         Integer (Block_Idx.Z * Block_Dim.Z + Thread_Idx.Z));
+      Clear_Lattice (Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X));
    end Clear_Lattice_CUDA;
 
 end Marching_Cubes;

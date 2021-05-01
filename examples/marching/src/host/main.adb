@@ -197,8 +197,8 @@ begin
          
          pragma CUDA_Execute
            (Clear_Lattice_CUDA,
-            Blocks_Per_Grid,
-            Threads_Per_Block);
+            (Blocks_Per_Grid.X, 1, 1),
+            (Threads_Per_Block.X, 1, 1));
       
          pragma CUDA_Execute
            (Mesh_CUDA
