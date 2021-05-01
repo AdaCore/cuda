@@ -63,8 +63,8 @@ package Geometry is
    --------------
 
    type Triangle is record
-      I1, I2, I3 : Unsigned_32 := 0;
-   end record with Convention => C;
+      I1, I2, I3 : Integer := 0;
+   end record;
 
    type Triangle_Array is array (Natural range <>) of aliased Triangle;
    type Triangle_Array_Access is access all Triangle_Array;
@@ -74,10 +74,9 @@ package Geometry is
    ------------
 
    type Vertex is record
-         Point : Point_Real := (others => 0.0);
-         Normal : Point_Real := (others => 0.0);
-      Index : Integer    := 0;
-   end record with Convention => C;
+      Point : Point_Real := (others => 0.0);
+      Normal : Point_Real := (others => 0.0);
+   end record;
 
    type Vertex_Array is array (Natural range <>) of aliased Vertex;
    type Vertex_Array_Access is access all Vertex_Array;

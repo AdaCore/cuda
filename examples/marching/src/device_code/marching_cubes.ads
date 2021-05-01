@@ -39,6 +39,8 @@ package Marching_Cubes is
       Interpolation_Steps : Positive := 4;
       XI, YI, ZI          : Integer);
 
+   procedure Clear_Lattice_CUDA with CUDA_Global;
+
    procedure Mesh_CUDA
      (D_Balls             : Point_Real_Array_Access;
       D_Triangles         : Triangle_Array_Access;

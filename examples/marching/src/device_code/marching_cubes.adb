@@ -12,12 +12,42 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Data; use Data;
 with Marching_Cubes.Data; use Marching_Cubes.Data;
 with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
 with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
+with System.Atomic_Operations.Exchange;
 
 package body Marching_Cubes
 is
+
+   -- TODO: replace with proper runtime function when available
+   function Atomic_Compare_Exchange_4
+     (Ptr           : Address;
+      Expected      : Address;
+      Desired       : Integer;
+      Weak          : Boolean   := False;
+      Success_Model : Integer := 5;
+      Failure_Model : Integer := 5) return Boolean;
+   pragma Import (Intrinsic,
+                  Atomic_Compare_Exchange_4,
+                  "__atomic_compare_exchange_4");
+
+   --  function Atomic_Load_4
+   --    (Ptr   : Address;
+   --     Model : Integer := 5) return Integer;
+   --  pragma Import (Intrinsic, Atomic_Load_4, "__atomic_load_4");
+
+   Edge_Lattice : array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of aliased Integer with Volatile;
+
+   procedure Clear_Lattice
+     (XI, YI, ZI : Integer)
+   is
+   begin
+      Edge_Lattice (XI, YI, ZI, 0) := -1;
+      Edge_Lattice (XI, YI, ZI, 1) := -1;
+      Edge_Lattice (XI, YI, ZI, 2) := -1;
+   end Clear_Lattice;
 
    ----------
    -- Mesh --
@@ -156,71 +186,153 @@ is
       -- Record_Edge --
       -----------------
 
-      procedure Record_Edge (E : Integer; TI : Unsigned_32)
+      procedure Compute_Edge
+        (Vertex_Index : Integer; E : Integer)
       is
          Factor      : Float      := 0.5;
          Intr_Step   : Float;
          Dir, P1, P2 : Point_Real;
          Point : Point_Real;
       begin
-         if Record_All_Vertices
-           or else V1 (E) = (0, 0, 0)
-           or else V2 (E) = (0, 0, 0)
+         P1 := (Float (V1 (E).X) * Step.X,
+                Float (V1 (E).Y) * Step.Y,
+                Float (V1 (E).Z) * Step.Z);
+
+         P2 := (Float (V2 (E).X) * Step.X,
+                Float (V2 (E).Y) * Step.Y,
+                Float (V2 (E).Z) * Step.Z);
+
+         P1 := @ + V0;
+         P2 := @ + V0;
+
+         --  Interpolate
+
+         Intr_Step := (if Metaballs (P1) > 0.0 then -0.25 else 0.25);
+         Dir  := P2 - P1;
+
+         for I in 1 .. Interpolation_Steps loop
+            if Metaballs (P1 + Dir * Factor) > 0.0 then
+               Factor := Factor - Intr_Step;
+            else
+               Factor := Factor + Intr_Step;
+            end if;
+
+            Intr_Step := Intr_Step / 2.0;
+         end loop;
+
+         Point := P1 + Dir * Factor;
+
+         declare
+            D : Float := 1.0 / 10.0;
+            Grad : Point_Real;
+         begin
+            Grad.X := Density (Point + (D, 0.0, 0.0))
+              -Density (Point + (-D, 0.0, 0.0));
+            Grad.Y := Density (Point + (0.0, D, 0.0))
+              -Density (Point + (0.0, -D, 0.0));
+            Grad.Z := Density (Point + (0.0, D, 0.0))
+              -Density (Point + (0.0, -D, 0.0));
+
+            Vertices (Vertex_Index) := (Point => Point,
+                                        Normal => -Grad);
+            --  TODO: Normalize Grad once we have a math run-time
+         end;
+      end Compute_Edge;
+
+      function Record_Edge
+        (E : Integer;
+         XI, YI, ZI : Integer) return Integer
+      is
+         P1 : Point_Int_01 := V1 (E);
+         P2 : Point_Int_01 := V2 (E);
+         X1 : Integer := XI + P1.X;
+         Y1 : Integer := YI + P1.Y;
+         Z1 : Integer := ZI + P1.Z;
+         X2 : Integer := XI + P2.X;
+         Y2 : Integer := YI + P2.Y;
+         Z2 : Integer := ZI + P2.Z;
+
+         Temp       : Integer;
+         Edge_Index : Integer := -1;
+         Y_Size     : constant Integer := Lattice_Size.Y + 1;
+         Z_Size     : constant Integer := Lattice_Size.Z + 1;
+
+         Lattice_Value : aliased Integer := -1;
+         Vertex_Index : aliased Integer;
+      begin
+         if X2 > X1 then
+            Temp := X1;
+            X1   := X2;
+            X2   := Temp;
+         end if;
+
+         if Y2 > Y1 then
+            Temp := Y1;
+            Y1   := Y2;
+            Y2   := Temp;
+         end if;
+
+         if Z2 > Z1 then
+            Temp := Z1;
+            Z1   := Z2;
+            Z2   := Temp;
+         end if;
+
+         --  Use a unique value as the edge index
+
+         if X1 /= X2 then
+            Edge_Index := 0;
+         elsif Y1 /= Y2 then
+            Edge_Index := 1;
+         elsif Z1 /= Z2 then
+            Edge_Index := 2;
+         end if;
+
+         if Edge_Index = -1 then
+            return 0;
+            --  raise Program_Error;
+         end if;
+
+         --  If the vertex index has already been computed, retrieve it
+
+         --Vertex_Index := Atomic_Load_4 (Edge_Lattice (X1, Y1, Z1, Edge_Index)'Address);
+         Vertex_Index := Edge_Lattice (X1, Y1, Z1, Edge_Index);
+
+         if Vertex_Index /= -1 then
+            while Vertex_Index < 0 loop
+               --Vertex_Index := Atomic_Load_4 (Edge_Lattice (X1, Y1, Z1, Edge_Index)'Address);
+               Vertex_Index := Edge_Lattice (X1, Y1, Z1, Edge_Index);
+            end loop;
+
+            return Vertex_Index;
+         end if;
+
+         --  If the vertex index has not been computed, attempt at reserving
+         --  it by putting -2
+
+         if Atomic_Compare_Exchange_4
+           (Ptr      => Edge_Lattice (X1, Y1, Z1, Edge_Index)'Address,
+            Expected => Lattice_Value'Address,
+            Desired  => -2)
          then
             Vertex_Index := Integer (Atomic_Add (Last_Vertex, 1));
 
-            if Vertex_Index not in Vertices'First - 1 .. Vertices'Last - 1 then
-               return;
-            end if;
+            --  TODO: probably need an atomic store here
+            Edge_Lattice (X1, Y1, Z1, Edge_Index) := Vertex_Index;
 
-            Vertex_Index := Vertex_Index + 1;
+            Compute_Edge (Vertex_Index, E);
 
-            P1 := (Float (V1 (E).X) * Step.X,
-                   Float (V1 (E).Y) * Step.Y,
-                   Float (V1 (E).Z) * Step.Z);
-
-            P2 := (Float (V2 (E).X) * Step.X,
-                   Float (V2 (E).Y) * Step.Y,
-                   Float (V2 (E).Z) * Step.Z);
-
-            P1 := @ + V0;
-            P2 := @ + V0;
-
-            --  Interpolate
-
-            Intr_Step := (if Metaballs (P1) > 0.0 then -0.25 else 0.25);
-            Dir  := P2 - P1;
-
-            for I in 1 .. Interpolation_Steps loop
-               if Metaballs (P1 + Dir * Factor) > 0.0 then
-                  Factor := Factor - Intr_Step;
-               else
-                  Factor := Factor + Intr_Step;
-               end if;
-
-               Intr_Step := Intr_Step / 2.0;
+            return Vertex_Index;
+         else
+            while Lattice_Value < 0 loop
+               --Lattice_Value := Atomic_Load_4 (Edge_Lattice (X1, Y1, Z1, Edge_Index)'Address);
+               Lattice_Value := Edge_Lattice (X1, Y1, Z1, Edge_Index);
             end loop;
 
-            Point := P1 + Dir * Factor;
-
-            declare
-               D : Float := 1.0 / 10.0;
-               Grad : Point_Real;
-            begin
-               Grad.X := Density (Point + (D, 0.0, 0.0))
-                 -Density (Point + (-D, 0.0, 0.0));
-               Grad.Y := Density (Point + (0.0, D, 0.0))
-                 -Density (Point + (0.0, -D, 0.0));
-               Grad.Z := Density (Point + (0.0, D, 0.0))
-                 -Density (Point + (0.0, -D, 0.0));
-
-               Vertices (Vertex_Index) := (Index => Integer (TI),
-                                           Point => Point,
-                                           Normal => -Grad);
-               --  TODO: Normalize Grad once we have a math run-time
-            end;
+            return Lattice_Value;
          end if;
       end Record_Edge;
+
 
       --  Start of processing for Mesh
 
@@ -254,19 +366,9 @@ is
          E2 := Triangle_Table (Index * 15 + I * 3 + 2);
 
          Triangles (Triangle_Index) :=
-           (I1 => Get_Edge_Index (XI, YI, ZI, V1 (E0), V2 (E0)),
-            I2 => Get_Edge_Index (XI, YI, ZI, V1 (E1), V2 (E1)),
-            I3 => Get_Edge_Index (XI, YI, ZI, V1 (E2), V2 (E2)));
-
-         --  Only record the bottom edge {0, 0, 0}. Others will be
-         --  recorded by other cubes, unless for the boundary edges
-         --  (identified by Record_All_Vertices).
-
-         --  There may be a bug with which vertices can be recorded?
-
-         Record_Edge (E0, Triangles (Triangle_Index).I1);
-         Record_Edge (E1, Triangles (Triangle_Index).I2);
-         Record_Edge (E2, Triangles (Triangle_Index).I3);
+           (I1 => Record_Edge (E0, XI, YI, ZI),
+            I2 => Record_Edge (E1, XI, YI, ZI),
+            I3 => Record_Edge (E2, XI, YI, ZI));
       end loop;
    end Mesh;
 
@@ -300,5 +402,14 @@ is
          Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),
          Integer (Block_Idx.Z * Block_Dim.Z + Thread_Idx.Z));
    end Mesh_CUDA;
+
+   procedure Clear_Lattice_CUDA
+   is
+   begin
+      Clear_Lattice
+        (Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X),
+         Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),
+         Integer (Block_Idx.Z * Block_Dim.Z + Thread_Idx.Z));
+   end Clear_Lattice_CUDA;
 
 end Marching_Cubes;

@@ -194,6 +194,11 @@ begin
          Assign (W_Last_Triangle, 0);
          Assign (W_Last_Vertex, 0);
          Assign (W_Debug_Value, 0);
+         
+         pragma CUDA_Execute
+           (Clear_Lattice_CUDA,
+            Blocks_Per_Grid,
+            Threads_Per_Block);
       
          pragma CUDA_Execute
            (Mesh_CUDA
@@ -211,8 +216,7 @@ begin
                Interpolation_Steps => Interpolation_Steps,
                Debug_Value         => Device (W_Debug_Value)),
             Blocks_Per_Grid,
-            Threads_Per_Block
-           );
+            Threads_Per_Block);
          
          Compute_Started := True;
       elsif Mode = Mode_Sequential then

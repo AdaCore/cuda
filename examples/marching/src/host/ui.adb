@@ -294,39 +294,7 @@ package body UI is
    Scale        : constant Float   := 1.3;
    Sphere_VAO : Vertex_Array_Object;
    Vbo, Ebo : Buffer;
-   Edge_Lattice : array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of Integer;
    Data : Single_Array(0 .. Gl.Types.Size (Samples ** 3));
-
-   -------------------
-   -- Index_To_XYZE --
-   -------------------
-
-   procedure Index_To_XYZE (I : Integer; X, Y, Z, E : out Integer) is
-      ySize : constant Integer := Samples + 1;
-      zSize : constant Integer := Samples + 1;
-   begin
-      e := i mod 3;
-      z := ((i - e) / 3) mod ySize;
-      y := ((i - e - z * 3) / (3 * zSize)) mod ySize;
-      x := (i - e - z * 3 - y * (3 * zSize)) / (3 * zSize * ySize);
-   end Index_To_XYZE;
-
-   ----------------------
-   -- Get_Vertex_Index --
-   ----------------------
-
-   function Get_Vertex_Index (I : Unsigned_32) return Integer is
-      e, zi, yi, xi : Integer;
-   begin
-      Index_To_XYZE (Integer (i), xi, yi, zi, e);
-
-
-      return R : constant Integer := Edge_Lattice (xi, yi, zi, e) do
-         if R = -1 then
-            raise Program_Error;
-         end if;
-      end return;
-   end Get_Vertex_Index;
 
    procedure Render_Shape (Verts : Vertex_Array; Tris : Triangle_Array) is
       Max_Vertex : Integer := -1;
@@ -342,37 +310,26 @@ package body UI is
          Ebo.Initialize_Id;
       end if;
 
-      Edge_Lattice := (others => (others => (others => (others => -1))));
-
       for V of Verts loop
-         declare
-            E, zi, yi, xi : Integer;
-         begin
-            Index_To_XYZE (V.Index, xi, yi, zi, e);
+         Max_Vertex := Max_Vertex + 1;
 
-            if Edge_Lattice (xi, yi, zi, e) = -1 then
-               Max_Vertex := Max_Vertex + 1;
-               Edge_Lattice (xi, yi, zi, e) := Max_Vertex;
+         Vert := V.Point;
+         Norm := V.Normal;
 
-               Vert := V.Point;
-               Norm := V.Normal;
-
-               Data (GL.Types.Int (Max_Vertex) * 6) := Single(Vert.X * Scale);
-               Data (GL.Types.Int (Max_Vertex) * 6 + 1) := Single(Vert.Y * Scale);
-               Data (GL.Types.Int (Max_Vertex) * 6 + 2) := Single(Vert.Z * Scale);
-               Data (GL.Types.Int (Max_Vertex) * 6 + 3) := Single(Norm.X);
-               Data (GL.Types.Int (Max_Vertex) * 6 + 4) := Single(Norm.Y);
-               Data (GL.Types.Int (Max_Vertex) * 6 + 5) := Single(Norm.Z);
-            end if;
-         end;
+         Data (GL.Types.Int (Max_Vertex) * 6) := Single(Vert.X * Scale);
+         Data (GL.Types.Int (Max_Vertex) * 6 + 1) := Single(Vert.Y * Scale);
+         Data (GL.Types.Int (Max_Vertex) * 6 + 2) := Single(Vert.Z * Scale);
+         Data (GL.Types.Int (Max_Vertex) * 6 + 3) := Single(Norm.X);
+         Data (GL.Types.Int (Max_Vertex) * 6 + 4) := Single(Norm.Y);
+         Data (GL.Types.Int (Max_Vertex) * 6 + 5) := Single(Norm.Z);
       end loop;
 
       It := 0;
 
       for T of Tris loop
-         Shape_Tris (It) := Gl.Types.Int (Get_Vertex_Index (T.i1));
-         Shape_Tris (It + 1) := Gl.Types.Int (Get_Vertex_Index (T.i2));
-         Shape_Tris (It + 2) := Gl.Types.Int (Get_Vertex_Index (T.i3));
+         Shape_Tris (It) := Gl.Types.Int (T.i1);
+         Shape_Tris (It + 1) := Gl.Types.Int (T.i2);
+         Shape_Tris (It + 2) := Gl.Types.Int (T.i3);
 
          It := It + 3;
       end loop;
