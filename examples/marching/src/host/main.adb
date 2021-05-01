@@ -42,21 +42,8 @@ with UI; use UI;
 with CUDA_Objects;
 with CUDA_Arrays;
 
-
 procedure Main is         
-   
-   function Length (R : Point_Real) return Float is
-     (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
-
-   function Normalize (R : Point_Real) return Point_Real is
-     (declare
-      L : constant Float := Length (R);
-      begin
-        (if L = 0.0 then
-             (0.0, 0.0, 0.0)
-         else
-            R / L));
-   
+    
    Seed : Generator;
    
    Interpolation_Steps : constant Positive := 64;
@@ -164,6 +151,8 @@ procedure Main is
    
    Mode : Mode_Type := Mode_CUDA;
    
+   Compute_Started : Boolean := False;
+   
 begin      
    if Argument_Count >= 1 then
       if Ada.Command_Line.Argument (1) = "1" then
@@ -190,6 +179,17 @@ begin
       Last_Vertex := Verts'First - 1;
       
       if Mode = Mode_CUDA then
+         if Compute_Started then
+            --  Copy back data if computation has been done
+      
+            Assign (Debug_Value, W_Debug_Value);
+            Assign (Last_Triangle, W_Last_Triangle);
+            Assign (Last_Vertex, W_Last_Vertex);
+      
+            Assign (Tris (0 .. Last_Triangle), W_Triangles, 0, Last_Triangle);
+            Assign (Verts (0 .. Last_Vertex), W_Vertices, 0, Last_Vertex);
+         end if;
+         
          Assign (W_Balls, Balls);
          Assign (W_Last_Triangle, 0);
          Assign (W_Last_Vertex, 0);
@@ -213,15 +213,8 @@ begin
             Blocks_Per_Grid,
             Threads_Per_Block
            );
-      
-         --  Copy back data
-      
-         Assign (Debug_Value, W_Debug_Value);
-         Assign (Last_Triangle, W_Last_Triangle);
-         Assign (Last_Vertex, W_Last_Vertex);
-      
-         Assign (Tris (0 .. Last_Triangle), W_Triangles, 0, Last_Triangle);
-         Assign (Verts (0 .. Last_Vertex), W_Vertices, 0, Last_Vertex);
+         
+         Compute_Started := True;
       elsif Mode = Mode_Sequential then
          for XI in 0 .. Samples - 1 loop
             for YI in 0 .. Samples - 1 loop
