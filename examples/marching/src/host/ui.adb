@@ -38,6 +38,7 @@ with Cameras; use Cameras;
 with Geometry; use Geometry;
 with Marching_Cubes; use Marching_Cubes;
 with Utilities; use Utilities;
+with Data; use Data;
 
 package body UI is
 
@@ -173,7 +174,7 @@ package body UI is
       New_Line;
    end Put_Line;
 
-   procedure Render_Shape (Shape : Volume);
+   procedure Render_Shape (Verts : Vertex_Array; Tris : Triangle_Array);
 
    procedure Initialize is
    begin
@@ -213,7 +214,7 @@ package body UI is
 
    Angle : Degree := 0.0;
 
-   procedure Draw (Shape : Volume; Running : out Boolean) is
+   procedure Draw (Verts : Vertex_Array; Tris : Triangle_Array; Running : out Boolean) is
       Delta_Time : Seconds := 0.0;
       Last_Frame : Seconds := 0.0;
       Current_Frame : Seconds;
@@ -266,7 +267,7 @@ package body UI is
 
       GL.Uniforms.Set_Single (S_Metallic, 0.9);
       GL.Uniforms.Set_Single (S_Roughtness, 0.5);
-      Render_Shape (Shape);
+      Render_Shape (Verts, Tris);
 
       for I in Light_Positions'Range loop
          declare
@@ -293,23 +294,47 @@ package body UI is
    Scale        : constant Float   := 1.3;
    Sphere_VAO : Vertex_Array_Object;
    Vbo, Ebo : Buffer;
+   Edge_Lattice : array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of Integer;
+   Data : Single_Array(0 .. Gl.Types.Size (Samples ** 3));
 
-   procedure Render_Shape (Shape : Volume) is
+   -------------------
+   -- Index_To_XYZE --
+   -------------------
+
+   procedure Index_To_XYZE (I : Integer; X, Y, Z, E : out Integer) is
+      ySize : constant Integer := Samples + 1;
+      zSize : constant Integer := Samples + 1;
+   begin
+      e := i mod 3;
+      z := ((i - e) / 3) mod ySize;
+      y := ((i - e - z * 3) / (3 * zSize)) mod ySize;
+      x := (i - e - z * 3 - y * (3 * zSize)) / (3 * zSize * ySize);
+   end Index_To_XYZE;
+
+   ----------------------
+   -- Get_Vertex_Index --
+   ----------------------
+
+   function Get_Vertex_Index (I : Unsigned_32) return Integer is
+      e, zi, yi, xi : Integer;
+   begin
+      Index_To_XYZE (Integer (i), xi, yi, zi, e);
+
+
+      return R : constant Integer := Edge_Lattice (xi, yi, zi, e) do
+         if R = -1 then
+            raise Program_Error;
+         end if;
+      end return;
+   end Get_Vertex_Index;
+
+   procedure Render_Shape (Verts : Vertex_Array; Tris : Triangle_Array) is
+      Max_Vertex : Integer := -1;
       Vert, Norm  : Point_Real;
-      Tri         : Volume_Indicies;
-
-      Tris_Count : GL.Types.Int := Gl.Types.Int ((Last_Face_Index (Shape) - First_Face_Index (Shape) + 1) * 3);
-      Vert_Count : GL.Types.Int := Gl.Types.Int ((Last_Vertex_Index (Shape) - First_Vertex_Index (Shape) + 1));
-
-      Shape_Tris  : Int_Array (0 .. Tris_Count - 1);
 
       It : GL.Types.Int := 0;
       Stride : GL.Types.Int := (3 * 2 * 3) * (Single'Size / 8);
-
-      Data : Single_Array(0 .. Vert_Count * 6 - 1);
-
-      Triangles_Number : GL.Types.Size :=
-        GL.Types.Size (Last_Face_Index (Shape) - First_Face_Index (Shape) + 1);
+      Shape_Tris : Int_Array (0 .. (Tris'Length) * 3 - 1);
    begin
       if not Sphere_VAO.Initialized then
          Sphere_VAO.Initialize_Id;
@@ -317,24 +342,37 @@ package body UI is
          Ebo.Initialize_Id;
       end if;
 
-      for I in 0 .. Vert_Count - 1 loop
-         Vert := Get_Vertex (Shape, First_Vertex_Index (Shape) + Integer (I));
-         Norm := Get_Normal (Shape, First_Vertex_Index (Shape) + Integer (I));
-         Vert := Get_Vertex (Shape, First_Vertex_Index (Shape) + Integer (I));
+      Edge_Lattice := (others => (others => (others => (others => -1))));
 
-         Data (GL.Types.Int (I) * 6) := Single(Vert.X * Scale);
-         Data (GL.Types.Int (I) * 6 + 1) := Single(Vert.Y * Scale);
-         Data (GL.Types.Int (I) * 6 + 2) := Single(Vert.Z * Scale);
-         Data (GL.Types.Int (I) * 6 + 3) := Single(Norm.X);
-         Data (GL.Types.Int (I) * 6 + 4) := Single(Norm.Y);
-         Data (GL.Types.Int (I) * 6 + 5) := Single(Norm.Z);
+      for V of Verts loop
+         declare
+            E, zi, yi, xi : Integer;
+         begin
+            Index_To_XYZE (V.Index, xi, yi, zi, e);
+
+            if Edge_Lattice (xi, yi, zi, e) = -1 then
+               Max_Vertex := Max_Vertex + 1;
+               Edge_Lattice (xi, yi, zi, e) := Max_Vertex;
+
+               Vert := V.Point;
+               Norm := V.Normal;
+
+               Data (GL.Types.Int (Max_Vertex) * 6) := Single(Vert.X * Scale);
+               Data (GL.Types.Int (Max_Vertex) * 6 + 1) := Single(Vert.Y * Scale);
+               Data (GL.Types.Int (Max_Vertex) * 6 + 2) := Single(Vert.Z * Scale);
+               Data (GL.Types.Int (Max_Vertex) * 6 + 3) := Single(Norm.X);
+               Data (GL.Types.Int (Max_Vertex) * 6 + 4) := Single(Norm.Y);
+               Data (GL.Types.Int (Max_Vertex) * 6 + 5) := Single(Norm.Z);
+            end if;
+         end;
       end loop;
 
-      for I in First_Face_Index (Shape) .. Last_Face_Index (Shape) loop
-         Tri := Get_Vertices (Shape, I);
-         Shape_Tris (It) := Gl.Types.Int (Tri (1));
-         Shape_Tris (It + 1) := Gl.Types.Int (Tri (2));
-         Shape_Tris (It + 2) := Gl.Types.Int (Tri (3));
+      It := 0;
+
+      for T of Tris loop
+         Shape_Tris (It) := Gl.Types.Int (Get_Vertex_Index (T.i1));
+         Shape_Tris (It + 1) := Gl.Types.Int (Get_Vertex_Index (T.i2));
+         Shape_Tris (It + 2) := Gl.Types.Int (Get_Vertex_Index (T.i3));
 
          It := It + 3;
       end loop;
@@ -343,7 +381,7 @@ package body UI is
          Sphere_VAO.Bind;
 
          Bind (Array_Buffer, Vbo);
-         Load_To_Single_Buffer (Array_Buffer, Data, Static_Draw);
+         Load_To_Single_Buffer (Array_Buffer, Data (0 .. Gl.Types.Int (Max_Vertex + 1) * 6 - 1), Static_Draw);
 
          Bind (Element_Array_Buffer, Ebo);
          Load_To_Int_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
@@ -353,7 +391,7 @@ package body UI is
          Enable_Vertex_Attrib_Array (2);
          Set_Vertex_Attrib_Pointer (2, 3, Single_Type, 6, 3);
 
-         Draw_Elements (Triangles, Gl.Types.Int (Tris_Count), UInt_Type);
+         Draw_Elements (Triangles, Gl.Types.Int (Tris'Length) * 3, UInt_Type);
       end if;
    end Render_Shape;
 

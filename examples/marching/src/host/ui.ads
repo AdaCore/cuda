@@ -1,4 +1,4 @@
-with Volumes; use Volumes;
+with Geometry; use Geometry;
 
 package UI is
 
@@ -6,6 +6,6 @@ package UI is
 
    procedure Finalize;
 
-   procedure Draw (Shape : Volume; Running : out Boolean);
+   procedure Draw (Verts : Vertex_Array; Tris : Triangle_Array; Running : out Boolean);
 
 end UI;

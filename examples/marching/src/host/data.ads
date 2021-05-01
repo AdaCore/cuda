@@ -34,7 +34,7 @@ package Data is
 
    Start   : constant Point_Real := (-2.0, -2.0, -2.0);
    Stop    : constant Point_Real := (2.0, 2.0, 2.0);
-   Samples : constant Integer := 64;
+   Samples : constant Integer := 128;
    --  Number of division for each dimensison of the space described above.
 
 

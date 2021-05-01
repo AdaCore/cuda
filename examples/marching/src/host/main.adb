@@ -30,7 +30,6 @@ with Maths;                    use Maths.Single_Math_Functions;
 with Program_Loader;           use Program_Loader;
 with Utilities;                use Utilities;
 
-with Volumes;                  use Volumes;
 with Geometry;                 use Geometry;
 with Marching_Cubes;           use Marching_Cubes;
 with Data;                     use Data;
@@ -39,7 +38,6 @@ with CUDA.Driver_Types; use CUDA.Driver_Types;
 with CUDA.Vector_Types; use CUDA.Vector_Types;
 
 with UI; use UI;
-with Shape_Management; use Shape_Management;
 
 with CUDA_Objects;
 with CUDA_Arrays;
@@ -47,10 +45,21 @@ with CUDA_Arrays;
 
 procedure Main is         
    
+   function Length (R : Point_Real) return Float is
+     (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
+
+   function Normalize (R : Point_Real) return Point_Real is
+     (declare
+      L : constant Float := Length (R);
+      begin
+        (if L = 0.0 then
+             (0.0, 0.0, 0.0)
+         else
+            R / L));
+   
    Seed : Generator;
    
    Interpolation_Steps : constant Positive := 64;
-   Shape               : Volume;
       
    Last_Triangle     : aliased Integer;
    Last_Vertex       : aliased Integer;
@@ -244,16 +253,14 @@ begin
          for XI in 0 .. Samples - 1 loop
             Compute_Tasks (XI).Finished;
          end loop;
-      end if;
-      
-      Shape_Management.Create_Volume
-        (Shape,
-         Verts (0 .. Integer (Last_Vertex)),
-         Tris (0 .. Integer (Last_Triangle)));
+      end if;      
       
       --  Build result data        
       
-      Draw (Shape, Running);      
+      Draw 
+        (Verts (0 .. Integer (Last_Vertex)), 
+         Tris (0 .. Integer (Last_Triangle)),
+         Running);      
       
       --  Move the balls
    
@@ -286,8 +293,6 @@ begin
          FPS       := 0;
          Last_Time := Clock;
       end if;
-      
-      Clear (Shape);
    end loop;
    
    --  Finalize

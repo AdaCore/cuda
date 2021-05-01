@@ -50,18 +50,6 @@ package Geometry is
    type Point_Real_Array is array (Natural range <>) of aliased Point_Real;
    type Point_Real_Array_Access is access all Point_Real_Array;
 
-   function Length (R : Point_Real) return Float is
-     (Sqrt (R.X ** 2 + R.Y ** 2 + R.Z ** 2));
-
-   function Normalize (R : Point_Real) return Point_Real is
-     (declare
-         L : constant Float := Length (R);
-      begin
-         (if L = 0.0 then
-            (0.0, 0.0, 0.0)
-         else
-            R / L));
-
    ---------------
    -- Point_Int --
    ---------------
@@ -78,7 +66,7 @@ package Geometry is
       I1, I2, I3 : Unsigned_32 := 0;
    end record with Convention => C;
 
-   type Triangle_Array is array (Natural range 0 .. <>) of aliased Triangle;
+   type Triangle_Array is array (Natural range <>) of aliased Triangle;
    type Triangle_Array_Access is access all Triangle_Array;
 
    ------------
@@ -91,7 +79,7 @@ package Geometry is
       Index : Integer    := 0;
    end record with Convention => C;
 
-   type Vertex_Array is array (Natural range 0 .. <>) of aliased Vertex;
+   type Vertex_Array is array (Natural range <>) of aliased Vertex;
    type Vertex_Array_Access is access all Vertex_Array;
 
 end Geometry;

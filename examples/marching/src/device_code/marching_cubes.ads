@@ -19,7 +19,7 @@ with Interfaces.C; use Interfaces.C;
 with System; use System;
 
 package Marching_Cubes is
-   type Unsigned32_Array is array (Integer range 0 .. <>) of aliased Unsigned_32;
+   type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
    type Int_Access is access all Integer;
 
