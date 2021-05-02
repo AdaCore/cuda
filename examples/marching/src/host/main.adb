@@ -57,6 +57,8 @@ procedure Main is
    
    Running           : Boolean := True;
    
+   package Ball_Wrappers is new CUDA_Arrays 
+     (Ball, Natural, Ball_Array, Ball_Array_Access);
    package Point_Real_Wrappers is new CUDA_Arrays 
      (Point_Real, Natural, Point_Real_Array, Point_Real_Array_Access);
    package Triangle_Wrappers is new CUDA_Arrays 
@@ -65,13 +67,14 @@ procedure Main is
      (Vertex, Natural, Vertex_Array, Vertex_Array_Access);
    
    
-   W_Balls             : Point_Real_Wrappers.CUDA_Array_Access;   
+   W_Balls             : Ball_Wrappers.CUDA_Array_Access;   
    W_Triangles         : Triangle_Wrappers.CUDA_Array_Access;
    W_Vertices          : Vertex_Wrappers.CUDA_Array_Access;
   
    use Point_Real_Wrappers;
    use Triangle_Wrappers;
    use Vertex_Wrappers;
+   use Ball_Wrappers;
    
    Threads_Per_Block : constant Dim3 := (8, 4, 4); 
    Blocks_Per_Grid : constant Dim3 :=
@@ -263,12 +266,12 @@ begin
    
       for I in Balls'Range loop
          declare
-            New_Position : Point_Real := Balls (I);
+            New_Position : Point_Real := Balls (I).Position;
             Speed : constant := 0.01;
          begin
-            New_Position.X := Balls (I).X + Speeds (I).X;
-            New_Position.Y := Balls (I).Y + Speeds (I).Y;
-            New_Position.Z := Balls (I).Z + Speeds (I).Z;
+            New_Position.X := Balls (I).Position.X + Speeds (I).X;
+            New_Position.Y := Balls (I).Position.Y + Speeds (I).Y;
+            New_Position.Z := Balls (I).Position.Z + Speeds (I).Z;
       
             if Length (New_Position) > 1.0 then
                Speeds (I).X := -@ + (Random (Seed) - 0.5) * Speed * 0.2;
@@ -278,7 +281,7 @@ begin
                Speeds (I) := Normalize (Speeds (I)) * Speed;
             end if;
       
-            Balls (I) := New_Position;
+            Balls (I).Position := New_Position;
          end;
       end loop;
       

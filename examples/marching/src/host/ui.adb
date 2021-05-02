@@ -137,12 +137,12 @@ package body UI is
    Shader : GL.Objects.Programs.Program;
    Light_Positions : Vector3_Array (0 .. 3) :=
      ((10.0,  10.0, 10.0),
-      (10.0,  -10.0, 10.0),
-      (10.0,  10.0, -10.0),
-      (-10.0,  10.0, -10.0));
+      (10.0,  10.0, 10.0),
+      (10.0,  10.0, 10.0),
+      (10.0,  10.0, 10.0));
    Light_Colors :Vector3_Array (0 .. 3) :=
-     ((0.0, 300.0, 0.0),
-      (0.0, 300.0, 0.0),
+     ((300.0, 300.0, 300.0),
+      (300.0, 300.0, 300.0),
       (300.0, 300.0, 300.0),
       (300.0, 300.0, 300.0));
 
@@ -199,10 +199,10 @@ package body UI is
       GL.Objects.Programs.Use_Program (Shader);
 
       declare
-         Albedo : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "albedo");
+--         Albedo : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "albedo");
          Ao : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "ao");
       begin
-         GL.Uniforms.Set_Single (Albedo, 1.0, 1.0, 1.0);
+--         GL.Uniforms.Set_Single (Albedo, 1.0, 1.0, 1.0);
          GL.Uniforms.Set_Single (Ao, 1.0);
       end;
    end Initialize;
@@ -233,7 +233,7 @@ package body UI is
       Camera.Pitch := Angle + 270.0;
       Update_Camera_Vectors (Camera);
 
-      Angle := Angle + 0.1;
+      --Angle := Angle + 0.1;
 
       Current_Frame := Glfw.Time;
 
@@ -301,7 +301,6 @@ package body UI is
       Vert, Norm  : Point_Real;
 
       It : GL.Types.Int := 0;
-      Stride : GL.Types.Int := (3 * 2 * 3) * (Single'Size / 8);
       Shape_Tris : Int_Array (0 .. (Tris'Length) * 3 - 1);
    begin
       if not Sphere_VAO.Initialized then
@@ -316,12 +315,15 @@ package body UI is
          Vert := V.Point;
          Norm := V.Normal;
 
-         Data (GL.Types.Int (Max_Vertex) * 6) := Single(Vert.X * Scale);
-         Data (GL.Types.Int (Max_Vertex) * 6 + 1) := Single(Vert.Y * Scale);
-         Data (GL.Types.Int (Max_Vertex) * 6 + 2) := Single(Vert.Z * Scale);
-         Data (GL.Types.Int (Max_Vertex) * 6 + 3) := Single(Norm.X);
-         Data (GL.Types.Int (Max_Vertex) * 6 + 4) := Single(Norm.Y);
-         Data (GL.Types.Int (Max_Vertex) * 6 + 5) := Single(Norm.Z);
+         Data (GL.Types.Int (Max_Vertex) * 9) := Single(Vert.X * Scale);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 1) := Single(Vert.Y * Scale);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 2) := Single(Vert.Z * Scale);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 3) := Single(Norm.X);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 4) := Single(Norm.Y);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 5) := Single(Norm.Z);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 6) := Single(V.Color.X);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 7) := Single(V.Color.Y);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 8) := Single(V.Color.Z);
       end loop;
 
       It := 0;
@@ -338,15 +340,17 @@ package body UI is
          Sphere_VAO.Bind;
 
          Bind (Array_Buffer, Vbo);
-         Load_To_Single_Buffer (Array_Buffer, Data (0 .. Gl.Types.Int (Max_Vertex + 1) * 6 - 1), Static_Draw);
+         Load_To_Single_Buffer (Array_Buffer, Data (0 .. Gl.Types.Int (Max_Vertex + 1) * 9 - 1), Static_Draw);
 
          Bind (Element_Array_Buffer, Ebo);
          Load_To_Int_Buffer (Element_Array_Buffer, Shape_Tris, Static_Draw);
 
          Enable_Vertex_Attrib_Array (0);
-         Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 6, 0);
+         Set_Vertex_Attrib_Pointer (0, 3, Single_Type, 9, 0);
          Enable_Vertex_Attrib_Array (2);
-         Set_Vertex_Attrib_Pointer (2, 3, Single_Type, 6, 3);
+         Set_Vertex_Attrib_Pointer (2, 3, Single_Type, 9, 3);
+         Enable_Vertex_Attrib_Array (3);
+         Set_Vertex_Attrib_Pointer (3, 3, Single_Type, 9, 6);
 
          Draw_Elements (Triangles, Gl.Types.Int (Tris'Length) * 3, UInt_Type);
       end if;

@@ -17,6 +17,7 @@ with Geometry;              use Geometry;
 with Interfaces;   use Interfaces;
 with Interfaces.C; use Interfaces.C;
 with System; use System;
+with Data; use Data;
 
 package Marching_Cubes is
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
@@ -28,7 +29,7 @@ package Marching_Cubes is
    ----------
 
    procedure Mesh
-     (Balls               : Point_Real_Array;
+     (Balls               : Ball_Array;
       Triangles           : in out Triangle_Array;
       Vertices            : in out Vertex_Array;
       Start               : Point_Real;
@@ -42,7 +43,7 @@ package Marching_Cubes is
    procedure Clear_Lattice_CUDA with CUDA_Global;
 
    procedure Mesh_CUDA
-     (D_Balls             : Point_Real_Array_Access;
+     (D_Balls             : Ball_Array_Access;
       D_Triangles         : Triangle_Array_Access;
       D_Vertices          : Vertex_Array_Access;
       Ball_Size           : Integer;

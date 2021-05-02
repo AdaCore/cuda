@@ -18,19 +18,30 @@ package Data is
 
    Tris   : Triangle_Array (0 .. 1_000_000);
    Verts  : Vertex_Array (0 .. Tris'Length * 3 - 1);
-   Balls  : Point_Real_Array :=
-     (0 => (0.0, 0.0, 0.0),
-      1 => (0.0, 0.0, 0.0),
-      2 => (0.0, 0.0, 0.0),
-      3 => (0.0, 0.0, 0.0),
-      4 => (0.0, 0.0, 0.0));
+
+   type Ball is record
+      Position : Point_Real;
+      Color : Point_Real;
+   end record;
+
+   type Ball_Array is array (Natural range <>) of Ball;
+   type Ball_Array_Access is access all Ball_Array;
+
+   Balls  : Ball_Array :=
+     (0 => (Position => (0.0, 0.0, 0.0), Color => (1.0, 0.0, 0.0)),
+      1 => (Position => (0.0, 0.0, 0.0), Color => (1.0, 0.0, 0.0)),
+      2 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 1.0, 0.0)),
+      3 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 1.0, 0.0)),
+      4 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 0.0, 1.0)),
+      5 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 0.0, 1.0)));
 
    Speeds : array (Balls'Range) of Point_Real :=
      ((0.01, 0.0, 0.0),
-      (0.0, -0.02, 0.0),
-      (0.01, 0.00, 0.005),
-      (0.001, 0.002, 0.0),
-      (0.002, 0.0, 0.01));
+      (-0.01, 0.0, 0.0),
+      (0.0, 0.01, 0.0),
+      (0.0, -0.01, 0.0),
+      (0.0, 0.0, 0.01),
+      (0.0, 0.0, -0.01));
 
    Start   : constant Point_Real := (-2.0, -2.0, -2.0);
    Stop    : constant Point_Real := (2.0, 2.0, 2.0);

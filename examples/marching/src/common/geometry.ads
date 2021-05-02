@@ -76,6 +76,7 @@ package Geometry is
    type Vertex is record
       Point : Point_Real := (others => 0.0);
       Normal : Point_Real := (others => 0.0);
+      Color : Point_Real := (others => 0.0);
    end record;
 
    type Vertex_Array is array (Natural range <>) of aliased Vertex;
