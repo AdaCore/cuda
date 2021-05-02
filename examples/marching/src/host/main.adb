@@ -46,7 +46,7 @@ procedure Main is
     
    Seed : Generator;
    
-   Interpolation_Steps : constant Positive := 64;
+   Interpolation_Steps : constant Positive := 16;
       
    Last_Triangle     : aliased Integer;
    Last_Vertex       : aliased Integer;
@@ -274,11 +274,11 @@ begin
             New_Position.Z := Balls (I).Position.Z + Speeds (I).Z;
       
             if Length (New_Position) > 1.0 then
-               Speeds (I).X := -@ + (Random (Seed) - 0.5) * Speed * 0.2;
-               Speeds (I).Y := -@ + (Random (Seed) - 0.5) * Speed * 0.2;
-               Speeds (I).Z := -@ + (Random (Seed) - 0.5) * Speed * 0.2;      
+               Speeds (I).X := -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
+               Speeds (I).Y := -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
+               Speeds (I).Z := -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;      
                
-               Speeds (I) := Normalize (Speeds (I)) * Speed;
+               Speeds (I) := Normalize (Speeds (I)) * Balls (I).Speed;
             end if;
       
             Balls (I).Position := New_Position;

@@ -23,26 +23,36 @@ package Data is
    type Ball is record
       Position : Point_Real;
       Color : RGB_T;
+      Size : Float;
+      Speed : Float;
    end record;
 
    type Ball_Array is array (Natural range <>) of Ball;
    type Ball_Array_Access is access all Ball_Array;
 
    Balls  : Ball_Array :=
-     (0 => (Position => (0.0, 0.0, 0.0), Color => (1.0, 0.0, 0.0)),
-      1 => (Position => (0.0, 0.0, 0.0), Color => (1.0, 0.0, 0.0)),
-      2 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 1.0, 0.0)),
-      3 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 1.0, 0.0)),
-      4 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 0.0, 1.0)),
-      5 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 0.0, 1.0)));
+     (0 => (Position => (0.0, 0.0, 0.0), Color => (1.0, 0.0, 0.0), Size => 0.10, Speed => 0.0025),
+      1 => (Position => (0.0, 0.0, 0.0), Color => (1.0, 0.0, 0.0), Size => 0.10, Speed => 0.0025),
+      2 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 1.0, 0.0), Size => 0.10, Speed => 0.0025),
+      3 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 1.0, 0.0), Size => 0.10, Speed => 0.0025),
+      4 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 0.0, 1.0), Size => 0.10, Speed => 0.0025),
+      5 => (Position => (0.0, 0.0, 0.0), Color => (0.0, 0.0, 1.0), Size => 0.10, Speed => 0.0025),
+      6 => (Position => (0.5, 0.0, 0.0), Color => (0.0, 0.0, 0.0), Size => -0.05, Speed => 0.01),
+      7 => (Position => (0.5, 0.0, 0.0), Color => (0.0, 0.0, 0.0), Size => -0.05, Speed => 0.01),
+      8 => (Position => (0.5, 0.0, 0.0), Color => (0.0, 0.0, 0.0), Size => -0.05, Speed => 0.01),
+      9 => (Position => (0.5, 0.0, 0.0), Color => (0.0, 0.0, 0.0), Size => -0.05, Speed => 0.01));
 
    Speeds : array (Balls'Range) of Point_Real :=
-     ((0.01, 0.0, 0.0),
-      (-0.01, 0.0, 0.0),
-      (0.0, 0.01, 0.0),
-      (0.0, -0.01, 0.0),
-      (0.0, 0.0, 0.01),
-      (0.0, 0.0, -0.01));
+     (0 => (1.0, 0.0, 0.0) * Balls (0).Speed,
+      1 => (-1.0, 0.0, 0.0) * Balls (1).Speed,
+      2 => (0.0, 1.0, 0.0) * Balls (2).Speed,
+      3 => (0.0, -1.0, 0.0) * Balls (3).Speed,
+      4 => (0.0, 0.0, 1.0) * Balls (4).Speed,
+      5 => (0.0, 0.0, -1.0) * Balls (5).Speed,
+      6 => (0.0, 0.0, 1.0) * Balls (6).Speed,
+      7 => (0.0, 0.0, 1.0) * Balls (7).Speed,
+      8 => (0.0, 0.0, 1.0) * Balls (8).Speed,
+      9 => (0.0, 0.0, 1.0) * Balls (9).Speed);
 
    Start   : constant Point_Real := (-2.0, -2.0, -2.0);
    Stop    : constant Point_Real := (2.0, 2.0, 2.0);

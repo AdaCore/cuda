@@ -137,9 +137,9 @@ package body UI is
    Shader : GL.Objects.Programs.Program;
    Light_Positions : Vector3_Array (0 .. 3) :=
      ((10.0,  10.0, 10.0),
-      (10.0,  10.0, 10.0),
-      (10.0,  10.0, 10.0),
-      (10.0,  10.0, 10.0));
+      (10.0,  10.0, -10.0),
+      (10.0,  -10.0, 10.0),
+      (10.0,  -10.0, -10.0));
    Light_Colors :Vector3_Array (0 .. 3) :=
      ((300.0, 300.0, 300.0),
       (300.0, 300.0, 300.0),
@@ -199,10 +199,8 @@ package body UI is
       GL.Objects.Programs.Use_Program (Shader);
 
       declare
---         Albedo : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "albedo");
          Ao : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "ao");
       begin
---         GL.Uniforms.Set_Single (Albedo, 1.0, 1.0, 1.0);
          GL.Uniforms.Set_Single (Ao, 1.0);
       end;
    end Initialize;
@@ -233,7 +231,7 @@ package body UI is
       Camera.Pitch := Angle + 270.0;
       Update_Camera_Vectors (Camera);
 
-      --Angle := Angle + 0.1;
+      Angle := Angle + 0.1;
 
       Current_Frame := Glfw.Time;
 
@@ -265,7 +263,7 @@ package body UI is
            (0.0, 0.0, 1.0, 0.0),
            (0.0, 0.0, 0.0, 1.0)));
 
-      GL.Uniforms.Set_Single (S_Metallic, 0.9);
+      GL.Uniforms.Set_Single (S_Metallic, 0.7);
       GL.Uniforms.Set_Single (S_Roughtness, 0.5);
       Render_Shape (Verts, Tris);
 

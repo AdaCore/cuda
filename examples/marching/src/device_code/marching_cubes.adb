@@ -170,7 +170,6 @@ is
          return Float
       is
          Total : Float := 0.0;
-         Size : constant := 0.05;
          Denominator : Float;
       begin
          for B of Balls loop
@@ -183,7 +182,7 @@ is
                Denominator := 0.00001;
             end if;
 
-            Total := Total + Size / Denominator;
+            Total := Total + B.Size / Denominator;
          end loop;
          return Total - 1.0;
       end Metaballs;
