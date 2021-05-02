@@ -69,6 +69,18 @@ match ParamSpec (not prev (ParamSpec ()) and x"access .*")
    and parent (SubpDecl (p_defining_name ().filter (x".*Get.*")))
 wrap access_into_return ();
 
+match ParamSpec(x"(device|Device).*:.*int.*") do
+    match ParamSpec (x"access .*") do
+        match ParamSpec (not prev (ParamSpec ())) do
+            wrap access_into_return ("Device_T");
+        else
+            wrap access_into_out ("Device_T");
+        end;
+    else
+        wrap into_explicit_conversion ("Device_T");
+    end;
+end;
+
 match ParamSpec (x"event.*:.*System.Address")
 wrap address_into_return ("CUDA.Driver_Types.Event_T");
 
@@ -78,6 +90,8 @@ wrap address_into_return ("System.Address");
 match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
     spec_content => @ & i"""
+        type Device_T is new Integer;
+
         function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
         function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
         function Block_Dim return CUDA.Vector_Types.Dim3  with Inline;
