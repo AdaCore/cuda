@@ -321,9 +321,9 @@ package body UI is
          Data (GL.Types.Int (Max_Vertex) * 9 + 3) := Single(Norm.X);
          Data (GL.Types.Int (Max_Vertex) * 9 + 4) := Single(Norm.Y);
          Data (GL.Types.Int (Max_Vertex) * 9 + 5) := Single(Norm.Z);
-         Data (GL.Types.Int (Max_Vertex) * 9 + 6) := Single(V.Color.X);
-         Data (GL.Types.Int (Max_Vertex) * 9 + 7) := Single(V.Color.Y);
-         Data (GL.Types.Int (Max_Vertex) * 9 + 8) := Single(V.Color.Z);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 6) := Single(V.Color.R);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 7) := Single(V.Color.G);
+         Data (GL.Types.Int (Max_Vertex) * 9 + 8) := Single(V.Color.B);
       end loop;
 
       It := 0;

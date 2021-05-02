@@ -13,6 +13,7 @@
 ------------------------------------------------------------------------------
 
 with Geometry; use Geometry;
+with Colors; use Colors;
 
 package Data is
 
@@ -21,7 +22,7 @@ package Data is
 
    type Ball is record
       Position : Point_Real;
-      Color : Point_Real;
+      Color : RGB_T;
    end record;
 
    type Ball_Array is array (Natural range <>) of Ball;

@@ -17,6 +17,7 @@ with Marching_Cubes.Data; use Marching_Cubes.Data;
 with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
 with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
 with System.Atomic_Operations.Exchange;
+with Colors; use Colors;
 
 package body Marching_Cubes
 is
@@ -106,102 +107,14 @@ is
          return Total - 1.0;
       end Metaballs;
 
-      -- see https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
-
-      type RGB_T is record
-         R, G, B : Float;
-      end record;
-
-      type HSL_T is record
-        H, S, L: Float;
-      end record;
-
-      function  hue2rgb(p, q, t : Float) return Float is
-         tt : Float := t;
-      begin
-         if tt < 0.0 then
-            tt := @ + 1.0;
-         end if;
-
-         if tt > 1.0 then
-            tt := @ - 1.0;
-         end if;
-
-         if tt < 1.0/6.0 then
-            return p + (q - p) * 6.0 * tt;
-         end if;
-
-         if tt < 1.0 / 2.0 then
-            return q;
-         end if;
-
-         if tt < 2.0 / 3.0 then
-            return p + (q - p) * (2.0/3.0 - tt) * 6.0;
-         end if;
-
-         return p;
-      end hue2rgb;
-
-      function hslToRgb(Src : HSL_T) return RGB_T is
-         Res : RGB_T;
-      begin
-         if Src.S = 0.0 then
-            Res.R := Src.L;
-            Res.G := Src.L;
-            Res.B := Src.L;
-         else
-            declare
-               q : Float := (if Src.l < 0.5 then src.l * (1.0 + src.s) else src.l + src.s - src.l * src.s);
-               p : Float := 2.0 * src.l - q;
-            begin
-               res.r := hue2rgb(p, q, src.h + 1.0/3.0);
-               res.g := hue2rgb(p, q, src.h);
-               res.b := hue2rgb(p, q, src.h - 1.0/3.0);
-            end;
-         end if;
-
-         return res;
-      end hslToRgb;
-
-      function rgbToHsl(src : RGB_T) return HSL_T is
-         Max : Float := Float'Max (Src.R, Float'Max (Src.G, Src.B));
-         Min : Float := Float'Min (Src.R, Float'Min (Src.G, Src.B));
-         Res : HSL_T;
-      begin
-         Res.L := (Max + Min) / 2.0;
-         if Max = Min then
-            Res.H := 0.0;
-            Res.S := 0.0;
-         else
-            declare
-               D : Float := Max - Min;
-            begin
-               Res.S := (if Res.L > 0.5 then D / (2.0 - Max - Min) else D / (Max + Min));
-
-               if Src.R >= Src.G and Src.R >= Src.B then
-                  Res.H := (Src.g - src.b) / d + (if src.g < src.b then 6.0 else 0.0);
-               elsif SRC.G >= SRC.b then
-                  Res.H := (src.b - src.r) / d + 2.0;
-               else
-                  Res.H := (src.r - src.g) / d + 4.0;
-               end if;
-
-               Res.H := @ / 6.0;
-            end;
-         end if;
-
-         return Res;
-      end rgbToHsl;
-
       function Metaballs_Color
         (Position : Point_Real)
-         return Point_Real
+         return RGB_T
       is
-         Total : Point_Real := (others => 0.0);
+         Total : RGB_T := (others => 0.0);
          Denominator : Float;
          Total_Denominator : Float := 0.0;
          HSL : HSL_T;
-         RGB : RGB_T;
       begin
          for B of Balls loop
             Denominator :=
@@ -215,29 +128,10 @@ is
 
          Total := Total / Total_Denominator;
 
-         if Total.X > 1.0 then
-            Total.X := 1.0;
-         elsif Total.Y > 1.0 then
-            Total.Y := 1.0;
-         elsif Total.Z > 1.0 then
-            Total.Z := 1.0;
-         end if;
-
-         if Total.X < 0.0 then
-            Total.X := 0.0;
-         elsif Total.Y < 0.0 then
-            Total.Y := 0.0;
-         elsif Total.Z < 0.0 then
-            Total.Z := 0.0;
-         end if;
-
-
-         HSL := rgbToHsl ((Total.X, Total.Y, Total.Z));
+         HSL := RGB_To_HSL (Total);
          HSL.S := 1.0;
          HSL.L := 0.5;
-         RGB := hslToRgb (HSL);
-
-         return (RGB.R, RGB.G, RGB.B);
+         return HSL_To_RGB (HSL);
       end Metaballs_Color;
 
 
