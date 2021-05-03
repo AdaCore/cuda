@@ -6,23 +6,27 @@ generic
    type Array_Typ is array (Index_Typ range <>) of Typ;
    type Array_Access is access all Array_Typ;
 package Storage_Models.Arrays is
-   type Foreign_Array_Access is private;
+
+   type Foreign_Array_Access is record
+      Data   : Foreign_Address;
+      Bounds : Foreign_Address;
+   end record;
 
    function Allocate (First, Last : Index_Typ) return Foreign_Array_Access;
    function Allocate_And_Init (Src : Array_Typ) return Foreign_Array_Access;
 
    procedure Assign
-     (Dst : Foreign_Array_Access; Src : Array_Typ);
+     (Dst : Foreign_Array_Access; Src : Array_Typ; Options : Copy_Options := Default_Copy_Options);
    procedure Assign
-     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Array_Typ);
+     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Array_Typ; Options : Copy_Options := Default_Copy_Options);
    procedure Assign
-     (Dst : Foreign_Array_Access; Src : Typ);
+     (Dst : Foreign_Array_Access; Src : Typ; Options : Copy_Options := Default_Copy_Options);
    procedure Assign
-     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Typ);
+     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Typ; Options : Copy_Options := Default_Copy_Options);
    procedure Assign
-     (Dst : in out Array_Typ; Src : Foreign_Array_Access);
+     (Dst : in out Array_Typ; Src : Foreign_Array_Access; Options : Copy_Options := Default_Copy_Options);
    procedure Assign
-     (Dst : in out Array_Typ; Src : Foreign_Array_Access; First, Last : Index_Typ);
+     (Dst : in out Array_Typ; Src : Foreign_Array_Access; First, Last : Index_Typ; Options : Copy_Options := Default_Copy_Options);
 
    procedure Deallocate (Src : in out Foreign_Array_Access);
 
@@ -34,11 +38,10 @@ package Storage_Models.Arrays is
 
    function Bounds (Src : Foreign_Array_Access) return Array_Typ_Bounds;
 
-private
+   type Foreign_Array_Slice_Access is new Foreign_Array_Access;
 
-   type Foreign_Array_Access is record
-      Data   : Foreign_Address;
-      Bounds : Foreign_Address;
-   end record;
+   function Allocate (Src : Foreign_Array_Access; First, Last : Index_Typ) return Foreign_Array_Slice_Access;
+
+   procedure Deallocate (Src : in out Foreign_Array_Slice_Access);
 
 end Storage_Models.Arrays;
