@@ -44,6 +44,8 @@ with Storage_Models.Arrays;
 with Storage_Models.Objects;
 with CUDA_Storage_Models;
 
+with Ada.Calendar; use Ada.Calendar;
+
 procedure Main is         
     
    Seed : Generator;
@@ -159,6 +161,8 @@ procedure Main is
    Compute_Started : Boolean := False;
    
 begin      
+   Reset (Seed, Integer (Seconds (Clock)));
+   
    if Argument_Count >= 1 then
       if Ada.Command_Line.Argument (1) = "1" then
          Mode := Mode_CUDA;
