@@ -6,8 +6,8 @@ package CUDA_Storage_Models is
 
    function Malloc_Allocate (Size : Natural) return System.Address with Inline;
    procedure Malloc_Deallocate (Address : System.Address) with Inline;
-   procedure Malloc_Copy_To_Foreign (Dst : System.Address; Src : System.Address; Bytes : Natural) with Inline;
-   procedure Malloc_Copy_To_Native (Dst : System.Address; Src : System.Address; Bytes : Natural) with Inline;
+   procedure Malloc_Copy_To_Foreign (Dst : System.Address; Dst_Offset : Natural; Src : System.Address; Bytes : Natural) with Inline;
+   procedure Malloc_Copy_To_Native (Dst : System.Address; Src : System.Address; Src_Offset : Natural; Bytes : Natural) with Inline;
 
    package Malloc_Storage_Model is new Storage_Models
      (Foreign_Address => System.Address,
@@ -18,8 +18,8 @@ package CUDA_Storage_Models is
 
    function Malloc_Host_Allocate (Size : Natural) return System.Address with Inline;
    procedure Malloc_Host_Deallocate (Address : System.Address) with Inline;
-   procedure Malloc_Host_Copy_To_Foreign (Dst : System.Address; Src : System.Address; Bytes : Natural) with Inline;
-   procedure Malloc_Host_Copy_To_Native (Dst : System.Address; Src : System.Address; Bytes : Natural) with Inline;
+   procedure Malloc_Host_Copy_To_Foreign (Dst : System.Address; Dst_Offset : Natural; Src : System.Address; Bytes : Natural) with Inline;
+   procedure Malloc_Host_Copy_To_Native (Dst : System.Address; Src : System.Address; Src_Offset : Natural; Bytes : Natural) with Inline;
 
    package Malloc_Host_Storage_Model is new Storage_Models
      (Foreign_Address => System.Address,

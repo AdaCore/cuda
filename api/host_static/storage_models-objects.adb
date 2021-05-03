@@ -30,9 +30,10 @@ package body Storage_Models.Objects is
    procedure Assign (Dst: Foreign_Access; Src : Typ) is
    begin
       Copy_To_Foreign
-        (Dst   => Foreign_Address (Dst),
-         Src   => Src'Address,
-         Bytes => Typ'Size / 8);
+        (Dst        => Foreign_Address (Dst),
+         Dst_Offset => 0,
+         Src        => Src'Address,
+         Bytes      => Typ'Size / 8);
    end Assign;
 
    ------------
@@ -42,9 +43,10 @@ package body Storage_Models.Objects is
    procedure Assign (Dst : in out Typ; Src : Foreign_Access) is
    begin
       Copy_To_Native
-        (Dst   => Dst'Address,
-         Src   => Foreign_Address (Src),
-         Bytes => Typ'Size / 8);
+        (Dst        => Dst'Address,
+         Src        => Foreign_Address (Src),
+         Src_Offset => 0,
+         Bytes      => Typ'Size / 8);
    end Assign;
 
    ------------
