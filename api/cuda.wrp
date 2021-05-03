@@ -87,6 +87,9 @@ wrap address_into_return ("CUDA.Driver_Types.Event_T");
 match ParamSpec (x"devPtr") and parent (SubpDecl (x"cudaMalloc"))
 wrap address_into_return ("System.Address");
 
+match ParamSpec (x"ptr") and parent (SubpDecl (x"cudaMallocHost"))
+wrap address_into_return ("System.Address");
+
 match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
     spec_content => @ & i"""

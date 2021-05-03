@@ -39,8 +39,10 @@ with CUDA.Vector_Types; use CUDA.Vector_Types;
 
 with UI; use UI;
 
-with CUDA_Objects;
-with CUDA_Arrays;
+with Storage_Models;
+with Storage_Models.Arrays;
+with Storage_Models.Objects;
+with CUDA_Storage_Models;
 
 procedure Main is         
     
@@ -57,19 +59,19 @@ procedure Main is
    
    Running           : Boolean := True;
    
-   package Ball_Wrappers is new CUDA_Arrays 
+   package Ball_Wrappers is new CUDA_Storage_Models.Malloc_Storage_Model.Arrays 
      (Ball, Natural, Ball_Array, Ball_Array_Access);
-   package Point_Real_Wrappers is new CUDA_Arrays 
+   package Point_Real_Wrappers is new CUDA_Storage_Models.Malloc_Storage_Model.Arrays 
      (Point_Real, Natural, Point_Real_Array, Point_Real_Array_Access);
-   package Triangle_Wrappers is new CUDA_Arrays 
+   package Triangle_Wrappers is new CUDA_Storage_Models.Malloc_Storage_Model.Arrays
      (Triangle, Natural, Triangle_Array, Triangle_Array_Access);
-   package Vertex_Wrappers is new CUDA_Arrays 
+   package Vertex_Wrappers is new CUDA_Storage_Models.Malloc_Storage_Model.Arrays 
      (Vertex, Natural, Vertex_Array, Vertex_Array_Access);
    
    
-   W_Balls             : Ball_Wrappers.CUDA_Array_Access;   
-   W_Triangles         : Triangle_Wrappers.CUDA_Array_Access;
-   W_Vertices          : Vertex_Wrappers.CUDA_Array_Access;
+   W_Balls             : Ball_Wrappers.Foreign_Array_Access;   
+   W_Triangles         : Triangle_Wrappers.Foreign_Array_Access;
+   W_Vertices          : Vertex_Wrappers.Foreign_Array_Access;
   
    use Point_Real_Wrappers;
    use Triangle_Wrappers;
@@ -82,12 +84,12 @@ procedure Main is
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);  
 
-   package W_Int is new CUDA_Objects (Integer, Int_Access);
+   package W_Int is new CUDA_Storage_Models.Malloc_Storage_Model.Objects (Integer, Int_Access);
    use W_Int;
    
-   W_Last_Triangle  : W_Int.CUDA_Access := Allocate; 
-   W_Last_Vertex  : W_Int.CUDA_Access := Allocate;
-   W_Debug_Value  : W_Int.CUDA_Access := Allocate;
+   W_Last_Triangle  : W_Int.Foreign_Access := Allocate; 
+   W_Last_Vertex  : W_Int.Foreign_Access := Allocate;
+   W_Debug_Value  : W_Int.Foreign_Access := Allocate;
 
    Debug_Value : aliased Integer := 0; 
       
@@ -205,19 +207,19 @@ begin
       
          pragma CUDA_Execute
            (Mesh_CUDA
-              (D_Balls             => Device (W_Balls),
-               D_Triangles         => Device (W_Triangles),
-               D_Vertices          => Device (W_Vertices),
+              (D_Balls             => Uncheck_Convert (W_Balls),
+               D_Triangles         => Uncheck_Convert (W_Triangles),
+               D_Vertices          => Uncheck_Convert (W_Vertices),
                Ball_Size           => Balls'Length,
                Triangles_Size      => Tris'Length,
                Vertices_Size       => Verts'Length,
                Start               => Start,
                Stop                => Stop,
                Lattice_Size        => (Samples, Samples, Samples),
-               Last_Triangle       => Device (W_Last_Triangle),
-               Last_Vertex         => Device (W_Last_Vertex),
+               Last_Triangle       => Uncheck_Convert (W_Last_Triangle),
+               Last_Vertex         => Uncheck_Convert (W_Last_Vertex),
                Interpolation_Steps => Interpolation_Steps,
-               Debug_Value         => Device (W_Debug_Value)),
+               Debug_Value         => Uncheck_Convert (W_Debug_Value)),
             Blocks_Per_Grid,
             Threads_Per_Block);
          
