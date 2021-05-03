@@ -93,6 +93,9 @@ wrap address_into_return ("System.Address");
 match ParamSpec (x"ptr") and parent (SubpDecl (x"cudaMallocHost"))
 wrap address_into_return ("System.Address");
 
+match ParamSpec (not prev (ParamSpec ())) and parent (SubpDecl (x"cudaEventElapsedTime"))
+wrap access_into_return ();
+
 match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
     spec_content => @ & i"""
