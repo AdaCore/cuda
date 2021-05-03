@@ -16,6 +16,10 @@ package Storage_Models.Arrays is
    procedure Assign
      (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Array_Typ);
    procedure Assign
+     (Dst : Foreign_Array_Access; Src : Typ);
+   procedure Assign
+     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Typ);
+   procedure Assign
      (Dst : in out Array_Typ; Src : Foreign_Array_Access);
    procedure Assign
      (Dst : in out Array_Typ; Src : Foreign_Array_Access; First, Last : Index_Typ);

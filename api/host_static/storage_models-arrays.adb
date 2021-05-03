@@ -69,6 +69,44 @@ package body Storage_Models.Arrays is
          Bytes      => Dst_Length * Typ'Size / 8);
    end Assign;
 
+   ----------
+   -- Assign --
+   ---------
+
+   procedure Assign (Dst : Foreign_Array_Access; Src : Typ) is
+      Dst_Bounds : Array_Typ_Bounds := Bounds (Dst);
+   begin
+      Assign (Dst, Dst_Bounds.First, Dst_Bounds.Last, Src);
+   end Assign;
+
+
+   ----------
+   -- Assign --
+   ----------
+
+   procedure Assign (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Typ) is
+      Dst_Length : Natural := Length (First, Last);
+      Dst_Bounds : Array_Typ_Bounds := Bounds (Dst);
+      Start_Offset : Natural := Offset (Dst_Bounds.First, First);
+
+      Chunk : aliased array (1 .. 1024) of Typ := (others => Src);
+      Remainder : Integer := 0;
+   begin
+      for D in 0 .. Dst_Length / 1024 loop
+         Remainder := Dst_Length - D * 1024;
+
+         if Remainder > 1024 then
+            Remainder := 1024;
+         end if;
+
+         Copy_To_Foreign
+           (Dst        => Dst.Data,
+            Dst_Offset => (Start_Offset + D) * Typ'Size / 8,
+            Src        => Chunk'Address,
+            Bytes      => Remainder * Typ'Size / 8);
+      end loop;
+   end Assign;
+
    ------------
    -- Assign --
    ------------
