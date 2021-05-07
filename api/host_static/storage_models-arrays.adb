@@ -12,15 +12,16 @@ package body Storage_Models.Arrays is
    -- Allocate --
    --------------
 
-   function Allocate (First, Last : Index_Typ) return Foreign_Array_Access is
-      Ret : Foreign_Array_Access;
-      Bounds : aliased Array_Typ_Bounds := (First, Last);
+   function Allocate (First, Last : Index_Typ) return Array_Access is
+      Ret : Array_Access;
+      Bounds : Array_Typ'Bounds := (First, Last);
    begin
-      Ret.Data := Allocate (Length (First, Last) * Typ'Size / 8);
-      Ret.Bounds := Allocate (Array_Typ_Bounds'Size / 8);
+      Ret := Array_Typ'Fat_Pointer
+        (Data   => Allocate (Length (First, Last) * Typ'Size / 8);
+         Bounds => Allocate (Array_Typ_Bounds'Size / 8));
 
       Copy_To_Foreign
-        (Dst     => Ret.Bounds,
+        (Dst     => Ret'Fat_Pointer.Bounds.all'Address,
          Src     => Bounds'Address,
          Bytes   => Array_Typ_Bounds'Size / 8,
          Options => Default_Copy_Options);
@@ -32,7 +33,7 @@ package body Storage_Models.Arrays is
    -- Allocate_And_Init --
    -----------------------
 
-   function Allocate_And_Init (Src : Array_Typ) return Foreign_Array_Access is
+   function Allocate_And_Init (Src : Array_Typ) return Array_Access is
       Ret : Foreign_Array_Access := Allocate (Src'First, Src'Last);
    begin
       Assign (Ret, Src, Default_Copy_Options);
