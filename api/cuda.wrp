@@ -125,6 +125,9 @@ wrap address_into_return ("CUDA.Driver_Types.Event_T");
 match ParamSpec(x"pStream.*:.*System.Address")
 wrap address_into_return ("CUDA.Driver_Types.Stream_T");
 
+match ParamSpec (x"pGraphNode.*:.*System.Address") and not prev (ParamSpec ())
+wrap address_into_return ("CUDA.Driver_Types.Graph_Node_T");
+
 match ParamSpec (x"devPtr") and parent (SubpDecl (x"cudaMalloc"))
 wrap address_into_return ("System.Address");
 
