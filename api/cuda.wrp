@@ -33,6 +33,9 @@ wrap w_DefiningName (normalize_ada_name ("\1") & "_\2_" & normalize_ada_name ("\
 match DefiningName (x"^cuda(.*[a-zA-Z])([1-3]D)$")
 wrap w_DefiningName (normalize_ada_name ("\1") & "_\2");
 
+match DefiningName (x"^p([A-Z].*)$" and not "pType")
+wrap w_DefiningName (normalize_ada_name ("\1"));
+
 match ParamSpec()
    and f_type_expr ("Interfaces.C.Strings.chars_ptr")
 wrap chars_into_string ();
@@ -128,6 +131,9 @@ wrap address_into_return ("CUDA.Driver_Types.Stream_T");
 match ParamSpec (x"pGraphNode.*:.*System.Address") and not prev (ParamSpec ())
 wrap address_into_return ("CUDA.Driver_Types.Graph_Node_T");
 
+match ParamSpec (x"pDependencies.*:.*System.Address") and n: next (ParamSpec (x"numDependencies"))
+wrap address_into_in_array ("Graph_Node_Array_T", n);
+
 match ParamSpec (x"devPtr") and parent (SubpDecl (x"cudaMalloc"))
 wrap address_into_return ("System.Address");
 
@@ -146,6 +152,8 @@ weave w_PackageDecl (
            Least : Integer;
            Greatest : Integer;
         end record;
+
+        type Graph_Node_Array_T is array (Integer range <>) of CUDA.Driver_Types.Graph_Node_T;
 
         function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
         function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
