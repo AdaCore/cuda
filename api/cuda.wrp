@@ -37,9 +37,9 @@ match ParamSpec()
    and f_type_expr ("Interfaces.C.Strings.chars_ptr")
 wrap chars_into_string ();
 
-match SubpDecl()
+match s: SubpDecl()
     and child (f_subp_kind ("function"))
-    and p_subp_decl_spec.p_returns ("Interfaces.C.Strings.chars_ptr")
+    and p_subp_decl_spec ().p_returns ().filter (x"Interfaces.C.Strings.chars_ptr")
 wrap chars_into_string ();
 
 match ObjectDecl(child (DefiningName (x"^cuda(Error.*)$")))
