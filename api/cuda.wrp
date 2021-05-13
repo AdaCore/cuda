@@ -61,6 +61,34 @@ match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) do
     end;
 end;
 
+match sb: SubpDecl(child (DefiningName (x"cudaDeviceGetStreamPriorityRange"))) do
+    match p: child (ParamSpec(x"greatestPriority"))
+    pick p
+    wrap w: w_ParamSpecCall (
+      generate_formal => "NO",
+      pre_call_decl => defer ("""\e<sb.tmp ("greatest")> : aliased int;\n"""),
+      actual_value => defer ("""\e<sb.tmp ("greatest")>'Access""")
+   );
+
+    match p: child (ParamSpec(x"leastPriority"))
+    pick p
+    wrap w: w_ParamSpecCall (
+      generate_formal => "NO",
+      pre_call_decl => defer ("""\e<sb.tmp ("least")> : aliased int;\n"""),
+      actual_value => defer ("""\e<sb.tmp ("least")>'Access""")
+   );
+
+   weave w: w_SubpDeclCall (
+    subp_kind => "function",
+    result_type_expr => "Stream_Priority_Range_T",
+    post_call_decl => @ & defer (i"""
+        \e<sb.tmp ("result")> : Stream_Priority_Range_T :=
+          (Least => Integer (\e<sb.tmp ("least")>),
+           Greatest => Integer (\e<sb.tmp ("greatest")>));\n"""),
+        return_stmt => defer ("""return \e<sb.tmp ("result")>;""")
+   );
+end;
+
 match SubpDecl ()
    and child (f_subp_kind ("function"))
    and p_subp_decl_spec ().p_returns ().filter (x"driver_types_h.cudaError_t")
@@ -110,6 +138,11 @@ match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
     spec_content => @ & i"""
         type Device_T is new Integer;
+
+        type Stream_Priority_Range_T is record
+           Least : Integer;
+           Greatest : Integer;
+        end record;
 
         function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
         function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
