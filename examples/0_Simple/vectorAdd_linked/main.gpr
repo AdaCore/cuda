@@ -1,4 +1,4 @@
-with "../../../api/cuda";
+with "../../../api/cuda_host";
 
 project Main is
 

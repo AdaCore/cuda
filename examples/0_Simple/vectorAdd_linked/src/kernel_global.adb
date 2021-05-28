@@ -1,9 +1,9 @@
 with CUDA.Runtime_Api; use CUDA.Runtime_Api; -- Block_Dim, Block_IDx, Thread_IDx
 with Interfaces.C;     use Interfaces.C; -- Operators for Block_Dim, Block_IDx, Thread_IDx
 
-package body Kernel is
+package body Kernel_Global is
    
-   procedure Vector_Add
+   procedure Vector_Add_Global
      (A_Addr : System.Address;
       B_Addr : System.Address;
       C_Addr : System.Address;
@@ -17,6 +17,6 @@ package body Kernel is
       if I < Num_Elements then
          C (C'First + I) := A (A'First + I) + B (B'First + I);
       end if;
-   end Vector_Add;
+   end Vector_Add_Global;
 
-end Kernel;
+end Kernel_Global;

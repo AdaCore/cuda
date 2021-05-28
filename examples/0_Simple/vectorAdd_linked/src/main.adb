@@ -8,7 +8,7 @@ with CUDA.Driver_Types;         use CUDA.Driver_Types;
 with CUDA.Runtime_Api;          use CUDA.Runtime_Api;
 with CUDA.Stddef;
 
-with Kernel; use Kernel;
+with Kernel_Global; use Kernel_Global;
 
 with Ada.Unchecked_Deallocation;
 
@@ -65,7 +65,7 @@ begin
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
-   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Threads_Per_Block, Blocks_Per_Grid);
+   pragma CUDA_Execute (Vector_Add_Global (D_A, D_B, D_C, Num_Elements), Threads_Per_Block, Blocks_Per_Grid);
 
    Err := Get_Last_Error;
 
