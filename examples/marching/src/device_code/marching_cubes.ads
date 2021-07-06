@@ -24,9 +24,7 @@ package Marching_Cubes is
 
    type Int_Access is access all Integer;
 
-   ----------
-   -- Mesh --
-   ----------
+   procedure Clear_Lattice (XI : Integer);
 
    procedure Mesh
      (Balls               : Ball_Array;
