@@ -427,7 +427,7 @@ is
             Expected => Lattice_Value'Address,
             Desired  => -2)
          then
-            Vertex_Index := Integer (Atomic_Add (Last_Vertex, 1));
+            Vertex_Index := Integer (Atomic_Add (Last_Vertex, 1)) + 1;
 
             --  TODO: probably need an atomic store here
             Edge_Lattice (X1, Y1, Z1, Edge_Index) := Vertex_Index;
@@ -469,7 +469,7 @@ is
         or else ZI = Lattice_Size.Z - 1;
 
       for I in 0 .. Case_To_Numpolys (Index) - 1 loop
-         Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1));
+         Triangle_Index := Integer (Atomic_Add (Last_Triangle, 1)) + 1;
 
          Triangle_Index := Triangle_Index + 1;
 

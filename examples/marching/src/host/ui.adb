@@ -190,6 +190,8 @@ package body UI is
       My_Window.Enable_Callback (Callbacks.Mouse_Position);
       My_Window.Enable_Callback (Callbacks.Key);
 
+      Glfw.Windows.Context.Set_Swap_Interval (0);
+
       GL.Toggles.Enable (GL.Toggles.Depth_Test);
 
       Shader := Program_From
@@ -213,9 +215,6 @@ package body UI is
    Angle : Degree := 0.0;
 
    procedure Draw (Verts : Vertex_Array; Tris : Triangle_Array; Running : out Boolean) is
-      Delta_Time : Seconds := 0.0;
-      Last_Frame : Seconds := 0.0;
-      Current_Frame : Seconds;
       View : Matrix4;
       S_View : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "view");
       S_CamPos : GL.Uniforms.Uniform := GL.Objects.Programs.Uniform_Location (Shader, "camPos");
@@ -232,11 +231,6 @@ package body UI is
       Update_Camera_Vectors (Camera);
 
       Angle := Angle + 0.1;
-
-      Current_Frame := Glfw.Time;
-
-      Delta_Time := Current_Frame - Last_Frame;
-      Last_Frame := Current_Frame;
 
       Utilities.Clear_Background_Colour ((0.0, 0.0, 0.0, 1.0));
       GL.Buffers.Clear ((Depth => True, Color => True, others => False));

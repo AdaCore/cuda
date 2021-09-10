@@ -96,6 +96,7 @@ procedure Main is
    Debug_Value : aliased Integer := 0; 
       
    task type Compute is
+      entry Clear (XI : Integer);
       entry Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer);
       entry Exit_Loop;
       entry Finished;
@@ -106,6 +107,20 @@ procedure Main is
       Do_Exit : Boolean := False;
    begin
       loop
+         select
+            accept Clear (XI : Integer) do
+               X1r := XI;
+            end;
+         or
+            accept Exit_Loop do
+               Do_Exit := True;
+            end;
+         end select;
+         
+         exit when Do_Exit;
+            
+         Clear_Lattice (X1r);
+            
          select
             accept Set_And_Go (X1, X2, Y1, Y2, Z1, Z2 : Integer) do
                X1r := X1;
@@ -144,8 +159,9 @@ procedure Main is
                end loop;
             end loop;
          exception
-            when others =>
+            when E : others =>
                Put_Line ("ERROR IN TASK");
+               Put_Line (Exception_Information (E));
          end;
          
          accept Finished;
@@ -230,6 +246,10 @@ begin
          Compute_Started := True;
       elsif Mode = Mode_Sequential then
          for XI in 0 .. Samples - 1 loop
+            Clear_Lattice (XI);
+         end loop;
+         
+         for XI in 0 .. Samples - 1 loop
             for YI in 0 .. Samples - 1 loop
                for ZI in 0 .. Samples - 1 loop
                   Mesh
@@ -249,7 +269,11 @@ begin
             end loop;
          end loop;
       elsif Mode = Mode_Tasking then
-         for XI in 0 .. Samples - 1 loop
+         for XI in 0 .. Samples - 1 loop            
+            Compute_Tasks (XI).Clear (XI);
+         end loop;
+         
+         for XI in 0 .. Samples - 1 loop            
             Compute_Tasks (XI).Set_And_Go
               (XI, XI,
                0, Samples - 1,
@@ -295,7 +319,8 @@ begin
       
       FPS := @ + 1;
       if Clock - Last_Time >= 1.0 then
-         Put_Line (FPS'Image & " FPS");
+         Put (FPS'Image & " FPS,");
+         Put_Line (Integer (Float (Clock - Last_Time) / Float (FPS) * 1000.0)'Img & " ms");
          FPS       := 0;
          Last_Time := Clock;
       end if;
