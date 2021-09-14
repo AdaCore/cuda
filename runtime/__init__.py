@@ -33,10 +33,12 @@ class CUDADevice(DFBBTarget):
         # The required compiler switches
         return ('-gnatp',)
 
+    def base_profile(self, profile):
+        # No base profile as the CUDA runtime uses it's own sources.
+        return 'none'
+
     def amend_rts(self, rts_profile, cfg):
-        # For simplicity pretend to be ZFP. CUDA rts_sources doesn't use any
-        # ZFP RTS variables so we are safe to do this for now.
-        super(CUDADevice, self).amend_rts('zfp', cfg)
+        super(CUDADevice, self).amend_rts('none', cfg)
         cfg.rts_vars['Cuda_Target'] = 'device'
         # Add cuda sources. Probably better to put these in their own cuda
         # directory with their own make file.
