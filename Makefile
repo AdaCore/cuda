@@ -11,6 +11,8 @@ llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 
 main: install/bin
 	@echo $(PATH)
+	mkdir -p $(llvm_dir)/nvptx
+	cp $(CUDA_ROOT)/nvvm/libdevice/libdevice.10.bc $(llvm_dir)/nvptx/libdevice.10.bc
 	gprbuild -p -P wrapper/wrapper.gpr
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
 	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
