@@ -31,8 +31,6 @@
 
 --  This is the CUDA version. It omits constraint checks.
 
-pragma Compiler_Unit_Warning;
-
 with Ada.Unchecked_Conversion;
 
 package body System.Storage_Elements is
