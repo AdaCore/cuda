@@ -6,7 +6,7 @@ project CUDA_Host is
    for Object_Dir use "obj";
 
    package Compiler is
-      for Switches ("Ada") use ("-gnatp");
+      for Switches ("Ada") use ("-gnatp", "-gnat2022");
    end Compiler;
 
    package Linker is
