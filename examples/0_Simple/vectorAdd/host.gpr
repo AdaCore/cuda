@@ -12,14 +12,13 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with "../../api/cuda_host.gpr";
-with "openglada/opengl-glfw.gpr";
+with "../../../api/cuda_host.gpr";
 
-project Marching_Cubes is
+project Host is
 
    for Exec_Dir use ".";
    for Object_Dir use "obj/host";
-   for Source_Dirs use ("src/**");
+   for Source_Dirs use ("src/common", "src/host");
    for Main use ("main.adb");
 
    for Create_Missing_Dirs use "True";
@@ -34,5 +33,5 @@ project Marching_Cubes is
       for Default_Switches ("ada") use ();
    end Linker;
 
-end Marching_Cubes;
+end Host;
 
