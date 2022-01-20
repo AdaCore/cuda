@@ -2,11 +2,11 @@
 --                                                                          --
 --                         GNAT COMPILER COMPONENTS                         --
 --                                                                          --
---                       G N A T C C G _ W R A P P E R                      --
+--                     G N A T C U D A _ W R A P P E R                      --
 --                                                                          --
 --                                 B o d y                                  --
 --                                                                          --
---          Copyright (C) 2010-2020, Free Software Foundation, Inc.         --
+--          Copyright (C) 2010-2022, Free Software Foundation, Inc.         --
 --                                                                          --
 -- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -30,6 +30,8 @@ with GNAT.Case_Util;            use GNAT.Case_Util;
 with GNAT.Directory_Operations; use GNAT.Directory_Operations;
 with GNAT.IO;                   use GNAT.IO;
 with GNAT.OS_Lib;               use GNAT.OS_Lib;
+
+with Gnatvsn;
 
 --  Wrapper around <install>/libexec/gnat_ccg/bin/c-xxx to be
 --  installed under <install>/bin
@@ -226,7 +228,11 @@ begin
          elsif Arg = "-v" then
             Put_Line ("Target: cuda");
             --  ??? temporary hard coded version numbers
-            Put_Line ("cuda-gcc version 22.0 (for GNAT Pro 22.0w (20210315))");
+            Put_Line ("cuda-gcc version "
+              & gnatvsn.Library_Version
+              & " (for GNAT Pro "
+              & gnatvsn.Gnat_Static_Version_String
+              & ")");
 
             Verbose := True;
             LLVM_Arg_Number := @ + 1;
