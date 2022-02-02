@@ -27,4 +27,10 @@ echo "project CUDA_Raw is end CUDA_Raw;" > cuda_raw.gpr
 cd ../cuda_api
 uwrap -l ada -w ../../cuda.wrp ../cuda_raw_binding/*_h.ads -P../cuda_raw_binding/cuda_raw
 gnatpp *
+cd ..
+mkdir libdevice
+cd libdevice
+LIBDEVICE_PATH="$(find -L "$CUDA_ROOT" -iname "libdevice.*.bc" | head -n 1)"
+llvm-ads "$LIBDEVICE_PATH" "$PWD"/libdevice.ads
+gnatpp *
 cd ../..
