@@ -23,6 +23,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
 with Ada.Command_Line;          use Ada.Command_Line;
 with Ada.Environment_Variables; use Ada.Environment_Variables;
 
@@ -38,6 +39,10 @@ with Gnatvsn;
 --  installed under <install>/bin
 
 function GNATCUDA_Wrapper return Integer is
+
+   subtype String_Access is GNAT.OS_Lib.String_Access;
+   --  GNAT.OS_Lib and Ada.Strings.Unbounded both declare String_Access, we care
+   --  about the one for OS_Lib here.
 
    Exec_Not_Found : exception;
 
@@ -197,6 +202,12 @@ function GNATCUDA_Wrapper return Integer is
    function Locate_And_Check (Name : String) return String_Access;
    --  Locates a binary on path and raises an exception if not found.
 
+   function Get_Argument
+     (Arg : String; Prefix : String; Result : out Unbounded_String)
+      return Boolean;
+   --  If Prefix is found in Arg, then set the suffix in Result and returns
+   --  true, else returns false.
+
    -----------
    -- Spawn --
    -----------
@@ -233,6 +244,23 @@ function GNATCUDA_Wrapper return Integer is
       return Tmp;
    end Locate_And_Check;
 
+   ------------------
+   -- Get_Argument --
+   ------------------
+
+   function Get_Argument
+     (Arg : String; Prefix : String; Result : out Unbounded_String) return Boolean is
+   begin
+      if Arg'Length >= Prefix'Length
+        and then Arg (Arg'First .. Arg'First + Prefix'Length - 1) = Prefix
+      then
+         Result := To_Unbounded_String (Arg (Arg'First + Prefix'Length .. Arg'Last));
+         return True;
+      else
+         return False;
+      end if;
+   end Get_Argument;
+
    --  Start of processing for GNATCCG_Wrapper
 
    CUDA_Bin : constant String := GNAT.Directory_Operations.Dir_Name
@@ -243,6 +271,7 @@ begin
    for J in 1 .. Argument_Count loop
       declare
          Arg  : constant String := Argument (J);
+         Sub_Arg : Unbounded_String;
       begin
          if Arg'Length > 0 and then Arg (1) /= '-'
            and then
@@ -269,10 +298,10 @@ begin
             Verbose := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
-         elsif Arg'Length > 9 and then Arg (1 .. 9) = "-mcpu=sm_" then
-            GPU_Name := new String'(Arg (10 .. Arg'Last));
-         elsif Arg'Length > 9 and then Arg (1 .. 17) = "-mcuda-libdevice=" then
-            Libdevice_Path := new String'(Arg (18 .. Arg'Last));
+         elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
+            GPU_Name := new String'(To_String (Sub_Arg));
+         elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
+            Libdevice_Path := new String'(To_String (Sub_Arg));
          else
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
