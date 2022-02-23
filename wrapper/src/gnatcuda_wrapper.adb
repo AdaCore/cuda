@@ -23,12 +23,14 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
 with Ada.Command_Line;          use Ada.Command_Line;
 with Ada.Environment_Variables; use Ada.Environment_Variables;
 
 with GNAT.Case_Util;            use GNAT.Case_Util;
 with GNAT.Directory_Operations; use GNAT.Directory_Operations;
 with GNAT.IO;                   use GNAT.IO;
+with GNAT.IO_Aux;               use GNAT.IO_Aux;
 with GNAT.OS_Lib;               use GNAT.OS_Lib;
 
 with Gnatvsn;
@@ -37,6 +39,12 @@ with Gnatvsn;
 --  installed under <install>/bin
 
 function GNATCUDA_Wrapper return Integer is
+
+   subtype String_Access is GNAT.OS_Lib.String_Access;
+   --  GNAT.OS_Lib and Ada.Strings.Unbounded both declare String_Access, we care
+   --  about the one for OS_Lib here.
+
+   Exec_Not_Found : exception;
 
    function Executable_Location return String;
    --  Return the name of the parent directory where the executable is stored
@@ -169,7 +177,11 @@ function GNATCUDA_Wrapper return Integer is
    GPU_Name   : String_Access;
    Count     : constant Natural := Argument_Count;
    Path_Val  : constant String  := Value ("PATH", "");
-   LLVM_Args : Argument_List (1 .. Count);
+
+   LLVM_Args : Argument_List (1 .. Count + 1);
+   --  We usually have to add -mcuda-libdevice= on top of the regular switches,
+   --  so adding one to the input count.
+
    LLVM_Arg_Number : Integer := 0;
    Compile   : Boolean := False;
    Verbose   : Boolean := False;
@@ -182,9 +194,19 @@ function GNATCUDA_Wrapper return Integer is
 
    Input_File_Number : Integer := 0;
    Input_Files : String_List (1 .. Argument_Count);
+   Libdevice_Path : String_Access;
 
    function Spawn (S : String; Args : Argument_List) return Integer;
    --  Call GNAT.OS_Lib.Spawn and take Verbose into account
+
+   function Locate_And_Check (Name : String) return String_Access;
+   --  Locates a binary on path and raises an exception if not found.
+
+   function Get_Argument
+     (Arg : String; Prefix : String; Result : out Unbounded_String)
+      return Boolean;
+   --  If Prefix is found in Arg, then set the suffix in Result and returns
+   --  true, else returns false.
 
    -----------
    -- Spawn --
@@ -205,12 +227,51 @@ function GNATCUDA_Wrapper return Integer is
       return GNAT.OS_Lib.Spawn (S, Args);
    end Spawn;
 
+   ----------------------
+   -- Locate_And_Check --
+   ----------------------
+
+   function Locate_And_Check (Name : String) return String_Access is
+      Tmp : String_Access;
+   begin
+      Tmp := Locate_Exec_On_Path (Name);
+
+      if Tmp = null then
+         Put_Line ("error: could not locate """ & Name & """ on PATH");
+         raise Exec_Not_Found;
+      end if;
+
+      return Tmp;
+   end Locate_And_Check;
+
+   ------------------
+   -- Get_Argument --
+   ------------------
+
+   function Get_Argument
+     (Arg : String; Prefix : String; Result : out Unbounded_String) return Boolean is
+   begin
+      if Arg'Length >= Prefix'Length
+        and then Arg (Arg'First .. Arg'First + Prefix'Length - 1) = Prefix
+      then
+         Result := To_Unbounded_String (Arg (Arg'First + Prefix'Length .. Arg'Last));
+         return True;
+      else
+         return False;
+      end if;
+   end Get_Argument;
+
    --  Start of processing for GNATCCG_Wrapper
 
+   CUDA_Bin : constant String := GNAT.Directory_Operations.Dir_Name
+     (Locate_And_Check ("ptxas").all);
+   CUDA_Root : constant String := GNAT.Directory_Operations.Dir_Name
+     (CUDA_Bin (CUDA_Bin'First .. CUDA_Bin'Last - 1));
 begin
    for J in 1 .. Argument_Count loop
       declare
          Arg  : constant String := Argument (J);
+         Sub_Arg : Unbounded_String;
       begin
          if Arg'Length > 0 and then Arg (1) /= '-'
            and then
@@ -227,24 +288,54 @@ begin
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-v" then
             Put_Line ("Target: cuda");
-            --  ??? temporary hard coded version numbers
             Put_Line ("cuda-gcc version "
               & gnatvsn.Library_Version
               & " (for GNAT Pro "
               & gnatvsn.Gnat_Static_Version_String
               & ")");
+            Put_Line ("CUDA Installation: " & CUDA_Root);
 
             Verbose := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
-         elsif Arg'Length > 9 and then Arg (1 .. 9) = "-mcpu=sm_" then
-            GPU_Name := new String'(Arg (10 .. Arg'Last));
+         elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
+            GPU_Name := new String'(To_String (Sub_Arg));
+         elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
+            Libdevice_Path := new String'(To_String (Sub_Arg));
          else
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
          end if;
       end;
    end loop;
+
+   if Libdevice_Path = null then
+      --  We don't have a path for libdevice specified on the commande line,
+      --  use heuristics to find the proper one
+
+      declare
+         Path_1 : String := CUDA_Root
+           & "/nvidia-cuda-toolkit/libdevice/libdevice.10.bc";
+         Path_2 : String := CUDA_Root
+           & "/nvvm/libdevice/libdevice.10.bc";
+      begin
+         if GNAT.IO_Aux.File_Exists (Path_1) then
+            Libdevice_Path := new String'(Path_1);
+         elsif GNAT.IO_Aux.File_Exists (Path_2) then
+            Libdevice_Path := new String'(Path_2);
+         else
+            Put_Line
+              ("error: could not locate libdevice on "
+               & Path_1 & " or " & Path_2);
+
+            return 1;
+         end if;
+      end;
+   end if;
+
+   LLVM_Arg_Number := @ + 1;
+   LLVM_Args (LLVM_Arg_Number) := new String'
+     ("-mcuda-libdevice=" & Libdevice_Path.all);
 
    if GPU_Name = null then
       GPU_Name := new String'("75");
@@ -296,7 +387,7 @@ begin
             new String'(Kernel_Object));
       begin
          Status := Spawn
-           (Locate_Exec_On_Path ("llvm-gcc").all,
+           (Locate_And_Check ("llvm-gcc").all,
             Prefix_LLVM_ARGS &
               new String'("-mcpu=sm_" & GPU_Name.all) &
               LLVM_Args (1 .. LLVM_Arg_Number));
@@ -306,7 +397,7 @@ begin
          end if;
 
          Status := Spawn
-           (Locate_Exec_On_Path ("ptxas").all,
+           (Locate_And_Check ("ptxas").all,
             PTXAS_Args);
 
          if Status /= 0 then
@@ -314,18 +405,21 @@ begin
          end if;
 
          Status := Spawn
-           (Locate_Exec_On_Path ("fatbinary").all,
+           (Locate_And_Check ("fatbinary").all,
             Fatbinary_Args);
 
          if Status /= 0 then
             return Status;
          end if;
 
-         Status := Spawn (Locate_Exec_On_Path ("ld").all, Ld_Args);
+         Status := Spawn (Locate_And_Check ("ld").all, Ld_Args);
 
          return Status;
       end;
    end if;
 
-   return 1;
+   return 0;
+exception
+   when Exec_Not_Found =>
+      return 1;
 end GNATCUDA_Wrapper;
