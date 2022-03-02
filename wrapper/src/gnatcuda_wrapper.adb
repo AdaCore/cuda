@@ -315,7 +315,7 @@ begin
 
       declare
          Path_1 : String := CUDA_Root
-           & "/nvidia-cuda-toolkit/libdevice/libdevice.10.bc";
+           & "/lib/nvidia-cuda-toolkit/libdevice/libdevice.10.bc";
          Path_2 : String := CUDA_Root
            & "/nvvm/libdevice/libdevice.10.bc";
       begin
