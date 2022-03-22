@@ -300,7 +300,7 @@ begin
             Compile := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
-         elsif Arg = "-v" then
+         elsif Arg = "-v" or Arg = "--version" then
             Put_Line ("Target: cuda");
             Put_Line ("cuda-gcc version "
               & gnatvsn.Library_Version
