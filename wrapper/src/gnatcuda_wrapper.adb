@@ -263,10 +263,24 @@ function GNATCUDA_Wrapper return Integer is
 
    --  Start of processing for GNATCCG_Wrapper
 
-   CUDA_Bin : constant String := GNAT.Directory_Operations.Dir_Name
-     (Locate_And_Check ("ptxas").all);
-   CUDA_Root : constant String := GNAT.Directory_Operations.Dir_Name
-     (CUDA_Bin (CUDA_Bin'First .. CUDA_Bin'Last - 1));
+   CUDA_Root_Lazy : Unbounded_String := Null_Unbounded_String;
+   --  Path to CUDA Root, resolved lazily when it is needed, not earlier
+   function CUDA_Root return String is
+   begin
+      if CUDA_Root_Lazy = Null_Unbounded_String then
+         declare
+            CUDA_Bin : constant String := GNAT.Directory_Operations.Dir_Name
+              (Locate_And_Check ("ptxas").all);
+         begin
+            Set_Unbounded_String
+              (CUDA_Root_Lazy,
+                (GNAT.Directory_Operations.Dir_Name
+                  (CUDA_Bin (CUDA_Bin'First .. CUDA_Bin'Last - 1))));
+         end;
+      end if;
+
+      return To_String (CUDA_Root_Lazy);
+   end CUDA_Root;
 begin
    for J in 1 .. Argument_Count loop
       declare
@@ -286,7 +300,7 @@ begin
             Compile := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
-         elsif Arg = "-v" then
+         elsif Arg = "-v" or Arg = "--version" then
             Put_Line ("Target: cuda");
             Put_Line ("cuda-gcc version "
               & gnatvsn.Library_Version
