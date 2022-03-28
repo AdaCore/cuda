@@ -1,7 +1,7 @@
 with CUDA.Runtime_Api; use CUDA.Runtime_Api; -- Block_Dim, Block_IDx, Thread_IDx
 with Interfaces.C;     use Interfaces.C; -- Operators for Block_Dim, Block_IDx, Thread_IDx
 
-package body Kernel_Device is
+package body Device_Functions is
    
    procedure Vector_Add_Device
      (A_Addr : System.Address;
@@ -19,4 +19,4 @@ package body Kernel_Device is
       end if;
    end Vector_Add_Device;
 
-end Kernel_Device;
+end Device_Functions;
