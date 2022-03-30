@@ -8,6 +8,8 @@ SM_XX="75"
 # Build CUDA runtime
 Execution_Side=Device gprbuild -P ../../../api/cuda_device.gpr -j0
 
+mkdir -p obj/device obj/host
+
 # Build fatbin
 "llvm-gcc" \
    -I"/../../../api/device_static/" \
