@@ -1,85 +1,82 @@
 ------------------------------------------------------------------------------
 --                       Copyright (C) 2017, AdaCore                        --
--- This is free software;  you can redistribute it  and/or modify it  under --
--- terms of the  GNU General Public License as published  by the Free Soft- --
--- ware  Foundation;  either version 3,  or (at your option) any later ver- --
--- sion.  This software is distributed in the hope  that it will be useful, --
--- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
--- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
--- License for  more details.  You should have  received  a copy of the GNU --
--- General  Public  License  distributed  with  this  software;   see  file --
--- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
--- of the license.                                                          --
+-- This Is Free Software;  You Can Redistribute It  And/Or Modify It  Under --
+-- Terms Of The  GNU General Public License As Published  By The Free Soft- --
+-- Ware  Foundation;  Either Version 3,  Or (At Your Option) Any Later Ver- --
+-- Sion.  This Software Is Distributed In The Hope  That It Will Be Useful, --
+-- But WITHOUT ANY WARRANTY;  Without Even The Implied Warranty Of MERCHAN- --
+-- TABILITY Or FITNESS FOR A PARTICULAR PURPOSE. See The GNU General Public --
+-- License For  More Details.  You Should Have  Received  A Copy Of The GNU --
+-- General  Public  License  Distributed  With  This  Software;   See  File --
+-- COPYING3.  If Not, Go To Http://Www.Gnu.Org/Licenses For A Complete Copy --
+-- Of The License.                                                          --
 ------------------------------------------------------------------------------
 
-With System;
-With Interfaces.C; Use Interfaces.C;
+with System;
+with Interfaces.C; use Interfaces.C;
 
-With Ada.Numerics.Float_Random; Use Ada.Numerics.Float_Random;
-With Ada.Text_IO;               Use Ada.Text_IO;
+with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
+with Ada.Text_IO;               use Ada.Text_IO;
 
-With CUDA.Driver_Types; Use CUDA.Driver_Types;
-With CUDA.Runtime_Api;  Use CUDA.Runtime_Api;
-With CUDA.Stddef;
+with CUDA.Driver_Types; use CUDA.Driver_Types;
+with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
+with CUDA.Stddef;
 
-With Ada.Unchecked_Deallocation;
-With Ada.Numerics.Elementary_Functions; Use Ada.Numerics.Elementary_Functions;
+with Ada.Unchecked_Deallocation;
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 
-With Graphic;
+with Graphic;
 
-With Bilateral_Host;
-With Bilateral_Kernel;
+with Bilateral_Host;
+with Bilateral_Kernel;
 
-With Importer;
-With Exporter;
+with Importer;
+with Exporter;
 
-Procedure Main Is
+procedure Main is
    Width  : Natural;
    Height : Natural;
 
-   Package BK Renames Bilateral_Kernel;
-   Package G Renames Graphic;
-   Package BH Renames Bilateral_Host;
+   package BK renames Bilateral_Kernel;
+   package G renames Graphic;
+   package BH renames Bilateral_Host;
 
-   Type Execution_Device Is (Cpu, Gpu);
-   Use_Dev : Execution_Device := Gpu;
-Begin
+   type Execution_Device is (Cpu, Gpu);
+   Use_Dev : constant Execution_Device := Gpu;
+begin
 
    Importer.Get_Image_Infos ("./data/ada_lovelace_photo.ppm", Width, Height);
-   Declare
-      Img              : G.Image_Access := New G.Image (1 .. Width, 1 .. Height);
-      Filtered_Img     : G.Image_Access := New G.Image (1 .. Width, 1 .. Height);
-      Spatial_Stdev    : Float := 0.74;
-      Color_Dist_Stdev : Float := 200.0;
-   Begin
-      Importer.Fill_Image ("./data/ada_lovelace_photo.ppm", Width, Height, Img.All);
+   declare
+      Img              : G.Image_Access := new G.Image (1 .. Width, 1 .. Height);
+      Filtered_Img     : G.Image_Access := new G.Image (1 .. Width, 1 .. Height);
+      Spatial_Stdev    : constant Float := 0.74;
+      Color_Dist_Stdev : constant Float := 200.0;
+   begin
+      Importer.Fill_Image ("./data/ada_lovelace_photo.ppm", Width, Height, Img.all);
 
       Put_Line ("import done");
 
-      Case Use_Dev Is
-         When Cpu =>
-            BH.Bilateral_Cpu (
-               Host_Img           => Img, 
-               Host_Filtered_Img  => Filtered_Img,
-               Width              => Width,
-               Height             => Height,
-               Spatial_Stdev      => Spatial_Stdev,
-               Color_Dist_Stdev   => Color_Dist_Stdev
-            );
-         When Gpu =>
-            BH.Bilateral_Cuda (
-               Host_Img           => Img, 
-               Host_Filtered_Img  => Filtered_Img,
-               Width              => Width,
-               Height             => Height,
-               Spatial_Stdev      => Spatial_Stdev,
-               Color_Dist_Stdev   => Color_Dist_Stdev);
-      End Case;
+      case Use_Dev is
+         when Cpu =>
+            BH.Bilateral_Cpu (Host_Img          => Img, 
+                              Host_Filtered_Img => Filtered_Img,
+                              Width             => Width, 
+                              Height            => Height,
+                              Spatial_Stdev     => Spatial_Stdev,
+                              Color_Dist_Stdev  => Color_Dist_Stdev);
+         when Gpu =>
+            BH.Bilateral_Cuda (Host_Img          => Img, 
+                               Host_Filtered_Img => Filtered_Img,
+                               Width             => Width, 
+                               Height            => Height,
+                               Spatial_Stdev     => Spatial_Stdev,
+                               Color_Dist_Stdev  => Color_Dist_Stdev);
+      end case;
 
       Put_Line ("bilateral done");
 
-      Exporter.Write_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.All);
+      Exporter.Write_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.all);
 
       Put_Line ("export done");
-   End;
-End Main;
+   end;
+end Main;

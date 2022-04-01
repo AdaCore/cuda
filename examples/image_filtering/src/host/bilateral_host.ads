@@ -12,23 +12,23 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-With Graphic;
+with Graphic;
 
-Package Bilateral_Host Is
+package Bilateral_Host is
 
-    Package G Renames Graphic;
+   package G renames Graphic;
 
-    Procedure Bilateral_Cpu (Host_Img          : G.Image_Access; 
+   procedure Bilateral_Cpu (Host_Img          : G.Image_Access; 
+                            Host_Filtered_Img : G.Image_Access;
+                            Width             : Integer; 
+                            Height            : Integer; 
+                            Spatial_Stdev     : Float;
+                            Color_Dist_Stdev  : Float);
+
+   procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
                              Host_Filtered_Img : G.Image_Access;
-                             Width             : Integer;
-                             Height            : Integer;
+                             Width             : Integer; 
+                             Height            : Integer; 
                              Spatial_Stdev     : Float;
                              Color_Dist_Stdev  : Float);
-
-    Procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
-                              Host_Filtered_Img : G.Image_Access;
-                              Width             : Integer;
-                              Height            : Integer;
-                              Spatial_Stdev     : Float;
-                              Color_Dist_Stdev  : Float);
-End Bilateral_Host;
+end Bilateral_Host;

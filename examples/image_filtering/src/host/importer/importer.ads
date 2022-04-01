@@ -12,19 +12,19 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-With Graphic;
+with Graphic;
 
-Package Importer Is
+package Importer is
 
-    Package G Renames Graphic;
+   package G renames Graphic;
 
-    Procedure Get_Image_Infos (File_Path : String; 
-                               Width     : Out Natural; 
-                               Height    : Out Natural);
+   procedure Get_Image_Infos (File_Path : String; 
+                              Width     : out Natural; 
+                              Height    : out Natural);
 
-    Procedure Fill_Image (File_Path : String; 
-                          Width     : Natural; 
-                          Height    : Natural; 
-                          Img       : In Out G.Image);
+   procedure Fill_Image (File_Path : String; 
+                         Width     : Natural; 
+                         Height    : Natural;
+                         Img       : in out G.Image);
 
-End Importer;
+end Importer;

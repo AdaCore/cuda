@@ -12,11 +12,11 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-With Graphic;
+with Graphic;
 
-Package Exporter Is
+package Exporter is
 
-    Package G Renames Graphic;
-    Procedure Write_Image (File_Path : String; Img : G.Image);
+   package G renames Graphic;
+   procedure Write_Image (File_Path : String; Img : G.Image);
 
-End Exporter;
+end Exporter;

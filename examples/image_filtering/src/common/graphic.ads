@@ -12,13 +12,13 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-Package Graphic Is
-    Type Rgb Is Record
-        R, G, B : Float;
-    End Record;
+package Graphic is
+   type Rgb is record
+      R, G, B : Float;
+   end record;
 
-    Type Image Is Array (Natural Range <>, Natural Range <>) Of Rgb;
-    Type Image_Access Is Access All Image;
+   type Image is array (Natural range <>, Natural range <>) of Rgb;
+   type Image_Access is access all Image;
 
-    Procedure Normalize (Img : Image_Access);
-End Graphic;
+   procedure Normalize (Img : Image_Access);
+end Graphic;
