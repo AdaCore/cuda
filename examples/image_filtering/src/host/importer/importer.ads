@@ -22,9 +22,9 @@ package Importer is
                               Width     : out Natural; 
                               Height    : out Natural);
 
-   procedure Fill_Image (File_Path : String; 
-                         Width     : Natural; 
-                         Height    : Natural;
-                         Img       : in out G.Image);
+   procedure Import_Image (File_Path : String; 
+                           Width     : Natural; 
+                           Height    : Natural;
+                           Img       : in out G.Image);
 
 end Importer;

@@ -53,7 +53,7 @@ package body Bilateral_Host is
                           J                 => J);
          end loop;
       end loop;
-   end Bilateral_Cpu;
+   end;
 
    procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
                              Host_Filtered_Img : G.Image_Access;
@@ -68,7 +68,6 @@ package body Bilateral_Host is
                                                               1);
       Device_Img, Device_Filtered_Img : System.Address;
    begin
-
       -- send input data to device
       Device_Img := CUDA.Runtime_Api.Malloc (Image_Bytes);
       CUDA.Runtime_Api.Memcpy (Device_Img, 
@@ -97,5 +96,5 @@ package body Bilateral_Host is
                                Device_Filtered_Img, 
                                Image_Bytes,
                                CDT.Memcpy_Device_To_Host);
-   end Bilateral_Cuda;
+   end;
 end Bilateral_Host;

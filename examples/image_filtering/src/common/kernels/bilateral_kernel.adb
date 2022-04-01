@@ -33,9 +33,7 @@ package body Bilateral_Kernel is
                         Spatial_Stdev     : Float;
                         Color_Dist_Stdev  : Float; 
                         I                 : Integer; 
-                        J                 : Integer)
-   is
-
+                        J                 : Integer) is
       Kernel_Size : Integer := Integer (2.0 * Spatial_Stdev * 3.0);
       Half_Size   : Natural := (Kernel_Size - 1) / 2;
 
@@ -90,7 +88,6 @@ package body Bilateral_Kernel is
       Ye : Integer := J + Half_Size;
 
       Test : Float := 0.0;
-
    begin
       for X in Xb .. Xe loop
          for Y in Yb .. Ye loop
@@ -123,15 +120,14 @@ package body Bilateral_Kernel is
       Filtered_Img (I, J).R := Filtered_Rgb.R / Sum_Sg_Cdg;
       Filtered_Img (I, J).G := Filtered_Rgb.G / Sum_Sg_Cdg;
       Filtered_Img (I, J).B := Filtered_Rgb.B / Sum_Sg_Cdg;
-   end Bilateral;
+   end;
 
    procedure Bilateral_Cuda (Device_Img          : System.Address; 
                              Device_Filtered_Img : System.Address;
                              Width               : Integer; 
                              Height              : Integer; 
                              Spatial_Stdev       : Float;
-                             Color_Dist_Stdev    : Float)
-   is
+                             Color_Dist_Stdev    : Float) is
       I : Integer := Integer (Block_Idx.X);
       J : Integer := Integer (Block_Idx.Y);
    begin
@@ -143,6 +139,6 @@ package body Bilateral_Kernel is
                  Color_Dist_Stdev, 
                  I, 
                  J);
-   end Bilateral_Cuda;
+   end;
 
 end Bilateral_Kernel;

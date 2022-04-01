@@ -44,12 +44,12 @@ package body Importer is
          end if;
       end;
       Close (Input_File);
-   end Get_Image_Infos;
+   end;
 
-   procedure Fill_Image (File_Path : String; 
-                         Width     : Natural; 
-                         Height    : Natural;
-                         Img       : in out G.Image) is
+   procedure Import_Image (File_Path : String; 
+                           Width     : Natural; 
+                           Height    : Natural;
+                           Img       : in out G.Image) is
       use GNAT.Spitbol.Patterns;
       use Ada.Text_IO;
       Input_File : File_Type;
@@ -96,6 +96,6 @@ package body Importer is
          end loop;
       end;
       Close (Input_File);
-   end Fill_Image;
+   end;
 
 end Importer;

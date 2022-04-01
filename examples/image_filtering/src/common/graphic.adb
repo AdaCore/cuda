@@ -23,6 +23,6 @@ package body Graphic is
             Img (I, J).B := Img (I, J).B / 255.0;
          end loop;
       end loop;
-   end Normalize;
+   end;
 
 end Graphic;

@@ -18,7 +18,7 @@ with Ada.Text_IO;       use Ada.Text_IO;
 
 package body Exporter is
 
-   procedure Write_Image (File_Path : String; Img : G.Image) is
+   procedure Export_Image (File_Path : String; Img : G.Image) is
       File   : File_Type;
       Width  : Natural := Img'Length (1);
       Height : Natural := Img'Length (2);
@@ -35,6 +35,6 @@ package body Exporter is
                             Trim (Integer (Img (I, J).B)'Image, Left));
          end loop;
       end loop;
-   end Write_Image;
+   end;
 
 end Exporter;

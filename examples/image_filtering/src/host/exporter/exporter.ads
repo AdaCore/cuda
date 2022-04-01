@@ -17,6 +17,6 @@ with Graphic;
 package Exporter is
 
    package G renames Graphic;
-   procedure Write_Image (File_Path : String; Img : G.Image);
+   procedure Export_Image (File_Path : String; Img : G.Image);
 
 end Exporter;

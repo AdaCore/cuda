@@ -46,13 +46,14 @@ procedure Main is
 begin
 
    Importer.Get_Image_Infos ("./data/ada_lovelace_photo.ppm", Width, Height);
+
    declare
       Img              : G.Image_Access := new G.Image (1 .. Width, 1 .. Height);
       Filtered_Img     : G.Image_Access := new G.Image (1 .. Width, 1 .. Height);
       Spatial_Stdev    : constant Float := 0.74;
       Color_Dist_Stdev : constant Float := 200.0;
    begin
-      Importer.Fill_Image ("./data/ada_lovelace_photo.ppm", Width, Height, Img.all);
+      Importer.Import_Image ("./data/ada_lovelace_photo.ppm", Width, Height, Img.all);
 
       Put_Line ("import done");
 
@@ -75,7 +76,7 @@ begin
 
       Put_Line ("bilateral done");
 
-      Exporter.Write_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.all);
+      Exporter.Export_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.all);
 
       Put_Line ("export done");
    end;
