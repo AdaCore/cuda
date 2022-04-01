@@ -1,84 +1,84 @@
-with ada.text_io;
-with Ada.Directories; use Ada.Directories;
+With Ada.Text_Io;
+With Ada.Directories; Use Ada.Directories;
 
-with GNAT.Spitbol.Patterns;  
+With GNAT.Spitbol.Patterns;  
 
-with ada.strings.unbounded; use ada.strings.Unbounded;
+With Ada.Strings.Unbounded; Use Ada.Strings.Unbounded;
 
-package body importer is
+Package Body Importer Is
 
-    procedure get_image_infos (file_path : string; width: out natural; height: out natural) is
-    use GNAT.Spitbol.Patterns;
-    use ada.text_io;
-    input_file : file_type;
+    Procedure Get_Image_Infos (File_Path : String; Width: Out Natural; Height: Out Natural) Is
+    Use GNAT.Spitbol.Patterns;
+    Use Ada.Text_Io;
+    Input_File : File_Type;
 
-    begin
-        width  := 0;
-        height := 0;
-        open (input_file, in_file, file_path);
-        declare
-            magic_number   : string := get_line(input_file);
-            note           : string := get_line(input_file);
-            natural_p      : constant Pattern := Span("0123456789");
-            w, h           : vstring_var;
-            width_height_p : constant Pattern := Pos(0) & natural_p * w & Span(' ') & natural_p * h;
-            width_height   : vstring_var := to_unbounded_string(get_line(input_file));
-        begin
-            if match (width_height, width_height_p, "") then
-                width  := Natural'Value (to_string(w));
-                height := Natural'Value (to_string(h));
-            end if;
-        end;
-        close (input_file);
-    end;
+    Begin
+        Width  := 0;
+        Height := 0;
+        Open (Input_File, In_File, File_Path);
+        Declare
+            Magic_Number   : String := Get_Line(Input_File);
+            Note           : String := Get_Line(Input_File);
+            Natural_P      : Constant Pattern := Span("0123456789");
+            W, H           : Vstring_Var;
+            Width_Height_P : Constant Pattern := Pos(0) & Natural_P * W & Span(' ') & Natural_P * H;
+            Width_Height   : Vstring_Var := To_Unbounded_String(Get_Line(Input_File));
+        Begin
+            If Match (Width_Height, Width_Height_P, "") Then
+                Width  := Natural'Value (To_String(W));
+                Height := Natural'Value (To_String(H));
+            End If;
+        End;
+        Close (Input_File);
+    End;
 
-    procedure fill_image (file_path : string; width: natural; height: natural; img : in out G.Image) is
-        use GNAT.Spitbol.Patterns;
-        use ada.text_io;
-        input_file : file_type;
-    begin
-        open (input_file, in_file, file_path);
-        declare
-            color_value   : vstring_var;
-            color_value_p : constant Pattern := Span("0123456789") * color_value;
+    Procedure Fill_Image (File_Path : String; Width: Natural; Height: Natural; Img : In Out G.Image) Is
+        Use GNAT.Spitbol.Patterns;
+        Use Ada.Text_Io;
+        Input_File : File_Type;
+    Begin
+        Open (Input_File, In_File, File_Path);
+        Declare
+            Color_Value   : Vstring_Var;
+            Color_Value_P : Constant Pattern := Span("0123456789") * Color_Value;
 
-            magic_number  : string := get_line(input_file);
-            note          : string := get_line(input_file);
-            width_height  : string := get_line(input_file);
-            max_value     : string := get_line(input_file);
+            Magic_Number  : String := Get_Line(Input_File);
+            Note          : String := Get_Line(Input_File);
+            Width_Height  : String := Get_Line(Input_File);
+            Max_Value     : String := Get_Line(Input_File);
 
-            component_counter : natural := 0;
-            done              : boolean := False;
+            Component_Counter : Natural := 0;
+            Done              : Boolean := False;
 
-            col, row          : natural;
-        begin
-            while not done loop
-                component_counter := component_counter + 1;
-                col               := ((component_counter-1) mod width) + 1;
-                row               := (component_counter + (width - 1)) / width;
-                for i in 1 .. 3 loop
-                    declare
-                        vline : vstring_var := to_unbounded_string (get_line (input_file));
-                    begin
-                        if match (vline, color_value_p, "") then
-                        null;
-                            case i is
-                                when 1 =>
-                                    img (col, row).r := float'value (to_string (color_value));
-                                when 2 =>
-                                    img (col, row).g := float'value (to_string (color_value));
-                                when 3 =>
-                                    img (col, row).b := float'value (to_string (color_value));
-                            end case;
-                        end if;
-                    end;
-                end loop;
-                if end_of_file (input_file) then
-                    done := true;
-                end if;
-            end loop;
-        end;
-        close (input_file);
-    end;
+            Col, Row          : Natural;
+        Begin
+            While Not Done Loop
+                Component_Counter := Component_Counter + 1;
+                Col               := ((Component_Counter-1) Mod Width) + 1;
+                Row               := (Component_Counter + (Width - 1)) / Width;
+                For I In 1 .. 3 Loop
+                    Declare
+                        Vline : Vstring_Var := To_Unbounded_String (Get_Line (Input_File));
+                    Begin
+                        If Match (Vline, Color_Value_P, "") Then
+                        Null;
+                            Case I Is
+                                When 1 =>
+                                    Img (Col, Row).R := Float'Value (To_String (Color_Value));
+                                When 2 =>
+                                    Img (Col, Row).G := Float'Value (To_String (Color_Value));
+                                When 3 =>
+                                    Img (Col, Row).B := Float'Value (To_String (Color_Value));
+                            End Case;
+                        End If;
+                    End;
+                End Loop;
+                If End_Of_File (Input_File) Then
+                    Done := True;
+                End If;
+            End Loop;
+        End;
+        Close (Input_File);
+    End;
 
-end importer;
+End Importer;

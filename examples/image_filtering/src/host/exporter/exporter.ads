@@ -1,8 +1,8 @@
-with graphic;
+With Graphic;
 
-package exporter is
+Package Exporter Is
 
-    package G renames graphic;
-    procedure write_image (file_path : string; img : G.Image);
+    Package G Renames Graphic;
+    Procedure Write_Image (File_Path : String; Img : G.Image);
 
-end exporter;
+End Exporter;

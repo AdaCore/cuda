@@ -1,72 +1,71 @@
-with System;
-with Interfaces.C; use Interfaces.C;
+With System;
+With Interfaces.C; Use Interfaces.C;
 
-with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
-with Ada.Text_IO;               use Ada.Text_IO;
+With Ada.Numerics.Float_Random; Use Ada.Numerics.Float_Random;
+With Ada.Text_IO;               Use Ada.Text_IO;
 
-with CUDA.Driver_Types; use CUDA.Driver_Types;
-with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
-with CUDA.Stddef;
+With CUDA.Driver_Types; Use CUDA.Driver_Types;
+With CUDA.Runtime_Api;  Use CUDA.Runtime_Api;
+With CUDA.Stddef;
 
+With Ada.Unchecked_Deallocation;
+With Ada.Numerics.Elementary_Functions; Use Ada.Numerics.Elementary_Functions;
 
-with Ada.Unchecked_Deallocation;
-with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+With Graphic;
 
-with graphic;
+With Bilateral_Host;
+With Bilateral_Kernel;
 
-with bilateral_host;
-with bilateral_kernel;
+With Importer;
+With Exporter;
 
-with importer;
-with exporter;
+Procedure Main Is
+   Width  : Natural;
+   Height : Natural;
 
-procedure Main is
-   width  : Natural;
-   height : Natural;
+   Package BK Renames Bilateral_Kernel;
+   Package G Renames Graphic;
+   Package BH Renames Bilateral_Host;
 
-   package BK renames bilateral_kernel;
-   package G renames graphic;
-   package BH renames bilateral_host;
+   Type Execution_Device Is (Cpu, Gpu);
+   Use_Dev : Execution_Device := Gpu;
+Begin
 
-   type execution_device is (cpu, gpu);
-   use_dev : execution_device := gpu;
-begin
-
-   importer.get_image_infos ("./data/ada_lovelace_photo.ppm", width, height);
-   declare
-      img              : G.image_access := new G.Image (1 .. width, 1 .. height);
-      filtered_img     : G.image_access := new G.Image (1 .. width, 1 .. height);
-      spatial_stdev    : float := 0.74;
-      color_dist_stdev : float := 200.0;
-   begin
-      importer.fill_image ("./data/ada_lovelace_photo.ppm", width, height, img.all);
+   Importer.Get_Image_Infos ("./data/ada_lovelace_photo.ppm", Width, Height);
+   Declare
+      Img              : G.Image_Access := New G.Image (1 .. Width, 1 .. Height);
+      Filtered_Img     : G.Image_Access := New G.Image (1 .. Width, 1 .. Height);
+      Spatial_Stdev    : Float := 0.74;
+      Color_Dist_Stdev : Float := 200.0;
+   Begin
+      Importer.Fill_Image ("./data/ada_lovelace_photo.ppm", Width, Height, Img.All);
 
       Put_Line ("import done");
 
-      case use_dev is
-         when cpu =>
-            BH.bilateral_cpu (
-               host_img           => img, 
-               host_filtered_img  => filtered_img,
-               width              => width,
-               height             => height,
-               spatial_stdev      => spatial_stdev,
-               color_dist_stdev   => color_dist_stdev
+      Case Use_Dev Is
+         When Cpu =>
+            BH.Bilateral_Cpu (
+               Host_Img           => Img, 
+               Host_Filtered_Img  => Filtered_Img,
+               Width              => Width,
+               Height             => Height,
+               Spatial_Stdev      => Spatial_Stdev,
+               Color_Dist_Stdev   => Color_Dist_Stdev
             );
-         when gpu =>
-            BH.bilateral_cuda (
-               host_img           => img, 
-               host_filtered_img  => filtered_img,
-               width              => width,
-               height             => height,
-               spatial_stdev      => spatial_stdev,
-               color_dist_stdev   => color_dist_stdev);
-      end case;
+         When Gpu =>
+            BH.Bilateral_Cuda (
+               Host_Img           => Img, 
+               Host_Filtered_Img  => Filtered_Img,
+               Width              => Width,
+               Height             => Height,
+               Spatial_Stdev      => Spatial_Stdev,
+               Color_Dist_Stdev   => Color_Dist_Stdev);
+      End Case;
 
       Put_Line ("bilateral done");
 
-      exporter.write_image ("./data/ada_lovelace_photo_bilateral.ppm", filtered_img.all);
+      Exporter.Write_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.All);
 
       Put_Line ("export done");
-   end;
-end Main;
+   End;
+End Main;

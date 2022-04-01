@@ -1,14 +1,14 @@
-package body graphic is
+Package Body Graphic Is
 
-    procedure normalize (img : image_access) is
-    begin
-        for i in img.all'range(1) loop
-            for j in img.all'range(2) loop
-                img (i, j).r := img (i, j).r / 255.0;
-                img (i, j).g := img (i, j).g / 255.0;
-                img (i, j).b := img (i, j).b / 255.0;
-            end loop;
-        end loop;
-    end;
+    Procedure Normalize (Img : Image_Access) Is
+    Begin
+        For I In Img.All'Range(1) Loop
+            For J In Img.All'Range(2) Loop
+                Img (I, J).R := Img (I, J).R / 255.0;
+                Img (I, J).G := Img (I, J).G / 255.0;
+                Img (I, J).B := Img (I, J).B / 255.0;
+            End Loop;
+        End Loop;
+    End;
     
-end graphic;
+End Graphic;

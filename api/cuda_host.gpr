@@ -1,15 +1,22 @@
-project CUDA_Host is
-   for Create_Missing_Dirs use "True";
+Project Cuda_Host Is
+   For Create_Missing_Dirs Use "true";
 
-   for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "host_static");
+   For Source_Dirs Use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "host_static");
 
-   for Object_Dir use "obj";
+   For Object_Dir Use "obj";
 
-   package Compiler is
-      for Switches ("Ada") use ("-gnatp", "-gnat2022");
-   end Compiler;
+   Package Compiler Is
+      For Switches ("ada") Use ("-gnatp", "-gnat2022");
+   End Compiler;
 
-   package Linker is
-      for Default_Switches ("ada") use ("-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/local/cuda/targets/x86_64-linux/lib", "-lcudadevrt","-lcudart_static", "-lrt", "-lpthread", "-ldl");
-   end Linker;
-end CUDA_Host;
+   Package Linker Is
+      For Default_Switches ("ada") Use (
+                                        "-L/usr/local/cuda/targets/x86_64-linux/lib/stubs",
+                                        "-L/usr/local/cuda/targets/x86_64-linux/lib",
+                                        "-lcudadevrt",
+                                        "-lcudart_static",
+                                        "-lrt",
+                                        "-lpthread",
+                                        "-ldl");
+   End Linker;
+End Cuda_Host;

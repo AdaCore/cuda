@@ -5,3 +5,4 @@ api/host
 install/
 __pycache__/
 .#*
+.clang-format

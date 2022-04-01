@@ -1,22 +1,22 @@
-with system;
+With System;
 
-package bilateral_kernel is
+Package Bilateral_Kernel Is
 
-    procedure bilateral (img_addr          : system.address; 
-                         filtered_img_addr : system.address;
-                         width             : integer;
-                         height            : integer;
-                         spatial_stdev     : float;
-                         color_dist_stdev  : float;
-                         i                 : integer;
-                         j                 : integer);
+    Procedure Bilateral (Img_Addr          : System.Address; 
+                         Filtered_Img_Addr : System.Address;
+                         Width             : Integer;
+                         Height            : Integer;
+                         Spatial_Stdev     : Float;
+                         Color_Dist_Stdev  : Float;
+                         I                 : Integer;
+                         J                 : Integer);
 
 
-    procedure bilateral_cuda (device_img          : system.address; 
-                              device_filtered_img : system.address;
-                              width               : integer;
-                              height              : integer;
-                              spatial_stdev       : float;
-                              color_dist_stdev    : float) with cuda_global;
+    Procedure Bilateral_Cuda (Device_Img          : System.Address; 
+                              Device_Filtered_Img : System.Address;
+                              Width               : Integer;
+                              Height              : Integer;
+                              Spatial_Stdev       : Float;
+                              Color_Dist_Stdev    : Float) With Cuda_Global;
 
-end bilateral_kernel;
+End Bilateral_Kernel;

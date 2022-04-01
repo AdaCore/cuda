@@ -1,16 +1,16 @@
-with Graphic;
+With Graphic;
 
-package importer is
+Package Importer Is
 
-    package G renames Graphic;
+    Package G Renames Graphic;
 
-    procedure get_image_infos (file_path : string; 
-                               width     : out natural; 
-                               height    : out natural);
+    Procedure Get_Image_Infos (File_Path : String; 
+                               Width     : Out Natural; 
+                               Height    : Out Natural);
 
-    procedure fill_image (file_path : string; 
-                          width     : natural; 
-                          height    : natural; 
-                          img       : in out G.Image);
+    Procedure Fill_Image (File_Path : String; 
+                          Width     : Natural; 
+                          Height    : Natural; 
+                          Img       : In Out G.Image);
 
-end importer;
+End Importer;

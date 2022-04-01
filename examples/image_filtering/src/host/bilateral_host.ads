@@ -1,20 +1,20 @@
-with graphic;
+With Graphic;
 
-package bilateral_host is
+Package Bilateral_Host Is
 
-    package G renames graphic;
+    Package G Renames Graphic;
 
-    procedure bilateral_cpu (host_img          : G.image_access; 
-                             host_filtered_img : G.image_access;
-                             width             : integer;
-                             height            : integer;
-                             spatial_stdev     : float;
-                             color_dist_stdev  : float);
+    Procedure Bilateral_Cpu (Host_Img          : G.Image_Access; 
+                             Host_Filtered_Img : G.Image_Access;
+                             Width             : Integer;
+                             Height            : Integer;
+                             Spatial_Stdev     : Float;
+                             Color_Dist_Stdev  : Float);
 
-    procedure bilateral_cuda (host_img          : G.image_access; 
-                              host_filtered_img : G.image_access;
-                              width             : integer;
-                              height            : integer;
-                              spatial_stdev     : float;
-                              color_dist_stdev  : float);
-end bilateral_host;
+    Procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
+                              Host_Filtered_Img : G.Image_Access;
+                              Width             : Integer;
+                              Height            : Integer;
+                              Spatial_Stdev     : Float;
+                              Color_Dist_Stdev  : Float);
+End Bilateral_Host;

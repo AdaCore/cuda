@@ -1,10 +1,10 @@
-package graphic is
-    type rgb is record
-        r, g, b : Float;
-    end record;
+Package Graphic Is
+    Type Rgb Is Record
+        R, G, B : Float;
+    End Record;
 
-    type image is array (Natural range <>, Natural range <>) of rgb;
-    type image_access is access all image;
+    Type Image Is Array (Natural Range <>, Natural Range <>) Of Rgb;
+    Type Image_Access Is Access All Image;
 
-    procedure normalize (img : image_access);
-end graphic;
+    Procedure Normalize (Img : Image_Access);
+End Graphic;

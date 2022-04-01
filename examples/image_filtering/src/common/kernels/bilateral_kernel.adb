@@ -1,122 +1,122 @@
-with system;
+With System;
 
-with cuda.runtime_api;
-use cuda.runtime_api; -- block_dim, block_idx, thread_idx
+With Cuda.Runtime_Api;
+Use Cuda.Runtime_Api; -- Block_Dim, Block_Idx, Thread_Idx
  
-with interfaces.c;
-use interfaces.c; -- operators for block_dim, block_idx, thread_idx
+With Interfaces.C;
+Use Interfaces.C;     -- Operators For Block_Dim, Block_Idx, Thread_Idx
 
-with graphic;
+With Graphic;
 
-package body bilateral_kernel is
+Package Body Bilateral_Kernel Is
 
-    package G renames graphic; 
+    Package G Renames Graphic; 
 
-    procedure bilateral (img_addr          : system.address; 
-                         filtered_img_addr : system.address;
-                         width             : integer;
-                         height            : integer;
-                         spatial_stdev     : float;
-                         color_dist_stdev  : float;
-                         i                 : integer;
-                         j                 : integer) is
+    Procedure Bilateral (Img_Addr          : System.Address; 
+                         Filtered_Img_Addr : System.Address;
+                         Width             : Integer;
+                         Height            : Integer;
+                         Spatial_Stdev     : Float;
+                         Color_Dist_Stdev  : Float;
+                         I                 : Integer;
+                         J                 : Integer) Is
 
-        kernel_size         : integer := integer (2.0 * spatial_stdev * 3.0);
-        half_size           : natural := (kernel_size - 1) / 2;
+        Kernel_Size         : Integer := Integer (2.0 * Spatial_Stdev * 3.0);
+        Half_Size           : Natural := (Kernel_Size - 1) / 2;
 
-        spatial_gaussian    : float := 0.0;
-        color_dist_gaussian : float := 0.0;
-        sg_cdg              : float := 0.0;
-        sum_sg_cdg          : float := 0.0;
-        rgb_dist            : float := 0.0;
-        filtered_rgb        : g.rgb := (0.0, 0.0, 0.0);
+        Spatial_Gaussian    : Float := 0.0;
+        Color_Dist_Gaussian : Float := 0.0;
+        Sg_Cdg              : Float := 0.0;
+        Sum_Sg_Cdg          : Float := 0.0;
+        Rgb_Dist            : Float := 0.0;
+        Filtered_Rgb        : G.Rgb := (0.0, 0.0, 0.0);
 
-        img          : g.image (1 .. width, 1 .. height) with address => img_addr;
-        filtered_img : g.image (1 .. width, 1 .. height) with address => filtered_img_addr;
+        Img          : G.Image (1 .. Width, 1 .. Height) With Address => Img_Addr;
+        Filtered_Img : G.Image (1 .. Width, 1 .. Height) With Address => Filtered_Img_Addr;
 
-        function exponential (n : integer; x : float) return float is
-            sum : float := 1.0;
-        begin
-            for i in reverse 1 .. n loop
-                sum := 1.0 + x * sum / float(i);
-            end loop;
-            return sum;
-        end;
+        Function Exponential (N : Integer; X : Float) Return Float Is
+            Sum : Float := 1.0;
+        Begin
+            For I In Reverse 1 .. N Loop
+                Sum := 1.0 + X * Sum / Float(I);
+            End Loop;
+            Return Sum;
+        End;
 
-        function sqrt(x : float; t : float) return float is
-            y : float := 1.0;
-        begin
-            while abs (x/y - y) > t loop
-                y := (y + x / y) / 2.0;
-            end loop;
-            return y;
-        end;
+        Function Sqrt(X : Float; T : Float) Return Float Is
+            Y : Float := 1.0;
+        Begin
+            While Abs (X/Y - Y) > T Loop
+                Y := (Y + X / Y) / 2.0;
+            End Loop;
+            Return Y;
+        End;
 
-        function compute_spatial_gaussian (m : float; n : float) return float is
-            spatial_variance : float := spatial_stdev * spatial_stdev;
-            two_pi_variance  : float := 2.0*3.1416*spatial_variance;
-            exp              : float := exponential (10, -0.5 * ((m*m + n*n)/spatial_variance));
-        begin
-            return (1.0 / (two_pi_variance)) * exp;
-        end;
+        Function Compute_Spatial_Gaussian (M : Float; N : Float) Return Float Is
+            Spatial_Variance : Float := Spatial_Stdev * Spatial_Stdev;
+            Two_Pi_Variance  : Float := 2.0*3.1416*Spatial_Variance;
+            Exp              : Float := Exponential (10, -0.5 * ((M*M + N*N)/Spatial_Variance));
+        Begin
+            Return (1.0 / (Two_Pi_Variance)) * Exp;
+        End;
 
-        function compute_color_dist_gaussian (k : float) return float is
-            color_dist_variance : float := color_dist_stdev * color_dist_stdev;
-        begin
-            return (1.0 / (sqrt(2.0*3.1416, 0.001)*color_dist_stdev)) * exponential (10, -0.5 * ((k*k)/color_dist_variance));
-        end;
+        Function Compute_Color_Dist_Gaussian (K : Float) Return Float Is
+            Color_Dist_Variance : Float := Color_Dist_Stdev * Color_Dist_Stdev;
+        Begin
+            Return (1.0 / (Sqrt(2.0*3.1416, 0.001)*Color_Dist_Stdev)) * Exponential (10, -0.5 * ((K*K)/Color_Dist_Variance));
+        End;
 
-        -- compute kernel bounds
-        xb : integer := i - half_size;
-        xe : integer := i + half_size;
-        yb : integer := j - half_size;
-        ye : integer := j + half_size;
+        -- Compute Kernel Bounds
+        Xb : Integer := I - Half_Size;
+        Xe : Integer := I + Half_Size;
+        Yb : Integer := J - Half_Size;
+        Ye : Integer := J + Half_Size;
 
-        test : float := 0.0;
+        Test : Float := 0.0;
 
-    begin
-        for x in xb .. xe loop
-            for y in yb .. ye loop
-                if x >= 1 and x <= width and y >= 1 and y <= height then
-                    -- compute color distance
-                    rgb_dist := sqrt ((img (i, j).r - img (x, y).r) * (img (i, j).r - img (x, y).r) +
-                                      (img (i, j).g - img (x, y).g) * (img (i, j).g - img (x, y).g) +
-                                      (img (i,j ).b - img (x, y).b) * (img (i, j).b - img (x, y).b), 0.001);
+    Begin
+        For X In Xb .. Xe Loop
+            For Y In Yb .. Ye Loop
+                If X >= 1 And X <= Width And Y >= 1 And Y <= Height Then
+                    -- Compute Color Distance
+                    Rgb_Dist := Sqrt ((Img (I, J).R - Img (X, Y).R) * (Img (I, J).R - Img (X, Y).R) +
+                                      (Img (I, J).G - Img (X, Y).G) * (Img (I, J).G - Img (X, Y).G) +
+                                      (Img (I,J ).B - Img (X, Y).B) * (Img (I, J).B - Img (X, Y).B), 0.001);
 
-                    -- compute gaussians
-                    spatial_gaussian := compute_spatial_gaussian (float(i - x), float(j - y));
-                    color_dist_gaussian := compute_color_dist_gaussian (rgb_dist);
+                    -- Compute Gaussians
+                    Spatial_Gaussian := Compute_Spatial_Gaussian (Float(I - X), Float(J - Y));
+                    Color_Dist_Gaussian := Compute_Color_Dist_Gaussian (Rgb_Dist);
 
-                    -- multiply gaussians
-                    sg_cdg := spatial_gaussian*color_dist_gaussian;
+                    -- Multiply Gaussians
+                    Sg_Cdg := Spatial_Gaussian*Color_Dist_Gaussian;
 
-                    -- accumulate
-                    filtered_rgb.r := filtered_rgb.r + sg_cdg * img (x,y).r;
-                    filtered_rgb.g := filtered_rgb.g + sg_cdg * img (x,y).g;
-                    filtered_rgb.b := filtered_rgb.b + sg_cdg * img (x,y).b;
+                    -- Accumulate
+                    Filtered_Rgb.R := Filtered_Rgb.R + Sg_Cdg * Img (X,Y).R;
+                    Filtered_Rgb.G := Filtered_Rgb.G + Sg_Cdg * Img (X,Y).G;
+                    Filtered_Rgb.B := Filtered_Rgb.B + Sg_Cdg * Img (X,Y).B;
 
-                    -- track to normalize intensity
-                    sum_sg_cdg := sum_sg_cdg + sg_cdg;
-                end if;
-            end loop;
-        end loop;
+                    -- Track To Normalize Intensity
+                    Sum_Sg_Cdg := Sum_Sg_Cdg + Sg_Cdg;
+                End If;
+            End Loop;
+        End Loop;
 
-        -- normalize intensity
-        filtered_img (i,j).r := filtered_rgb.r / sum_sg_cdg;
-        filtered_img (i,j).g := filtered_rgb.g / sum_sg_cdg;
-        filtered_img (i,j).b := filtered_rgb.b / sum_sg_cdg;
-    end;
+        -- Normalize Intensity
+        Filtered_Img (I,J).R := Filtered_Rgb.R / Sum_Sg_Cdg;
+        Filtered_Img (I,J).G := Filtered_Rgb.G / Sum_Sg_Cdg;
+        Filtered_Img (I,J).B := Filtered_Rgb.B / Sum_Sg_Cdg;
+    End;
 
-    procedure bilateral_cuda (device_img          : system.address; 
-                              device_filtered_img : system.address;
-                              width               : integer;
-                              height              : integer;
-                              spatial_stdev       : float;
-                              color_dist_stdev    : float) is
-        i : integer := integer (block_idx.x);
-        j : integer := integer (block_idx.y);
-    begin
-        bilateral (device_img, device_filtered_img, width, height, spatial_stdev, color_dist_stdev, i, j);
-    end;
+    Procedure Bilateral_Cuda (Device_Img          : System.Address; 
+                              Device_Filtered_Img : System.Address;
+                              Width               : Integer;
+                              Height              : Integer;
+                              Spatial_Stdev       : Float;
+                              Color_Dist_Stdev    : Float) Is
+        I : Integer := Integer (Block_Idx.X);
+        J : Integer := Integer (Block_Idx.Y);
+    Begin
+        Bilateral (Device_Img, Device_Filtered_Img, Width, Height, Spatial_Stdev, Color_Dist_Stdev, I, J);
+    End;
 
-end bilateral_kernel;
+End Bilateral_Kernel;

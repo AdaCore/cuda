@@ -1,73 +1,73 @@
-with CUDA.Stddef;
-with CUDA.Vector_Types;
-with CUDA.Driver_Types;
+With CUDA.Stddef;
+With CUDA.Vector_Types;
+With CUDA.Driver_Types;
 
-with Storage_Models;
-with Storage_Models.Arrays;
-with Storage_Models.Objects;
-with CUDA_Storage_Models;
+With Storage_Models;
+With Storage_Models.Arrays;
+With Storage_Models.Objects;
+With CUDA_Storage_Models;
 
-with Interfaces.C;
-use Interfaces.C; -- operators for block_dim, block_idx, thread_idx
+With Interfaces.C;
+Use Interfaces.C; -- Operators For Block_Dim, Block_Idx, Thread_Idx
 
-with System;
+With System;
 
-with CUDA.Runtime_Api;
+With CUDA.Runtime_Api;
 
-with bilateral_kernel;
+With Bilateral_Kernel;
 
-package body bilateral_host is
+Package Body Bilateral_Host Is
 
-    package BK renames bilateral_kernel;
+    Package BK Renames Bilateral_Kernel;
 
-    procedure bilateral_cpu
-       (host_img          : G.image_access; 
-        host_filtered_img : G.image_access;
-        width             : Integer; 
-        height            : Integer; 
-        spatial_stdev     : Float;
-        color_dist_stdev  : Float) is
-    begin
-        for i in host_img.all'Range (1) loop
-            for j in host_img.all'Range (2) loop
-                BK.bilateral
-                   (img_addr          => host_img.all'Address,
-                    filtered_img_addr => host_filtered_img.all'Address,
-                    width             => width, height => height,
-                    spatial_stdev     => spatial_stdev,
-                    color_dist_stdev  => color_dist_stdev, i => i, j => j);
-            end loop;
-        end loop;
-    end;
+    Procedure Bilateral_Cpu
+       (Host_Img          : G.Image_Access; 
+        Host_Filtered_Img : G.Image_Access;
+        Width             : Integer; 
+        Height            : Integer; 
+        Spatial_Stdev     : Float;
+        Color_Dist_Stdev  : Float) Is
+    Begin
+        For I In Host_Img.All'Range (1) Loop
+            For J In Host_Img.All'Range (2) Loop
+                BK.Bilateral
+                   (Img_Addr          => Host_Img.All'Address,
+                    Filtered_Img_Addr => Host_Filtered_Img.All'Address,
+                    Width             => Width, Height => Height,
+                    Spatial_Stdev     => Spatial_Stdev,
+                    Color_Dist_Stdev  => Color_Dist_Stdev, I => I, J => J);
+            End Loop;
+        End Loop;
+    End;
 
-    procedure bilateral_cuda (host_img          : G.image_access; 
-                              host_filtered_img : G.image_access;
-                              width             : Integer; 
-                              height            : Integer; 
-                              spatial_stdev     : Float;
-                              color_dist_stdev  : Float) is
-        image_bytes       : CUDA.Stddef.Size_T              := CUDA.Stddef.Size_T (host_img.all'Size / 8);
-        threads_per_block : constant cuda.vector_types.dim3 := (1, 1, 1);
-        blocks_per_grid   : constant cuda.vector_types.dim3 := (interfaces.c.unsigned (width), interfaces.c.unsigned (height), 1);
+    Procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
+                              Host_Filtered_Img : G.Image_Access;
+                              Width             : Integer; 
+                              Height            : Integer; 
+                              Spatial_Stdev     : Float;
+                              Color_Dist_Stdev  : Float) Is
+        Image_Bytes       : CUDA.Stddef.Size_T              := CUDA.Stddef.Size_T (Host_Img.All'Size / 8);
+        Threads_Per_Block : Constant Cuda.Vector_Types.Dim3 := (1, 1, 1);
+        Blocks_Per_Grid   : Constant Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned (Width), Interfaces.C.Unsigned (Height), 1);
 
-        device_img, device_filtered_img : System.Address;
-    begin
+        Device_Img, Device_Filtered_Img : System.Address;
+    Begin
 
-        device_img := CUDA.Runtime_Api.Malloc (image_bytes);
-        CUDA.Runtime_Api.Memcpy (device_img, host_img.all'Address, image_bytes, CUDA.Driver_Types.Memcpy_Host_To_Device);
+        Device_Img := CUDA.Runtime_Api.Malloc (Image_Bytes);
+        CUDA.Runtime_Api.Memcpy (Device_Img, Host_Img.All'Address, Image_Bytes, CUDA.Driver_Types.Memcpy_Host_To_Device);
 
-        device_filtered_img := CUDA.Runtime_Api.Malloc (image_bytes);
-        CUDA.Runtime_Api.Memcpy (device_filtered_img, host_filtered_img.all'Address, image_bytes, CUDA.Driver_Types.Memcpy_Host_To_Device);
+        Device_Filtered_Img := CUDA.Runtime_Api.Malloc (Image_Bytes);
+        CUDA.Runtime_Api.Memcpy (Device_Filtered_Img, Host_Filtered_Img.All'Address, Image_Bytes, CUDA.Driver_Types.Memcpy_Host_To_Device);
 
-        pragma Cuda_Execute (BK.bilateral_cuda (device_img, 
-                                                device_filtered_img, 
-                                                width, 
-                                                height, 
-                                                spatial_stdev,
-                                                color_dist_stdev),
-                             blocks_per_grid, 
-                             threads_per_block);
+        Pragma Cuda_Execute (BK.Bilateral_Cuda (Device_Img, 
+                                                Device_Filtered_Img, 
+                                                Width, 
+                                                Height, 
+                                                Spatial_Stdev,
+                                                Color_Dist_Stdev),
+                             Blocks_Per_Grid, 
+                             Threads_Per_Block);
 
-        CUDA.Runtime_Api.Memcpy (host_filtered_img.all'Address, device_filtered_img, image_bytes, CUDA.Driver_Types.Memcpy_Device_To_Host);
-    end;
-end bilateral_host;
+        CUDA.Runtime_Api.Memcpy (Host_Filtered_Img.All'Address, Device_Filtered_Img, Image_Bytes, CUDA.Driver_Types.Memcpy_Device_To_Host);
+    End;
+End Bilateral_Host;
