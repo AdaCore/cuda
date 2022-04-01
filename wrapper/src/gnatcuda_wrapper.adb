@@ -78,7 +78,7 @@ function GNATCUDA_Wrapper return Integer is
 
       function Get_Install_Dir (S : String) return String is
          Exec      : String  := GNAT.OS_Lib.Normalize_Pathname
-                                  (S, Resolve_Links => True);
+           (S, Resolve_Links => True);
          Path_Last : Integer := 0;
 
       begin
@@ -98,11 +98,11 @@ function GNATCUDA_Wrapper return Integer is
          if Path_Last < Exec'First + 2
            or else Exec (Path_Last - 2 .. Path_Last) /= "bin"
            or else (Path_Last - 3 >= Exec'First
-                     and then
-                       not Is_Directory_Separator (Exec (Path_Last - 3)))
+                    and then
+                      not Is_Directory_Separator (Exec (Path_Last - 3)))
          then
             return Exec (Exec'First .. Path_Last)
-               & GNAT.OS_Lib.Directory_Separator;
+              & GNAT.OS_Lib.Directory_Separator;
 
          else
             --  Skip bin/, but keep the last directory separator
@@ -111,7 +111,7 @@ function GNATCUDA_Wrapper return Integer is
          end if;
       end Get_Install_Dir;
 
-   --  Start of processing for Executable_Location
+      --  Start of processing for Executable_Location
 
    begin
       --  First determine if a path prefix was placed in front of the
@@ -147,32 +147,6 @@ function GNATCUDA_Wrapper return Integer is
 
       return C = Directory_Separator or else C = '/';
    end Is_Directory_Separator;
-
-   --  Libexec : constant String := Executable_Location & "libexec/gnat_ccg/bin";
-   --
-   --  -----------------
-   --  -- Locate_Exec --
-   --  -----------------
-   --
-   --  function Locate_Exec (Exec : String) return String is
-   --     Exe : constant String_Access := Get_Target_Executable_Suffix;
-   --     --  Note: the leak on Exe does not matter since this function is called
-   --     --  only once.
-   --
-   --     Result : constant String := Libexec & "/" & Exec;
-   --
-   --  begin
-   --     if Is_Executable_File (Result & Exe.all) then
-   --        return Result;
-   --     else
-   --        Put_Line (Result & " executable not found, exiting.");
-   --        OS_Exit (1);
-   --     end if;
-   --  end Locate_Exec;
-
-   --  Local variables
-
-   --  GPU_Name : constant String := "75"; -- TODO we should have switches for This
 
    GPU_Name   : String_Access;
    Count     : constant Natural := Argument_Count;
@@ -274,8 +248,8 @@ function GNATCUDA_Wrapper return Integer is
          begin
             Set_Unbounded_String
               (CUDA_Root_Lazy,
-                (GNAT.Directory_Operations.Dir_Name
-                  (CUDA_Bin (CUDA_Bin'First .. CUDA_Bin'Last - 1))));
+               (GNAT.Directory_Operations.Dir_Name
+                    (CUDA_Bin (CUDA_Bin'First .. CUDA_Bin'Last - 1))));
          end;
       end if;
 
@@ -303,10 +277,10 @@ begin
          elsif Arg = "-v" or Arg = "--version" then
             Put_Line ("Target: cuda");
             Put_Line ("cuda-gcc version "
-              & gnatvsn.Library_Version
-              & " (for GNAT Pro "
-              & gnatvsn.Gnat_Static_Version_String
-              & ")");
+                      & gnatvsn.Library_Version
+                      & " (for GNAT Pro "
+                      & gnatvsn.Gnat_Static_Version_String
+                      & ")");
             Put_Line ("CUDA Installation: " & CUDA_Root);
 
             Verbose := True;
@@ -347,50 +321,84 @@ begin
       end;
    end if;
 
-   LLVM_Arg_Number := @ + 1;
-   LLVM_Args (LLVM_Arg_Number) := new String'
-     ("-mcuda-libdevice=" & Libdevice_Path.all);
-
    if GPU_Name = null then
       GPU_Name := new String'("75");
    end if;
 
    if Compile then
-      if Input_File_Number /= 1 then
-         Put_Line ("error: expected one compilation file, got"
-                   & Input_File_Number'Img);
-         return 1;
+      LLVM_Arg_Number := @ + 1;
+      LLVM_Args (LLVM_Arg_Number) := new String'
+        ("-mcuda-libdevice=" & Libdevice_Path.all);
+
+      if Compile then
+         if Input_File_Number /= 1 then
+            Put_Line ("error: expected one compilation file, got"
+                      & Input_File_Number'Img);
+            return 1;
+         end if;
+
+         declare
+            File_Name : constant String :=
+              Base_Name
+                (Input_Files (1).all, File_Extension (Input_Files (1).all));
+            PTX_Name : aliased String := File_Name & ".s";
+            Obj_Name : aliased String := File_Name & ".cubin";
+
+            PTXAS_Args : constant Argument_List :=
+              (new String'("-arch=sm_" & GPU_Name.all),
+               new String'("-m64"),
+               new String'("--compile-only"),
+               new String'("-v"),
+               PTX_Name'Unchecked_Access,
+               new String'("--output-file"),
+               Obj_Name'Unchecked_Access);
+         begin
+            Status := Spawn
+              (Locate_And_Check ("llvm-gcc").all,
+               Prefix_LLVM_ARGS &
+                 new String'("-mcpu=sm_" & GPU_Name.all) &
+                 LLVM_Args (1 .. LLVM_Arg_Number));
+
+            if Status /= 0 then
+               Put_Line ("llvm-gcc failture");
+               return Status;
+            end if;
+
+            Status := Spawn
+              (Locate_And_Check ("ptxas").all,
+               PTXAS_Args);
+
+            if Status /= 0 then
+               Put_Line ("ptxas failture");
+               return Status;
+            end if;
+         end;
       end if;
-
+   else
       declare
-         File_Name : constant String :=
-           Base_Name
-             (Input_Files (1).all, File_Extension (Input_Files (1).all));
-         PTX_Name : aliased String := File_Name & ".s";
-         Obj_Name : aliased String := File_Name & ".o";
+         Kernel_Object : constant String := Input_Files (1).all;
+         Kernel_Fat : constant String := Kernel_Object
+           (Kernel_Object'First .. Kernel_Object'Last - 2);
+         Kernel_Linked : constant String := Kernel_Object
+           (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
 
-         PTXAS_Args : constant Argument_List :=
-           (new String'("-m64"),
-            new String'("--dont-merge-basicblocks"),
-            new String'("--return-at-end"),
-            new String'("-v"),
-            new String'("--gpu-name"),
-            new String'("sm_" & GPU_Name.all),
-            new String'("--output-file"),
-            Obj_Name'Unchecked_Access,
-            PTX_Name'Unchecked_Access);
-
-         Kernel_Fat : constant String := File_Name & ".fatbin";
-         Kernel_Object : constant String := File_Name & ".fatbin.o";
+         Nvlink_Args : constant Argument_List :=
+           (new String'("--arch=sm_" & GPU_Name.all),
+            new String'("-m64"),
+            new String'("-L" & CUDA_Root & "targets/x86_64-linux/lib/stubs"),
+            new String'("-L" & CUDA_Root & "targets/x86_64-linux/lib"))
+           & Input_Files (2 .. Input_File_Number)
+           &(new String'("-lcudadevrt"),
+             new String'("-o"),
+             new String'(Kernel_Linked));
 
          Fatbinary_Args : constant Argument_List :=
            (new String'("-64"),
             new String'("--create"),
             new String'(Kernel_Fat),
-            new String'("--image=profile=sm_"
-              & GPU_Name.all & ",file=" & Obj_Name),
-            new String'("--image=profile=compute_"
-              & GPU_Name.all & ",file=" & PTX_Name));
+            new String'("-link"),
+            new String'("--image3=kind=elf,sm="
+              & GPU_Name.all & ",file=" & Kernel_Linked));
 
          Ld_Args : constant Argument_List :=
            (new String'("-r"),
@@ -401,20 +409,11 @@ begin
             new String'(Kernel_Object));
       begin
          Status := Spawn
-           (Locate_And_Check ("llvm-gcc").all,
-            Prefix_LLVM_ARGS &
-              new String'("-mcpu=sm_" & GPU_Name.all) &
-              LLVM_Args (1 .. LLVM_Arg_Number));
+           (Locate_And_Check ("nvlink").all,
+            Nvlink_Args);
 
          if Status /= 0 then
-            return Status;
-         end if;
-
-         Status := Spawn
-           (Locate_And_Check ("ptxas").all,
-            PTXAS_Args);
-
-         if Status /= 0 then
+            Put_Line ("nvlink failure");
             return Status;
          end if;
 
@@ -423,12 +422,16 @@ begin
             Fatbinary_Args);
 
          if Status /= 0 then
+            Put_Line ("fatbinary failure");
             return Status;
          end if;
 
          Status := Spawn (Locate_And_Check ("ld").all, Ld_Args);
 
-         return Status;
+         if Status /= 0 then
+            Put_Line ("ld failure");
+            return Status;
+         end if;
       end;
    end if;
 
