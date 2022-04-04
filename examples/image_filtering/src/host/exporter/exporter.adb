@@ -20,8 +20,8 @@ package body Exporter is
 
    procedure Export_Image (File_Path : String; Img : G.Image) is
       File   : File_Type;
-      Width  : Natural := Img'Length (1);
-      Height : Natural := Img'Length (2);
+      Width  : constant Natural := Img'Length (1);
+      Height : constant Natural := Img'Length (2);
    begin
       Create (File, Out_File, File_Path);
       Put_Line (File, "P3");

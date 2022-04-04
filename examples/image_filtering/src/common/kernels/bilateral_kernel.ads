@@ -30,6 +30,6 @@ package Bilateral_Kernel is
                              Width               : Integer; 
                              Height              : Integer; 
                              Spatial_Stdev       : Float;
-                             Color_Dist_Stdev    : Float);
+                             Color_Dist_Stdev    : Float) with Cuda_Global;
 
 end Bilateral_Kernel;

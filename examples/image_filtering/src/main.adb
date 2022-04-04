@@ -79,5 +79,8 @@ begin
       Exporter.Export_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.all);
 
       Put_Line ("export done");
+
+      G.Free (Img);
+      G.Free (Filtered_Img);
    end;
 end Main;

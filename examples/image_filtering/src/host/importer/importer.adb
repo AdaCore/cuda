@@ -31,8 +31,8 @@ package body Importer is
       Height := 0;
       Open (Input_File, In_File, File_Path);
       declare
-         Magic_Number   : String           := Get_Line (Input_File);
-         Note           : String           := Get_Line (Input_File);
+         Magic_Number   : constant String  := Get_Line (Input_File);
+         Note           : constant String  := Get_Line (Input_File);
          Natural_P      : constant Pattern := Span ("0123456789");
          W, H           : VString_Var;
          Width_Height_P : constant Pattern := Pos (0) & Natural_P * W & Span (' ') & Natural_P * H;
@@ -59,10 +59,10 @@ package body Importer is
          Color_Value   : VString_Var;
          Color_Value_P : constant Pattern := Span ("0123456789") * Color_Value;
 
-         Magic_Number : String := Get_Line (Input_File);
-         Note         : String := Get_Line (Input_File);
-         Width_Height : String := Get_Line (Input_File);
-         Max_Value    : String := Get_Line (Input_File);
+         Magic_Number : constant String := Get_Line (Input_File);
+         Note         : constant String := Get_Line (Input_File);
+         Width_Height : constant String := Get_Line (Input_File);
+         Max_Value    : constant String := Get_Line (Input_File);
 
          Component_Counter : Natural := 0;
          Done              : Boolean := False;

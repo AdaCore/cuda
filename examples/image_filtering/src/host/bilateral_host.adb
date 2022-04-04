@@ -61,7 +61,7 @@ package body Bilateral_Host is
                              Height            : Integer; 
                              Spatial_Stdev     : Float;
                              Color_Dist_Stdev  : Float) is
-      Image_Bytes       : CUDA.Stddef.Size_T              := CUDA.Stddef.Size_T (Host_Img.all'Size / 8);
+      Image_Bytes       : constant CUDA.Stddef.Size_T     := CUDA.Stddef.Size_T (Host_Img.all'Size / 8);
       Threads_Per_Block : constant Cuda.Vector_Types.Dim3 := (1, 1, 1);
       Blocks_Per_Grid   : constant Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned (Width), 
                                                               Interfaces.C.Unsigned (Height), 
@@ -96,5 +96,15 @@ package body Bilateral_Host is
                                Device_Filtered_Img, 
                                Image_Bytes,
                                CDT.Memcpy_Device_To_Host);
+
+      -- declare
+      --    Img                   : aliased G.Image (1 .. Width, 1 .. Height) with Address => Device_Img;
+      --    Img_Access            : G.Image_Access := Img'Unrestricted_Access;
+      --    Filtered_Img          : aliased G.Image (1 .. Width, 1 .. Height) with Address => Device_Filtered_Img;
+      --    Filtered_Img_Access   : G.Image_Access := Filtered_Img'Unrestricted_Access;
+      -- begin
+      --    G.Free (Img_Access);
+      --    G.Free (Filtered_Img_Access);
+      -- end;
    end;
 end Bilateral_Host;

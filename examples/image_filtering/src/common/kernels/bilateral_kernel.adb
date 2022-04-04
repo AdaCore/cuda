@@ -34,8 +34,8 @@ package body Bilateral_Kernel is
                         Color_Dist_Stdev  : Float; 
                         I                 : Integer; 
                         J                 : Integer) is
-      Kernel_Size : Integer := Integer (2.0 * Spatial_Stdev * 3.0);
-      Half_Size   : Natural := (Kernel_Size - 1) / 2;
+      Kernel_Size : constant Integer := Integer (2.0 * Spatial_Stdev * 3.0);
+      Half_Size   : constant Natural := (Kernel_Size - 1) / 2;
 
       Spatial_Gaussian    : Float := 0.0;
       Color_Dist_Gaussian : Float := 0.0;
@@ -66,15 +66,15 @@ package body Bilateral_Kernel is
       end;
 
       function Compute_Spatial_Gaussian (M : Float; N : Float) return Float is
-         Spatial_Variance : Float := Spatial_Stdev * Spatial_Stdev;
-         Two_Pi_Variance  : Float := 2.0 * 3.141_6 * Spatial_Variance;
-         Exp              : Float := Exponential (10, -0.5 * ((M * M + N * N) / Spatial_Variance));
+         Spatial_Variance : constant Float := Spatial_Stdev * Spatial_Stdev;
+         Two_Pi_Variance  : constant Float := 2.0 * 3.141_6 * Spatial_Variance;
+         Exp              : constant Float := Exponential (10, -0.5 * ((M * M + N * N) / Spatial_Variance));
       begin
          return (1.0 / (Two_Pi_Variance)) * Exp;
       end;
 
       function Compute_Color_Dist_Gaussian (K : Float) return Float is
-         Color_Dist_Variance : Float := Color_Dist_Stdev * Color_Dist_Stdev;
+         Color_Dist_Variance : constant Float := Color_Dist_Stdev * Color_Dist_Stdev;
       begin
          return
            (1.0 / (Sqrt (2.0 * 3.141_6, 0.001) * Color_Dist_Stdev)) *
@@ -82,21 +82,18 @@ package body Bilateral_Kernel is
       end;
 
       -- Compute Kernel Bounds
-      Xb : Integer := I - Half_Size;
-      Xe : Integer := I + Half_Size;
-      Yb : Integer := J - Half_Size;
-      Ye : Integer := J + Half_Size;
-
-      Test : Float := 0.0;
+      Xb : constant Integer := I - Half_Size;
+      Xe : constant Integer := I + Half_Size;
+      Yb : constant Integer := J - Half_Size;
+      Ye : constant Integer := J + Half_Size;
    begin
       for X in Xb .. Xe loop
          for Y in Yb .. Ye loop
             if X >= 1 and X <= Width and Y >= 1 and Y <= Height then
                -- Compute Color Distance
-               Rgb_Dist :=
-                 Sqrt ((Img (I, J).R - Img (X, Y).R) * (Img (I, J).R - Img (X, Y).R) +
-                       (Img (I, J).G - Img (X, Y).G) * (Img (I, J).G - Img (X, Y).G) +
-                       (Img (I, J).B - Img (X, Y).B) * (Img (I, J).B - Img (X, Y).B), 0.001);
+               Rgb_Dist := Sqrt ((Img (I, J).R - Img (X, Y).R) * (Img (I, J).R - Img (X, Y).R) +
+                                 (Img (I, J).G - Img (X, Y).G) * (Img (I, J).G - Img (X, Y).G) +
+                                 (Img (I, J).B - Img (X, Y).B) * (Img (I, J).B - Img (X, Y).B), 0.001);
 
                -- Compute Gaussians
                Spatial_Gaussian    := Compute_Spatial_Gaussian (Float (I - X), Float (J - Y));
@@ -116,10 +113,16 @@ package body Bilateral_Kernel is
          end loop;
       end loop;
 
-      -- Normalize Intensity
-      Filtered_Img (I, J).R := Filtered_Rgb.R / Sum_Sg_Cdg;
-      Filtered_Img (I, J).G := Filtered_Rgb.G / Sum_Sg_Cdg;
-      Filtered_Img (I, J).B := Filtered_Rgb.B / Sum_Sg_Cdg;
+      if Sum_Sg_Cdg > 0.0 then
+         -- Normalize Intensity
+         Filtered_Img (I, J).R := Filtered_Rgb.R / Sum_Sg_Cdg;
+         Filtered_Img (I, J).G := Filtered_Rgb.G / Sum_Sg_Cdg;
+         Filtered_Img (I, J).B := Filtered_Rgb.B / Sum_Sg_Cdg;
+      else
+         Filtered_Img (I, J).R := Img (I, J).R;
+         Filtered_Img (I, J).G := Img (I, J).G;
+         Filtered_Img (I, J).B := Img (I, J).B;
+      end if;
    end;
 
    procedure Bilateral_Cuda (Device_Img          : System.Address; 
@@ -128,8 +131,8 @@ package body Bilateral_Kernel is
                              Height              : Integer; 
                              Spatial_Stdev       : Float;
                              Color_Dist_Stdev    : Float) is
-      I : Integer := Integer (Block_Idx.X);
-      J : Integer := Integer (Block_Idx.Y);
+      I : constant Integer := Integer (Block_Idx.X);
+      J : constant Integer := Integer (Block_Idx.Y);
    begin
       Bilateral (Device_Img, 
                  Device_Filtered_Img, 
