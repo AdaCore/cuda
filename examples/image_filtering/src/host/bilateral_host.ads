@@ -25,7 +25,7 @@ package Bilateral_Host is
                             Spatial_Stdev     : Float;
                             Color_Dist_Stdev  : Float);
 
-   procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
+   procedure Bilateral_CUDA (Host_Img          : G.Image_Access; 
                              Host_Filtered_Img : G.Image_Access;
                              Width             : Integer; 
                              Height            : Integer; 

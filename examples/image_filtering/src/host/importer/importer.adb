@@ -13,7 +13,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Text_IO;
-with Ada.Directories; use Ada.Directories;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNAT.Spitbol.Patterns;

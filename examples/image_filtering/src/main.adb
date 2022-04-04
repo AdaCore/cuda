@@ -12,18 +12,7 @@
 -- Of The License.                                                          --
 ------------------------------------------------------------------------------
 
-with System;
-with Interfaces.C; use Interfaces.C;
-
-with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
-with Ada.Text_IO;               use Ada.Text_IO;
-
-with CUDA.Driver_Types; use CUDA.Driver_Types;
-with CUDA.Runtime_Api;  use CUDA.Runtime_Api;
-with CUDA.Stddef;
-
-with Ada.Unchecked_Deallocation;
-with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+with Ada.Text_IO;
 
 with Graphic;
 
@@ -37,8 +26,9 @@ procedure Main is
    Width  : Natural;
    Height : Natural;
 
-   package BK renames Bilateral_Kernel;
+   package AIO renames Ada.Text_IO;
    package G renames Graphic;
+   package BK renames Bilateral_Kernel;
    package BH renames Bilateral_Host;
 
    type Execution_Device is (Cpu, Gpu);
@@ -55,7 +45,7 @@ begin
    begin
       Importer.Import_Image ("./data/ada_lovelace_photo.ppm", Width, Height, Img.all);
 
-      Put_Line ("import done");
+      AIO.Put_Line ("import done");
 
       case Use_Dev is
          when Cpu =>
@@ -74,11 +64,11 @@ begin
                                Color_Dist_Stdev  => Color_Dist_Stdev);
       end case;
 
-      Put_Line ("bilateral done");
+      AIO.Put_Line ("bilateral done");
 
       Exporter.Export_Image ("./data/ada_lovelace_photo_bilateral.ppm", Filtered_Img.all);
 
-      Put_Line ("export done");
+      AIO.Put_Line ("export done");
 
       G.Free (Img);
       G.Free (Filtered_Img);

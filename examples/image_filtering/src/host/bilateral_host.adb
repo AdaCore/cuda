@@ -12,20 +12,12 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Interfaces.C;
+with System;
+
 with CUDA.Stddef;
 with CUDA.Vector_Types;
 with CUDA.Driver_Types;
-
-with Storage_Models;
-with Storage_Models.Arrays;
-with Storage_Models.Objects;
-with CUDA_Storage_Models;
-
-with Interfaces.C;
-use Interfaces.C; -- Operators For Block_Dim, Block_Idx, Thread_Idx
-
-with System;
-
 with CUDA.Runtime_Api;
 
 with Bilateral_Kernel;
@@ -34,6 +26,7 @@ package body Bilateral_Host is
 
    package BK renames Bilateral_Kernel;
    package CDT renames CUDA.Driver_Types;
+   package IC renames Interfaces.C;
 
    procedure Bilateral_Cpu (Host_Img          : G.Image_Access; 
                             Host_Filtered_Img : G.Image_Access;
@@ -55,16 +48,16 @@ package body Bilateral_Host is
       end loop;
    end;
 
-   procedure Bilateral_Cuda (Host_Img          : G.Image_Access; 
+   procedure Bilateral_CUDA (Host_Img          : G.Image_Access; 
                              Host_Filtered_Img : G.Image_Access;
                              Width             : Integer; 
                              Height            : Integer; 
                              Spatial_Stdev     : Float;
                              Color_Dist_Stdev  : Float) is
       Image_Bytes       : constant CUDA.Stddef.Size_T     := CUDA.Stddef.Size_T (Host_Img.all'Size / 8);
-      Threads_Per_Block : constant Cuda.Vector_Types.Dim3 := (1, 1, 1);
-      Blocks_Per_Grid   : constant Cuda.Vector_Types.Dim3 := (Interfaces.C.Unsigned (Width), 
-                                                              Interfaces.C.Unsigned (Height), 
+      Threads_Per_Block : constant CUDA.Vector_Types.Dim3 := (1, 1, 1);
+      Blocks_Per_Grid   : constant CUDA.Vector_Types.Dim3 := (IC.Unsigned (Width), 
+                                                              IC.Unsigned (Height), 
                                                               1);
       Device_Img, Device_Filtered_Img : System.Address;
    begin
@@ -82,7 +75,7 @@ package body Bilateral_Host is
                                CDT.Memcpy_Host_To_Device);
 
       -- compute filter kernel on device
-      pragma Cuda_Execute (BK.Bilateral_Cuda (Device_Img, 
+      pragma CUDA_Execute (BK.Bilateral_CUDA (Device_Img, 
                                               Device_Filtered_Img, 
                                               Width, 
                                               Height, 

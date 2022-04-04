@@ -12,19 +12,14 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with System;
-
-with Cuda.Runtime_Api;
-use Cuda.Runtime_Api; -- Block_Dim, Block_Idx, Thread_Idx
-
-with Interfaces.C;
-use Interfaces.C;     -- Operators For Block_Dim, Block_Idx, Thread_Idx
+with CUDA.Runtime_Api;
 
 with Graphic;
 
 package body Bilateral_Kernel is
 
    package G renames Graphic;
+   package CRA renames CUDA.Runtime_Api;
 
    procedure Bilateral (Img_Addr          : System.Address; 
                         Filtered_Img_Addr : System.Address;
@@ -125,14 +120,14 @@ package body Bilateral_Kernel is
       end if;
    end;
 
-   procedure Bilateral_Cuda (Device_Img          : System.Address; 
+   procedure Bilateral_CUDA (Device_Img          : System.Address; 
                              Device_Filtered_Img : System.Address;
                              Width               : Integer; 
                              Height              : Integer; 
                              Spatial_Stdev       : Float;
                              Color_Dist_Stdev    : Float) is
-      I : constant Integer := Integer (Block_Idx.X);
-      J : constant Integer := Integer (Block_Idx.Y);
+      I : constant Integer := Integer (CRA.Block_Idx.X);
+      J : constant Integer := Integer (CRA.Block_Idx.Y);
    begin
       Bilateral (Device_Img, 
                  Device_Filtered_Img, 
