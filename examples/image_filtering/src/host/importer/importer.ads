@@ -18,6 +18,8 @@ package Importer is
 
    package G renames Graphic;
 
+   Bad_filename : exception;
+
    procedure Get_Image_Infos (File_Path : String; 
                               Width     : out Natural; 
                               Height    : out Natural);

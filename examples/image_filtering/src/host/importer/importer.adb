@@ -43,6 +43,9 @@ package body Importer is
          end if;
       end;
       Close (Input_File);
+   exception
+      when Name_Error =>
+         raise Bad_filename;
    end;
 
    procedure Import_Image (File_Path : String; 
@@ -95,6 +98,9 @@ package body Importer is
          end loop;
       end;
       Close (Input_File);
+   exception
+      when Name_Error =>
+         raise Bad_filename;
    end;
 
 end Importer;

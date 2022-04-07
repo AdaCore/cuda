@@ -25,7 +25,7 @@ package body Exporter is
    begin
       Create (File, Out_File, File_Path);
       Put_Line (File, "P3");
-      Put_Line (File, "#median filtered image");
+      Put_Line (File, "# Made using filter_img");
       Put_Line (File, Trim (Width'Image, Left) & " " & Trim (Height'Image, Left));
       Put_Line (File, "255");
       for J in Img'Range (2) loop

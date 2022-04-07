@@ -42,6 +42,10 @@ project Host is
       for Default_Switches ("ada") use ();
    end Linker;
 
+   package Builder is
+      for Executable ("main.adb") use "filter_img";
+   end Builder;
+
 end Host;
 
 
