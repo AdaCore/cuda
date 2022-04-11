@@ -21,12 +21,12 @@ package Importer is
    Bad_filename : exception;
 
    procedure Get_Image_Infos (File_Path : String; 
-                              Width     : out Natural; 
-                              Height    : out Natural);
+                              Width     : out Positive; 
+                              Height    : out Positive);
 
    procedure Import_Image (File_Path : String; 
-                           Width     : Natural; 
-                           Height    : Natural;
+                           Width     : Positive; 
+                           Height    : Positive;
                            Img       : out G.Image);
 
 end Importer;

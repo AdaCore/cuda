@@ -20,8 +20,8 @@ with GNAT.Spitbol.Patterns;
 package body Importer is
 
    procedure Get_Image_Infos (File_Path : String; 
-                              Width     : out Natural; 
-                              Height    : out Natural) is
+                              Width     : out Positive; 
+                              Height    : out Positive) is
       use GNAT.Spitbol.Patterns;
       use Ada.Text_IO;
       Input_File : File_Type;
@@ -49,8 +49,8 @@ package body Importer is
    end;
 
    procedure Import_Image (File_Path : String; 
-                           Width     : Natural; 
-                           Height    : Natural;
+                           Width     : Positive; 
+                           Height    : Positive;
                            Img       : out G.Image) is
       use GNAT.Spitbol.Patterns;
       use Ada.Text_IO;

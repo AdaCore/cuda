@@ -47,6 +47,3 @@ project Host is
    end Builder;
 
 end Host;
-
-
-
