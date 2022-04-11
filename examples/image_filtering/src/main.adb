@@ -94,7 +94,7 @@ exception
    when Msg : GLP.Bad_Command =>
       Ada.Text_IO.Put_Line (File => Ada.Text_IO.Standard_Error,
                             Item => "Bad command line: " & E.Exception_Message (Msg));
-      Ada.Text_IO.Put_Line ("Try: ./img_filter in=./data/ada_lovelace_photo.ppm kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
+      Ada.Text_IO.Put_Line ("Try: ./filter_img in=./data/ada_lovelace_photo.ppm kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    when I.Bad_filename =>
       Ada.Text_IO.Put_Line ("Input file does not exists.");

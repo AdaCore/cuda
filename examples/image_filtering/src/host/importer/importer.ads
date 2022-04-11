@@ -27,6 +27,6 @@ package Importer is
    procedure Import_Image (File_Path : String; 
                            Width     : Natural; 
                            Height    : Natural;
-                           Img       : in out G.Image);
+                           Img       : out G.Image);
 
 end Importer;

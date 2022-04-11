@@ -15,9 +15,26 @@
 with Ada.Unchecked_Deallocation;
 
 package Graphic is
+   
    type Rgb is record
       R, G, B : Float;
    end record;
+
+   subtype Component is Float range 0.0 .. 255.0;
+
+   function "/" (Left : Rgb; Right: Float) return Rgb is
+     (Left.R / Right, Left.G / Right, Left.B / Right);
+
+   function "*" (Left : Rgb; Right: Float) return Rgb is
+     (Left.R * Right, Left.G * Right, Left.B * Right);
+
+   function "+" (Left : Rgb; Right: Rgb) return Rgb is
+     (Left.R + Right.R, Left.G + Right.G, Left.B + Right.B);
+
+   function distance_square (Left : Rgb; Right: Rgb) return float is
+      ((Left.R - Right.R) * (Left.R - Right.R) +
+       (Left.G - Right.G) * (Left.G - Right.G) +
+       (Left.B - Right.B) * (Left.B - Right.B));
 
    type Image is array (Natural range <>, Natural range <>) of Rgb;
    type Image_Access is access all Image;

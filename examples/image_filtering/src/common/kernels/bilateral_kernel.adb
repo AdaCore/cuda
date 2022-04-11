@@ -81,14 +81,14 @@ package body Bilateral_Kernel is
       Xe : constant Integer := I + Half_Size;
       Yb : constant Integer := J - Half_Size;
       Ye : constant Integer := J + Half_Size;
+
+      use G;
    begin
       for X in Xb .. Xe loop
          for Y in Yb .. Ye loop
             if X >= 1 and X <= Width and Y >= 1 and Y <= Height then
                -- Compute Color Distance
-               Rgb_Dist := Sqrt ((Img (I, J).R - Img (X, Y).R) * (Img (I, J).R - Img (X, Y).R) +
-                                 (Img (I, J).G - Img (X, Y).G) * (Img (I, J).G - Img (X, Y).G) +
-                                 (Img (I, J).B - Img (X, Y).B) * (Img (I, J).B - Img (X, Y).B), 0.001);
+               Rgb_Dist := Sqrt (distance_square (Img (I, J), Img (X, Y)), 0.001);
 
                -- Compute Gaussians
                Spatial_Gaussian    := Compute_Spatial_Gaussian (Float (I - X), Float (J - Y));
@@ -98,9 +98,7 @@ package body Bilateral_Kernel is
                Sg_Cdg := Spatial_Gaussian * Color_Dist_Gaussian;
 
                -- Accumulate
-               Filtered_Rgb.R := Filtered_Rgb.R + Sg_Cdg * Img (X, Y).R;
-               Filtered_Rgb.G := Filtered_Rgb.G + Sg_Cdg * Img (X, Y).G;
-               Filtered_Rgb.B := Filtered_Rgb.B + Sg_Cdg * Img (X, Y).B;
+               Filtered_Rgb := Filtered_Rgb + (Img (X, Y) * Sg_Cdg);
 
                -- Track To Normalize Intensity
                Sum_Sg_Cdg := Sum_Sg_Cdg + Sg_Cdg;
@@ -110,13 +108,9 @@ package body Bilateral_Kernel is
 
       if Sum_Sg_Cdg > 0.0 then
          -- Normalize Intensity
-         Filtered_Img (I, J).R := Filtered_Rgb.R / Sum_Sg_Cdg;
-         Filtered_Img (I, J).G := Filtered_Rgb.G / Sum_Sg_Cdg;
-         Filtered_Img (I, J).B := Filtered_Rgb.B / Sum_Sg_Cdg;
+         Filtered_img (I, J) := G."/" (Filtered_Rgb, Sum_Sg_Cdg);
       else
-         Filtered_Img (I, J).R := Img (I, J).R;
-         Filtered_Img (I, J).G := Img (I, J).G;
-         Filtered_Img (I, J).B := Img (I, J).B;
+         Filtered_img (I, J) := Img (I, J);
       end if;
    end;
 

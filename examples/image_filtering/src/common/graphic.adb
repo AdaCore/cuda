@@ -18,9 +18,7 @@ package body Graphic is
    begin
       for I in Img.all'Range (1) loop
          for J in Img.all'Range (2) loop
-            Img (I, J).R := Img (I, J).R / 255.0;
-            Img (I, J).G := Img (I, J).G / 255.0;
-            Img (I, J).B := Img (I, J).B / 255.0;
+            Img (I, J) := Img (I, J) / Component'Last;
          end loop;
       end loop;
    end;

@@ -26,6 +26,7 @@ package body Bilateral_Host is
 
    package BK renames Bilateral_Kernel;
    package CDT renames CUDA.Driver_Types;
+   package CRA renames CUDA.Runtime_Api;
    package IC renames Interfaces.C;
 
    procedure Bilateral_Cpu (Host_Img          : G.Image_Access; 
@@ -89,5 +90,8 @@ package body Bilateral_Host is
                                Device_Filtered_Img, 
                                Image_Bytes,
                                CDT.Memcpy_Device_To_Host);
+
+      CRA.Free (Device_Img);
+      CRA.Free (Device_Filtered_Img);
    end;
 end Bilateral_Host;

@@ -33,7 +33,7 @@ package body Importer is
          Magic_Number   : constant String  := Get_Line (Input_File);
          Note           : constant String  := Get_Line (Input_File);
          Natural_P      : constant Pattern := Span ("0123456789");
-         W, H           : VString_Var;
+         W, H           : aliased VString_Var;
          Width_Height_P : constant Pattern := Pos (0) & Natural_P * W & Span (' ') & Natural_P * H;
          Width_Height   : VString_Var      := To_Unbounded_String (Get_Line (Input_File));
       begin
@@ -51,7 +51,7 @@ package body Importer is
    procedure Import_Image (File_Path : String; 
                            Width     : Natural; 
                            Height    : Natural;
-                           Img       : in out G.Image) is
+                           Img       : out G.Image) is
       use GNAT.Spitbol.Patterns;
       use Ada.Text_IO;
       Input_File : File_Type;
