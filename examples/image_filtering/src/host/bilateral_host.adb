@@ -63,17 +63,17 @@ package body Bilateral_Host is
       Device_Img, Device_Filtered_Img : System.Address;
    begin
       -- send input data to device
-      Device_Img := CUDA.Runtime_Api.Malloc (Image_Bytes);
-      CUDA.Runtime_Api.Memcpy (Device_Img, 
-                               Host_Img.all'Address, 
-                               Image_Bytes, 
-                               CDT.Memcpy_Host_To_Device);
+      Device_Img := CRA.Malloc (Image_Bytes);
+      CRA.Memcpy (Device_Img, 
+                  Host_Img.all'Address, 
+                  Image_Bytes, 
+                  CDT.Memcpy_Host_To_Device);
 
-      Device_Filtered_Img := CUDA.Runtime_Api.Malloc (Image_Bytes);
-      CUDA.Runtime_Api.Memcpy (Device_Filtered_Img, 
-                               Host_Filtered_Img.all'Address, 
-                               Image_Bytes, 
-                               CDT.Memcpy_Host_To_Device);
+      Device_Filtered_Img := CRA.Malloc (Image_Bytes);
+      CRA.Memcpy (Device_Filtered_Img, 
+                  Host_Filtered_Img.all'Address, 
+                  Image_Bytes, 
+                  CDT.Memcpy_Host_To_Device);
 
       -- compute filter kernel on device
       pragma CUDA_Execute (BK.Bilateral_CUDA (Device_Img, 
@@ -86,10 +86,10 @@ package body Bilateral_Host is
                            Threads_Per_Block);
 
       -- send output data to host
-      CUDA.Runtime_Api.Memcpy (Host_Filtered_Img.all'Address, 
-                               Device_Filtered_Img, 
-                               Image_Bytes,
-                               CDT.Memcpy_Device_To_Host);
+      CRA.Memcpy (Host_Filtered_Img.all'Address, 
+                  Device_Filtered_Img, 
+                  Image_Bytes,
+                  CDT.Memcpy_Device_To_Host);
 
       CRA.Free (Device_Img);
       CRA.Free (Device_Filtered_Img);

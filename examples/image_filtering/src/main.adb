@@ -92,12 +92,12 @@ begin
    end;
 exception
    when Msg : GLP.Bad_Command =>
-      Ada.Text_IO.Put_Line (File => Ada.Text_IO.Standard_Error,
-                            Item => "Bad command line: " & E.Exception_Message (Msg));
-      Ada.Text_IO.Put_Line ("Try: ./filter_img in=./data/ada_lovelace_photo.ppm kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
+      AIO.Put_Line (File => AIO.Standard_Error,
+                    Item => "Bad command line: " & E.Exception_Message (Msg));
+      AIO.Put_Line ("Try: ./filter_img in=./data/ada_lovelace_photo.ppm kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    when I.Bad_filename =>
-      Ada.Text_IO.Put_Line ("Input file does not exists.");
+      AIO.Put_Line ("Input file does not exists.");
    when P.Bad_extension =>
-      Ada.Text_IO.Put_Line ("Only *.ppm images are supported.");
+      AIO.Put_Line ("Only *.ppm images are supported.");
 end Main;
