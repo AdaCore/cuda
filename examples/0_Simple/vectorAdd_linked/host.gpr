@@ -27,6 +27,10 @@ project Host is
       for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
    end Compiler;
 
+   package Binder is
+      for Default_Switches ("ada") use ("-d_c");
+   end Binder;
+
    package Linker is
       for Switches ("ada") use ("-L/usr/lib/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/lib/cuda/targets/x86_64-linux/lib", "-lcudadevrt", "-lcudart_static", "-lrt", "-lpthread", "-ldl",
          "-Wl,--unresolved-symbols=ignore-all");

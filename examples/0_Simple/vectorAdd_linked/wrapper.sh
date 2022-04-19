@@ -37,7 +37,8 @@ fatbinary --create=obj/device/kernel.fatbin -64 -link --image3=kind=elf,sm=75,fi
 
 (
 cd obj/device
-ld -r -b binary kernel.fatbin -o kernel.fatbin.o
+mv kernel.fatbin main.fatbin
+ld -r -b binary main.fatbin -o main.fatbin.o
 )
 
 # Build host
