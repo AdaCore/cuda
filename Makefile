@@ -15,7 +15,8 @@ main: install/bin libdevice.ads
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
 	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
 	./gen-rts-sources.py --bb-dir $(BB_SRC) --gnat $(GNAT_SRC) --rts-profile=light
-	./build-rts.py --bb-dir $(BB_SRC) --rts-src-descriptor install/lib/gnat/rts-sources.json cuda-device --force -b
+	# Disable bindings because cuda_env is not installed at this point
+	CUDA_GCC_DISABLE_BINDINGS=1 ./build-rts.py --bb-dir $(BB_SRC) --rts-src-descriptor install/lib/gnat/rts-sources.json cuda-device --force -b
 	mv install/device-cuda install/lib/rts-device-cuda
 	cp -R runtime/device_gnat/* install/lib/rts-device-cuda/gnat/
 	rm -rf $(llvm_dir)/lib/rts-device-cuda
