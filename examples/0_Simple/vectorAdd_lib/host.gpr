@@ -24,7 +24,7 @@ project Host is
    for Create_Missing_Dirs use "True";
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c", "-gnatDGL");
+      for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
    end Compiler;
 
    package Linker is
