@@ -388,7 +388,7 @@ begin
             new String'("-o"),
             new String'(Kernel_Object));
       begin
-         Status := Spawn
+         Status := Subprocess.Spawn
            (Locate_And_Check ("llvm-gcc").all,
             Prefix_LLVM_ARGS &
               new String'("-mcpu=sm_" & GPU_Name.all) &
@@ -398,7 +398,7 @@ begin
             return Status;
          end if;
 
-         Status := Spawn
+         Status := Subprocess.Spawn
            (Locate_And_Check ("ptxas").all,
             PTXAS_Args);
 
@@ -406,7 +406,7 @@ begin
             return Status;
          end if;
 
-         Status := Spawn
+         Status := Subprocess.Spawn
            (Locate_And_Check ("fatbinary").all,
             Fatbinary_Args);
 
@@ -414,7 +414,7 @@ begin
             return Status;
          end if;
 
-         Status := Spawn (Locate_And_Check ("ld").all, Ld_Args);
+         Status := Subprocess.Spawn (Locate_And_Check ("ld").all, Ld_Args);
 
          return Status;
       end;
