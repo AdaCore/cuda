@@ -109,6 +109,11 @@ package body CUDA_Bindings is
          GNAT.Os_Lib.Setenv ("CUDA_ROOT", Default_CUDA_Root);
       end if;
 
+      --  Sanity check that we're installed
+      pragma Assert
+        (Directory.Is_Directory,
+         "directory " & (+Directory) & " doesn't exist: are we installed?");
+
       pragma Assert
         (Shell
            (GNAT.Os_Lib.Getenv ("SHELL").all & " bind.sh", CWD => Directory) =
