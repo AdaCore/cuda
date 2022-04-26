@@ -186,7 +186,20 @@ function GNATCUDA_Wrapper return Integer is
 
    LLVM_Arg_Number : Integer := 0;
    Compile        : Boolean := False;
+
+   function Env_Is_Set (Var : String) return Boolean is
+      S_Acc : GNAT.OS_Lib.String_Access := GNAT.OS_Lib.Getenv (Var);
+      Is_Set : Boolean := S_Acc.all /= "";
+   begin
+      GNAT.OS_Lib.Free (S_Acc);
+      return Is_Set;
+   end Env_Is_Set;
+
+   Disable_Auto_Bindings : constant Boolean
+     := Env_Is_Set ("CUDA_GCC_DISABLE_BINDINGS");
+   --  Auto-binding can be disabled by environment
    Force_Bindings : Boolean := False;
+   --  Forces binding in *any* case
 
    Prefix_LLVM_ARGS : constant Argument_List :=
      (new String'("--target=nvptx64"),
@@ -338,7 +351,8 @@ begin
       GPU_Name := new String'("75");
    end if;
 
-   if Force_Bindings or else not CUDA_Bindings.Up_To_Date then
+   if Force_Bindings or else
+     not (Disable_Auto_Bindings or CUDA_Bindings.Up_To_Date) then
       Put_Line ("regenerating CUDA bindings");
       CUDA_Bindings.Generate;
    end if;
