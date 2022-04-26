@@ -395,7 +395,13 @@ begin
          Fatbinary_Args : constant Argument_List :=
            (new String'("-64"),
             new String'("--create"),
-            new String'(Kernel_Fat),
+
+            --  We currently only support one SAL per host application, with a
+            --  fatbinary name hardcoded in gnatbind. We should eventually move
+            --  to a scheme where we can have more than one. See U503-012
+            --  new String'(Kernel_Fat),
+            new String'("main.fatbin"),
+
             new String'("-link"),
             new String'("--image3=kind=elf,sm="
               & GPU_Name.all & ",file=" & Kernel_Linked));
@@ -404,9 +410,15 @@ begin
            (new String'("-r"),
             new String'("-b"),
             new String'("binary"),
-            new String'(Kernel_Fat),
+
+            new String'("main.fatbin"),
+            --new String'(Kernel_Fat),
+
             new String'("-o"),
-            new String'(Kernel_Object));
+
+            new String'(Kernel_Object)
+            --new String'("main.fatbin.o")
+           );
       begin
          Status := Spawn
            (Locate_And_Check ("nvlink").all,
