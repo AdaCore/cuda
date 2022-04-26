@@ -5,7 +5,7 @@ project Wrapper is
    for Main use ("gnatcuda_wrapper.adb") & project'Main;
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX");
+      for Switches ("ada") use ("-gnatX", "-gnata");
    end Compiler;
 
 end Wrapper;
