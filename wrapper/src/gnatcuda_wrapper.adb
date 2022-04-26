@@ -34,6 +34,8 @@ with GNAT.IO_Aux;               use GNAT.IO_Aux;
 with GNAT.OS_Lib;               use GNAT.OS_Lib;
 
 with Gnatvsn;
+with Subprocess;
+with CUDA_Bindings;
 
 --  Wrapper around <install>/libexec/gnat_ccg/bin/c-xxx to be
 --  installed under <install>/bin
@@ -183,8 +185,8 @@ function GNATCUDA_Wrapper return Integer is
    --  so adding one to the input count.
 
    LLVM_Arg_Number : Integer := 0;
-   Compile   : Boolean := False;
-   Verbose   : Boolean := False;
+   Compile        : Boolean := False;
+   Force_Bindings : Boolean := False;
 
    Prefix_LLVM_ARGS : constant Argument_List :=
      (new String'("--target=nvptx64"),
@@ -196,8 +198,6 @@ function GNATCUDA_Wrapper return Integer is
    Input_Files : String_List (1 .. Argument_Count);
    Libdevice_Path : String_Access;
 
-   function Spawn (S : String; Args : Argument_List) return Integer;
-   --  Call GNAT.OS_Lib.Spawn and take Verbose into account
 
    function Locate_And_Check (Name : String) return String_Access;
    --  Locates a binary on path and raises an exception if not found.
@@ -207,25 +207,6 @@ function GNATCUDA_Wrapper return Integer is
       return Boolean;
    --  If Prefix is found in Arg, then set the suffix in Result and returns
    --  true, else returns false.
-
-   -----------
-   -- Spawn --
-   -----------
-
-   function Spawn (S : String; Args : Argument_List) return Integer is
-   begin
-      if Verbose then
-         Put (S);
-
-         for J in Args'Range loop
-            Put (" " & Args (J).all);
-         end loop;
-
-         New_Line;
-      end if;
-
-      return GNAT.OS_Lib.Spawn (S, Args);
-   end Spawn;
 
    ----------------------
    -- Locate_And_Check --
@@ -300,6 +281,8 @@ begin
             Compile := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
+         elsif Arg = "--generate-bindings" then
+            Force_Bindings := True;
          elsif Arg = "-v" or Arg = "--version" then
             Put_Line ("Target: cuda");
             Put_Line ("cuda-gcc version "
@@ -309,7 +292,7 @@ begin
               & ")");
             Put_Line ("CUDA Installation: " & CUDA_Root);
 
-            Verbose := True;
+            Subprocess.Verbose := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
@@ -353,6 +336,11 @@ begin
 
    if GPU_Name = null then
       GPU_Name := new String'("75");
+   end if;
+
+   if Force_Bindings or else not CUDA_Bindings.Up_To_Date then
+      Put_Line ("regenerating CUDA bindings");
+      CUDA_Bindings.Generate;
    end if;
 
    if Compile then
