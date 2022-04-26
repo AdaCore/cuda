@@ -89,23 +89,20 @@ package body CUDA_Bindings is
 
    function Up_To_Date return Boolean is (Version_Info_Equals (Version_Info));
 
-   function Getenv_Safe (Name : String; Default : String) return String is
+   function Getenv_Safe (Name : String) return String is
       -- Memory-safe getenv
       S_Acc : GNAT.OS_Lib.String_Access := GNAT.OS_Lib.Getenv (Name);
+      S : String := S_Acc.all;
    begin
-      if S_Acc /= null then
-         return S : String := S_Acc.all do
-            GNAT.OS_Lib.Free (S_Acc);
-         end return;
-      else
-         return Default;
-      end if;
+      GNAT.OS_Lib.Free (S_Acc);
+      return S;
    end Getenv_Safe;
+   Getenv_Null : constant String := "";
 
    procedure Generate is
       Version : String := Version_Info;
    begin
-      if Getenv_Safe ("CUDA_ROOT", "") = "" then
+      if Getenv_Safe ("CUDA_ROOT") = Getenv_Null then
          GNAT.Os_Lib.Setenv ("CUDA_ROOT", Default_CUDA_Root);
       end if;
 
