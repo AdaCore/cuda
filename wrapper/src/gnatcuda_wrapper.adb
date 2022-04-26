@@ -380,8 +380,8 @@ begin
             Obj_Name'Unchecked_Access,
             PTX_Name'Unchecked_Access);
 
-         Kernel_Fat : constant String := File_Name & ".fatbin";
-         Kernel_Object : constant String := File_Name & ".fatbin.o";
+         Kernel_Fat : constant String := "main.fatbin";
+         Kernel_Object : constant String := "main.fatbin.o";
 
          Fatbinary_Args : constant Argument_List :=
            (new String'("-64"),
