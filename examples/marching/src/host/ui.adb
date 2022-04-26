@@ -28,6 +28,8 @@ with GL.Toggles;               use GL.Toggles;
 with GL.Fixed.Lighting;        use GL.Fixed.Lighting;
 with GL.Uniforms;
 use GL;
+with Paths;
+use type Paths.Path;
 
 with Program_Loader; use Program_Loader;
 with Maths; use Maths;
@@ -177,6 +179,8 @@ package body UI is
    procedure Render_Shape (Verts : Vertex_Array; Tris : Triangle_Array);
 
    procedure Initialize is
+      Shaders_Dir : constant Paths.Path
+        := Paths.Resolve_From_Root (Paths.Path'("src") / "shaders");
    begin
       Glfw.Init;
 
@@ -195,8 +199,8 @@ package body UI is
       GL.Toggles.Enable (GL.Toggles.Depth_Test);
 
       Shader := Program_From
-        ((Src ("src/shaders/pbr.vs", Vertex_Shader),
-         Src ("src/shaders/pbr.fs", Fragment_Shader)));
+        ((Src (+(Shaders_Dir / "pbr.vs"), Vertex_Shader),
+          Src (+(Shaders_Dir / "pbr.fs"), Fragment_Shader)));
 
       GL.Objects.Programs.Use_Program (Shader);
 
