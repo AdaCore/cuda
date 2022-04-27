@@ -33,6 +33,8 @@ with Ada.Strings.Unbounded;
 package Paths is
    type Path is new String;
 
+   Null_Path : constant Path := "";
+
    function "+" (P : Path) return String is (String (P));
 
    function "+" (S : Ada.Strings.Unbounded.Unbounded_String) return Path is
