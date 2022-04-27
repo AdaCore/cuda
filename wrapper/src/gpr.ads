@@ -2,7 +2,7 @@
 --                                                                          --
 --                         GNAT COMPILER COMPONENTS                         --
 --                                                                          --
---                         C U D A   B I N D I N G S                        --
+--                                  G P R                                   --
 --                                                                          --
 --                                 S p e c                                  --
 --                                                                          --
@@ -23,33 +23,5 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Paths;
-with Paths.Env;
-with GPR.Env;
-use all type Paths.Path;
-
-package CUDA_Bindings is
-
-   function CUDA_Install return Paths.Path
-      --  Install directory of the CUDA wrapper
-      is
-     (Paths.Env.Command_Dir.Parent) with
-      Post => CUDA_Install'Result.Is_Directory;
-      --  command is $INSTALL/bin/cuda-gcc
-
-   Directory : constant Paths.Path := GPR.Env.Resolve ("cuda_device.gpr").Parent;
-   --  Directory containing the bindings and binding infos.
-
-   Version_File : constant Paths.Path := Directory / "version";
-   --  File containing the bindings version information
-
-   function Up_To_Date return Boolean;
-   --  Returns True iff
-   --    + Bindings exist
-   --    + They are up-to-date in regard to hardware and software
-
-   procedure Generate with
-      Post => Up_To_Date;
-      --  Generate the up-to-date bindings in the directory
-
-end CUDA_Bindings;
+package GPR is
+end GPR;
