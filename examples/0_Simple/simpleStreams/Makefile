@@ -1,3 +1,3 @@
 build:
 	gprbuild -p -Pdevice
-	gprbuild -p -Phost -largs $(PWD)/obj/device/*.fatbin.o
+	gprbuild -p -Phost -largs $(PWD)/lib/*.fatbin.o

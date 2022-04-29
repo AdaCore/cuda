@@ -34,5 +34,9 @@ project Marching_Cubes is
       for Default_Switches ("ada") use ();
    end Linker;
 
+   package Binder is
+      for Default_Switches ("ada") use ("-d_c");
+   end Binder;   
+
 end Marching_Cubes;
 
