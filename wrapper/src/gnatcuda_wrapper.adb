@@ -158,7 +158,6 @@ function GNATCUDA_Wrapper return Integer is
 
    LLVM_Arg_Number : Integer := 0;
    Compile   : Boolean := False;
-   Link      : Boolean := True;
    Verbose   : Boolean := False;
 
    Prefix_LLVM_ARGS : constant Argument_List :=
@@ -287,9 +286,9 @@ begin
             Verbose := True;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
-            --  Only attempt compilation/linkage if -v isn't the sole argument
-            Compile := Argument_Count > 1;
-            Link := Argument_Count > 1;
+            if Argument_Count = 1 then
+               GNAT.OS_Lib.OS_Exit (0);
+            end if;
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
             GPU_Name := new String'(To_String (Sub_Arg));
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
@@ -378,7 +377,7 @@ begin
             end if;
          end;
       end if;
-   elsif Link then
+   else
       declare
          Kernel_Object : constant String := Input_Files (1).all;
          Kernel_Fat : constant String := Kernel_Object
