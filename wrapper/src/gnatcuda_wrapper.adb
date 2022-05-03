@@ -333,50 +333,48 @@ begin
       LLVM_Args (LLVM_Arg_Number) := new String'
         ("-mcuda-libdevice=" & Libdevice_Path.all);
 
-      if Compile then
-         if Input_File_Number /= 1 then
-            Put_Line ("error: expected one compilation file, got"
-                      & Input_File_Number'Img);
-            return 1;
+      if Input_File_Number /= 1 then
+         Put_Line ("error: expected one compilation file, got"
+                   & Input_File_Number'Img);
+         return 1;
+      end if;
+
+      declare
+         File_Name : constant String :=
+           Base_Name
+             (Input_Files (1).all, File_Extension (Input_Files (1).all));
+         PTX_Name : aliased String := File_Name & ".s";
+         Obj_Name : aliased String := File_Name & ".cubin";
+
+         PTXAS_Args : constant Argument_List :=
+           (new String'("-arch=sm_" & GPU_Name.all),
+            new String'("-m64"),
+            new String'("--compile-only"),
+            new String'("-v"),
+            PTX_Name'Unchecked_Access,
+            new String'("--output-file"),
+            Obj_Name'Unchecked_Access);
+      begin
+         Status := Spawn
+           (Locate_And_Check ("llvm-gcc").all,
+            Prefix_LLVM_ARGS &
+              new String'("-mcpu=sm_" & GPU_Name.all) &
+              LLVM_Args (1 .. LLVM_Arg_Number));
+
+         if Status /= 0 then
+            Put_Line ("llvm-gcc failture");
+            return Status;
          end if;
 
-         declare
-            File_Name : constant String :=
-              Base_Name
-                (Input_Files (1).all, File_Extension (Input_Files (1).all));
-            PTX_Name : aliased String := File_Name & ".s";
-            Obj_Name : aliased String := File_Name & ".cubin";
+         Status := Spawn
+           (Locate_And_Check ("ptxas").all,
+            PTXAS_Args);
 
-            PTXAS_Args : constant Argument_List :=
-              (new String'("-arch=sm_" & GPU_Name.all),
-               new String'("-m64"),
-               new String'("--compile-only"),
-               new String'("-v"),
-               PTX_Name'Unchecked_Access,
-               new String'("--output-file"),
-               Obj_Name'Unchecked_Access);
-         begin
-            Status := Spawn
-              (Locate_And_Check ("llvm-gcc").all,
-               Prefix_LLVM_ARGS &
-                 new String'("-mcpu=sm_" & GPU_Name.all) &
-                 LLVM_Args (1 .. LLVM_Arg_Number));
-
-            if Status /= 0 then
-               Put_Line ("llvm-gcc failture");
-               return Status;
-            end if;
-
-            Status := Spawn
-              (Locate_And_Check ("ptxas").all,
-               PTXAS_Args);
-
-            if Status /= 0 then
-               Put_Line ("ptxas failture");
-               return Status;
-            end if;
-         end;
-      end if;
+         if Status /= 0 then
+            Put_Line ("ptxas failture");
+            return Status;
+         end if;
+      end;
    else
       declare
          Kernel_Object : constant String := Input_Files (1).all;
