@@ -6,3 +6,4 @@ install/
 __pycache__/
 .#*
 .clang-format
+doc/_build/
