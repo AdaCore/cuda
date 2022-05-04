@@ -14,13 +14,8 @@ library project Device is
    for Library_Name use "kernel";
    for Library_Dir use "lib";
 
-   for Archive_Builder use ("cuda-gcc", "-v");
-   for Archive_Indexer use ("");
-   for Archive_Suffix use ".fatbin.o";
-
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-v");
-      for Object_File_Suffix ("ada") use ".cubin";
+      for Switches ("ada") use ("-gnatX", "-O2", "-gnatn");
    end Compiler;
 end Device;
 
