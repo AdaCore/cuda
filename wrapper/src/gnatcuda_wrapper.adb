@@ -355,6 +355,8 @@ begin
       GPU_Name := new String'("75");
    end if;
 
+   GPU_Name := new String'("53");
+
    if Compile then
       if Input_File_Number /= 1 then
          Put_Line ("error: expected one compilation file, got"
@@ -399,6 +401,8 @@ begin
             new String'(Kernel_Fat),
             new String'("-o"),
             new String'(Kernel_Object));
+
+            Ld : String := "aarch64-linux-gnu-ld";
       begin
          Status := Spawn
            (Locate_And_Check ("llvm-gcc").all,
@@ -426,7 +430,7 @@ begin
             return Status;
          end if;
 
-         Status := Spawn (Locate_And_Check ("ld").all, Ld_Args);
+         Status := Spawn (Locate_And_Check (Ld).all, Ld_Args);
 
          return Status;
       end;

@@ -21,17 +21,26 @@ project Host is
    for Source_Dirs use ("src/common", "src/host");
    for Main use ("main.adb");
 
+   for target use "aarch64-linux";
+
    for Create_Missing_Dirs use "True";
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
+      for Switches ("ada") use ("-gnatX", "-g3", "-gnatd_c");
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use ("-L/usr/lib/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/lib/cuda/targets/x86_64-linux/lib", "-lcudadevrt", "-lcudart_static", "-lrt", "-lpthread", "-ldl",
+      for Switches ("ada") use (
+         "-L/usr/local/cuda-11.4/targets/aarch64-linux/lib/stubs", 
+         "-L/usr/local/cuda-11.4/targets/aarch64-linux/lib", 
+         "-L/usr/aarch64-linux-gnu/lib/stubs",
+         "-L/usr/aarch64-linux-gnu/lib",
+         "-lcudadevrt", "-lcudart_static", 
+         "-lrt", 
+         "-lpthread", 
+         "-ldl",
          "-Wl,--unresolved-symbols=ignore-all");
       for Default_Switches ("ada") use ();
    end Linker;
 
 end Host;
-

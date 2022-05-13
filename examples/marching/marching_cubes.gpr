@@ -29,7 +29,14 @@ project Marching_Cubes is
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use ("-L/usr/lib/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/lib/cuda/targets/x86_64-linux/lib", "-lcudadevrt", "-lcudart_static", "-lrt", "-lpthread", "-ldl",
+      for Switches ("ada") use (
+         "-L/usr/lib/cuda/targets/x86_64-linux/lib/stubs", 
+         "-L/usr/lib/cuda/targets/x86_64-linux/lib", 
+         "-lcudadevrt", 
+         "-lcudart_static", 
+         "-lrt", 
+         "-lpthread", 
+         "-ldl",
          "-Wl,--unresolved-symbols=ignore-all");
       for Default_Switches ("ada") use ();
    end Linker;
