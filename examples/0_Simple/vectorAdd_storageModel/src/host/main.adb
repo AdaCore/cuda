@@ -57,12 +57,9 @@ begin
    H_A.all := (others => Float (Random (Gen)));
    H_B.all := (others => Float (Random (Gen)));
 
-   D_A := new Float_Array (1 .. Num_Elements);
-   D_B := new Float_Array (1 .. Num_Elements);
-   D_C := new Float_Array (1 .. Num_Elements);
-
-   D_A.all := H_A.all;
-   D_B.all := H_B.all;
+   D_A := new Float_Array'(H_A.all);
+   D_B := new Float_Array'(H_B.all);
+   D_C := new Float_Array (H_C.all'Range);
 
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
