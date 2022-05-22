@@ -33,5 +33,8 @@ project Host is
       for Default_Switches ("ada") use ();
    end Linker;
 
-end Host;
+   package Binder is
+      for Switches ("ada") use ("-d_c");
+   end Binder;
 
+end Host;

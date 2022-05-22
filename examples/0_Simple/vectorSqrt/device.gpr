@@ -7,7 +7,7 @@ library project Device is
    for Object_Dir use "obj/device";
 
    for Target use "cuda";
-   for Runtime ("ada") use "cuda-runtime";
+   for Runtime ("ada") use "device-cuda";
 
    for Create_Missing_Dirs use "True";
 
@@ -17,5 +17,5 @@ library project Device is
    package Compiler is
       for Switches ("ada") use ("-gnatX", "-O2", "-gnatp", "-gnatn");
    end Compiler;
-
+   
 end Device;
