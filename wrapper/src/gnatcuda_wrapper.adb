@@ -441,7 +441,7 @@ begin
             return Status;
          end if;
 
-         Status := Spawn (Locate_And_Check (To_String(Ld)).all, Ld_Args);
+         Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
 
          return Status;
       end;
