@@ -175,10 +175,11 @@ function GNATCUDA_Wrapper return Integer is
    --  GPU_Name : constant String := "75"; -- TODO we should have switches for This
 
    GPU_Name   : String_Access;
-   Count     : constant Natural := Argument_Count;
-   Path_Val  : constant String  := Value ("PATH", "");
+   Ld         : Unbounded_String := To_Unbounded_String ("ld");
+   Count      : constant Natural := Argument_Count;
+   Path_Val   : constant String  := Value ("PATH", "");
 
-   LLVM_Args : Argument_List (1 .. Count + 1);
+   LLVM_Args  : Argument_List (1 .. Count + 1);
    --  We usually have to add -mcuda-libdevice= on top of the regular switches,
    --  so adding one to the input count.
 
@@ -314,6 +315,19 @@ begin
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
             GPU_Name := new String'(To_String (Sub_Arg));
+         elsif Get_Argument (Arg, "-target=", Sub_Arg) then
+            declare
+               Target : String := To_String (Sub_Arg);
+            begin
+               if Target = "aarch64-linux" then
+                  LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
+               elsif Target = "x86_64-linux" then
+                  LD := To_Unbounded_String ("ld");
+               else
+                  Put_Line ("-target " & Target & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+                  Put_Line ("Proceeding with x86_64-linux.");
+               end if;
+            end;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
             Libdevice_Path := new String'(To_String (Sub_Arg));
          else
@@ -354,8 +368,6 @@ begin
    if GPU_Name = null then
       GPU_Name := new String'("75");
    end if;
-
-   GPU_Name := new String'("53");
 
    if Compile then
       if Input_File_Number /= 1 then
@@ -402,7 +414,6 @@ begin
             new String'("-o"),
             new String'(Kernel_Object));
 
-            Ld : String := "aarch64-linux-gnu-ld";
       begin
          Status := Spawn
            (Locate_And_Check ("llvm-gcc").all,
@@ -430,7 +441,7 @@ begin
             return Status;
          end if;
 
-         Status := Spawn (Locate_And_Check (Ld).all, Ld_Args);
+         Status := Spawn (Locate_And_Check (To_String(Ld)).all, Ld_Args);
 
          return Status;
       end;
