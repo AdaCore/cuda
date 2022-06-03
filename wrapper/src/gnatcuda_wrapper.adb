@@ -315,17 +315,17 @@ begin
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
             GPU_Name := new String'(To_String (Sub_Arg));
-         elsif Get_Argument (Arg, "-target=", Sub_Arg) then
+         elsif Get_Argument (Arg, "-host-target=", Sub_Arg) then
             declare
-               Target : String := To_String (Sub_Arg);
+               Host_Target : String := To_String (Sub_Arg);
             begin
-               if Target = "aarch64-linux" then
+               if Host_Target = "aarch64-linux" then
                   LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
-               elsif Target = "x86_64-linux" then
+               elsif Host_Target = "x86_64-linux" then
                   LD := To_Unbounded_String ("ld");
                else
-                  Put_Line ("-target " & Target & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
-                  Put_Line ("Proceeding with x86_64-linux.");
+                  Put_Line ("-host-target " & Host_Target & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+                  Put_Line ("Proceeding with -host-target=x86_64-linux.");
                end if;
             end;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
@@ -441,6 +441,7 @@ begin
             return Status;
          end if;
 
+         Put_Line ("Linker: " & To_String (Ld));
          Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
 
          return Status;
