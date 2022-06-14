@@ -1,7 +1,7 @@
 export PATH := install/bin:$(PATH)
 
 BB_SRC   := ../bb-runtimes
-GNAT_SRC := /home/henley/adacore/nvidia/wave/x86_64-linux/cuda_env/install/gnat
+GNAT_SRC := ../gnat
 
 local_llvm := $(shell which llvm-gcc)
 llvm_dir   := $(shell dirname $(dir $(local_llvm)))
