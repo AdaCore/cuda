@@ -16,22 +16,38 @@ with "../../../api/cuda_host.gpr";
 
 project Host is
 
+   for Create_Missing_Dirs use "True";
+   
    for Exec_Dir use ".";
    for Object_Dir use "obj/host";
    for Source_Dirs use ("src/common", "src/host");
    for Main use ("main.adb");
 
-   for Create_Missing_Dirs use "True";
+   type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
+   Host_Target : Host_Target_Option := external ("host_target", "x86_64-linux");
+
+   for Target use host_target;
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-g", "-gnatd_c");
+      for Switches ("ada") use ("-gnatX", "-gnatd_c");
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use ("-L/usr/lib/cuda/targets/x86_64-linux/lib/stubs", "-L/usr/lib/cuda/targets/x86_64-linux/lib", "-lcudadevrt", "-lcudart_static", "-lrt", "-lpthread", "-ldl",
-         "-Wl,--unresolved-symbols=ignore-all");
-      for Default_Switches ("ada") use ();
+      for Switches ("ada") use (
+            "-L/usr/local/cuda/targets/" & Host_Target & "/lib",
+            "-L/usr/local/cuda/targets/" & Host_Target & "/lib/stubs",
+            "-lcudadevrt", 
+            "-lcudart_static", 
+            "-lrt", 
+            "-lpthread", 
+            "-ldl",
+            "-Wl,--unresolved-symbols=ignore-all"
+         );
    end Linker;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-d_c");
+   end Binder;
 
 end Host;
 
