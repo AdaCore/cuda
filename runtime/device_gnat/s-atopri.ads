@@ -2,12 +2,11 @@
 --                                                                          --
 --                         GNAT RUN-TIME COMPONENTS                         --
 --                                                                          --
---       A D A . N U M E R I C S . A U X _ G E N E R I C _ F L O A T        --
+--               S Y S T E M . A T O M I C _ P R I M I T I V E S            --
 --                                                                          --
 --                                 S p e c                                  --
---                            (Generic Wrapper)                             --
 --                                                                          --
---          Copyright (C) 1992-2022, Free Software Foundation, Inc.         --
+--              Copyright (C) 2012-2020, Free Software Foundation, Inc.     --
 --                                                                          --
 -- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -30,46 +29,29 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  This package provides the basic computational interface for the generic
---  elementary functions. The C library version interfaces with the routines
---  in the C mathematical library.
+--  This package contains both atomic primitives defined from gcc built-in
+--  functions and operations used by the compiler to generate the lock-free
+--  implementation of protected objects.
 
---  This version here is for use with normal Unix math functions.
+with Interfaces.C;
 
-generic
-   type T is digits <>;
-package Ada.Numerics.Aux_Generic_Float is
+package System.Atomic_Primitives is
    pragma Pure;
 
-   function Sin (X : T) return T
-      with Import, External_Name => "__nv_fast_sinf";
+   Relaxed : constant := 0;
+   Consume : constant := 1;
+   Acquire : constant := 2;
+   Release : constant := 3;
+   Acq_Rel : constant := 4;
+   Seq_Cst : constant := 5;
+   Last    : constant := 6;
 
-   function Cos (X : T) return T
-      with Import, External_Name => "__nv_fast_cosf";
+   subtype Mem_Model is Integer range Relaxed .. Last;
 
-   function Tan (X : T) return T
-      with Import, External_Name => "__nv_fast_tanf";
+   function Atomic_Always_Lock_Free
+     (Size : Interfaces.C.size_t;
+      Ptr  : System.Address := System.Null_Address) return Boolean;
+   pragma Import
+     (Intrinsic, Atomic_Always_Lock_Free, "__atomic_always_lock_free");
 
-   function Exp (X : T) return T
-      with Import, External_Name => "__nv_fast_expf";
-
-   function Sqrt (X : T) return T
-      with Import, External_Name => "__nv_rsqrtf";
-
-   function Log (X : T) return T with Import, External_Name => "__nv_logf";
-
-   function Acos (X : T) return T with Import, External_Name => "__nv_acosf";
-
-   function Asin (X : T) return T with Import, External_Name => "__nv_asinf";
-
-   function Atan (X : T) return T with Import, External_Name => "__nv_atanf";
-
-   function Sinh (X : T) return T with Import, External_Name => "__nv_sinhf";
-
-   function Cosh (X : T) return T with Import, External_Name => "__nv_coshf";
-
-   function Tanh (X : T) return T with Import, External_Name => "__nv_tanhf";
-
-   function Pow (X, Y : T) return T with Import, External_Name => "__nv_powf";
-
-end Ada.Numerics.Aux_Generic_Float;
+end System.Atomic_Primitives;

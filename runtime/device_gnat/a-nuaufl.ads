@@ -34,10 +34,6 @@
 --  elementary functions. The C library version interfaces with the routines
 --  in the C mathematical library, and is thus quite portable.
 
---  with Ada.Numerics.Aux_Linker_Options;
---  pragma Warnings (Off, Ada.Numerics.Aux_Linker_Options);
-with libdevice;
-
 package Ada.Numerics.Aux_Float is
    pragma Pure;
 
@@ -46,21 +42,29 @@ package Ada.Numerics.Aux_Float is
    --  We import these functions directly from C. Note that we label them
    --  all as pure functions, because indeed all of them are in fact pure.
 
-   function Sin (X : T) return T with Import, External_Name => "__nv_fast_sinf";
+   function Sin (X : T) return T
+      with Import, External_Name => "__nv_fast_sinf";
 
-   function Cos (X : T) return T with Import, External_Name => "__nv_fast_cosf";
+   function Cos (X : T) return T
+      with Import, External_Name => "__nv_fast_cosf";
 
-   function Tan (X : T) return T with Import, External_Name => "__nv_fast_tanf";
+   function Tan (X : T) return T
+      with Import, External_Name => "__nv_fast_tanf";
 
-   function Exp (X : T) return T with Import, External_Name => "__nv_fast_expf";
+   function Exp (X : T) return T
+      with Import, External_Name => "__nv_fast_expf";
 
-   function Sqrt (X : T) return T with Import, External_Name => "__nv_rsqrtf";
+   function Sqrt (X : T) return T
+      with Import, External_Name => "__nv_rsqrtf";
 
-   function Log (X : T) return T with Import, External_Name => "__nv_logf";
+   function Log (X : T) return T
+      with Import, External_Name => "__nv_logf";
 
-   function Acos (X : T) return T with Import, External_Name => "__nv_acosf";
+   function Acos (X : T) return T
+      with Import, External_Name => "__nv_acosf";
 
-   function Asin (X : T) return T with Import, External_Name => "__nv_asinf";
+   function Asin (X : T) return T
+      with Import, External_Name => "__nv_asinf";
 
    function Atan (X : T) return T with Import, External_Name => "__nv_atanf";
 

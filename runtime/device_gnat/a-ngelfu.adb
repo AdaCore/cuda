@@ -36,7 +36,5 @@
 --  Uses functions sqrt, exp, log, pow, sin, asin, cos, acos, tan, atan, sinh,
 --  cosh, tanh from C library via math.h
 
-with Ada.Numerics.Aux_Generic_Float;
-
 package body Ada.Numerics.Generic_Elementary_Functions is
 end Ada.Numerics.Generic_Elementary_Functions;
