@@ -3,14 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Ada CUDA Bindings's documentation!
-=============================================
+Welcome to GNAT CUDA!
+=====================
 
 .. toctree::
+   :numbered:
    :maxdepth: 2
    :caption: Contents:
 
-
+   intro
+   installation
+   tutorial
+   build_architecture
 
 Indices and tables
 ==================
