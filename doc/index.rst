@@ -13,8 +13,11 @@ Welcome to GNAT CUDA!
 
    intro
    installation
-   tutorial
+   examples
    build_architecture
+   programming
+   performances
+   limitations
 
 Indices and tables
 ==================
