@@ -1,5 +1,5 @@
 **************************************
-Welcome to GNAT CUDA
+Welcome to GNAT for CUDA
 **************************************
 
 GNAT for CUDA is a toolsuite that allows to compile Ada and SPARK code directly
