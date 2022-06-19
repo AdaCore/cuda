@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Ada CUDA Bindings'
+project = 'GNAT for CUDA'
 copyright = '2022, AdaCore'
 author = 'AdaCore'
 

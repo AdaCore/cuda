@@ -51,7 +51,7 @@ A few things are noteworthy here:
  - The runtime is set to ``device-cuda``. This is the specific restricted
    Ada run-time that contains specifically capabilities available for the 
    device.
- - The compiler switches include "-O2" and "-gnatn", as to ensure maximum 
+ - The compiler switches include ``-O2`` and ``-gnatn``, as to ensure maximum 
    performances on the device.
  - The compiler switches also include ``-gnatX``. While not strictly necessary, 
    a number of capabilites are being added to the Ada programming language

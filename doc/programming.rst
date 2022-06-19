@@ -1,11 +1,11 @@
 **************************************
-Programming with GNAT CUDA
+Programming with GNAT for CUDA
 **************************************
 
 Defining and calling Kernels
 ============================
 
-Just as a typical CUDA program, programming in GNAT CUDA requires the 
+Just as a typical CUDA program, programming in GNAT for CUDA requires the 
 developper to identify in its application entry point to the GPU code called
 kernels. In Ada, this is done by associating a procedure with the ``CUDA_Global``
 aspect, which serves the same role as the CUDA ``__global__`` modifier. For 
@@ -129,7 +129,7 @@ Ada array (or more specifically Ada unconstrained arrays) carry data and
 boundaries. The structure of such types in memory is implementation-dependent,
 and can vary on many factors.
 
-GNAT CUDA currently provides a storage model library that allows to allocate
+GNAT for CUDA currently provides a storage model library that allows to allocate
 uni-dimensional arrays and to copy them back and forth easily. This is done
 through the generic package ``CUDA_Storage_Models.Malloc_Host_Storage_Model.Arrays``
 which can be instantiated with for generic formal parameters:
@@ -237,7 +237,7 @@ implementation. It is not yet available as part of the current version of the
 product but is on the close roadmap. Discussion around the generic capability 
 can be found `here <https://github.com/AdaCore/ada-spark-rfcs/pull/76>`_.
 
-GNAT CUDA provides a storage model that maps to CUDA primitives for allocation,
+GNAT for CUDA provides a storage model that maps to CUDA primitives for allocation,
 deallocation and copy. It is declared in the package ``CUDA.Storage_Models``.
 Users may used directly ``CUDA.Storage_Models.Model`` or create their own
 instances.
