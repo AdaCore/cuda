@@ -1,4 +1,3 @@
 build:
-	Execution_Side=Device gprbuild -m2 -P ../../../api/cuda_device.gpr -j0
-	Execution_Side=Device gprbuild -m2 -P device.gpr -j0
-	Execution_Side=Host gprbuild -m2 -P host -j0 -largs $(PWD)/lib/*.fatbin.o
+	gprbuild -Xcubin_version=sm_75 -Xhost_target=x86_64-linux -P device.gpr -v
+	gprbuild -Xhost_target=x86_64-linux -P host -j0 -largs $(PWD)/lib/*.fatbin.o

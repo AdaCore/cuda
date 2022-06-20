@@ -26,8 +26,8 @@ package body Importer is
       use Ada.Text_IO;
       Input_File : File_Type;
    begin
-      Width  := 0;
-      Height := 0;
+      Width  := 1;
+      Height := 1;
       Open (Input_File, In_File, File_Path);
       declare
          Magic_Number   : constant String  := Get_Line (Input_File);

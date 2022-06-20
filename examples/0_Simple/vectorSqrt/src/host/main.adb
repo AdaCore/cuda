@@ -18,7 +18,7 @@ procedure Main is
    package Elementary_Functions is new
       Ada.Numerics.Generic_Elementary_Functions (Float);
 
-   Num_Elements : Integer := 4096;
+   Num_Elements : Integer := 512;
 
    H_A, H_B : Access_Host_Float_Array;
    D_A, D_B : System.Address;
@@ -35,7 +35,7 @@ procedure Main is
      Ada.Unchecked_Deallocation (Float_Array, Access_Host_Float_Array);
 
 begin
-   Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
+   Put_Line ("[Vector sqrt of " & Num_Elements'Img & " elements]");
 
    H_A := new Float_Array (1 .. Num_Elements);
    H_B := new Float_Array (1 .. Num_Elements);
@@ -46,9 +46,8 @@ begin
       return;
    end if;
 
-   H_A.all := (others => Float (Random (Gen)));
-   for I in H_A'First..H_A'Last loop
-      H_A (I) := Float(I * I);
+   for I in H_A'First .. H_A'Last loop
+     H_A (I) := FLoat(I * I);
    end loop;
 
    D_A := Cuda.Runtime_Api.Malloc (Array_Size);
@@ -57,6 +56,12 @@ begin
    Cuda.Runtime_Api.Memcpy
      (Dst   => D_A,
       Src   => H_A.all'Address,
+      Count => Array_Size,
+      Kind  => Memcpy_Host_To_Device);
+
+   Cuda.Runtime_Api.Memcpy
+     (Dst   => D_B,
+      Src   => H_B.all'Address,
       Count => Array_Size,
       Kind  => Memcpy_Host_To_Device);
 
@@ -75,8 +80,13 @@ begin
       Count => Array_Size,
       Kind  => Memcpy_Device_To_Host);
 
-   for I in 1..10 loop
-      Put_Line (Elementary_Functions.Sqrt(H_A(I))'Img & " " & H_B (I)'Img);
+
+   for I in 1..Num_Elements loop
+      if H_B (I) - Elementary_Functions.Sqrt(H_A(I)) > 1.0 then
+         Put_Line ("Result verification failed at element "& I'Img & "!");
+
+         return;
+      end if;
    end loop;
 
    Put_Line ("Test PASSED");

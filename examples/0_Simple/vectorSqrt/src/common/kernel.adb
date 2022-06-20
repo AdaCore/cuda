@@ -4,8 +4,9 @@ with Interfaces.C;     use Interfaces.C; -- Operators for Block_Dim, Block_IDx, 
 with Ada.Numerics; use Ada.Numerics;
 with Ada.Numerics.Generic_Elementary_Functions;
 
-package body Kernel is
 
+package body Kernel is
+   
    procedure Vector_Sqrt
      (A_Addr : System.Address;
       B_Addr : System.Address;
