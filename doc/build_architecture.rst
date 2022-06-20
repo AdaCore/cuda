@@ -2,7 +2,7 @@
 Build Architecture
 **************************************
 
-A GNAT for CUDA application is a distributed application which contains two main
+A GNAT for CUDA® application is a distributed application which contains two main
 components:
 
  - A host application, which is responsible for running overall orchestration

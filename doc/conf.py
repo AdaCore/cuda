@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'GNAT for CUDA'
+project = 'GNAT for CUDA®'
 copyright = '2022, AdaCore'
 author = 'AdaCore'
 
