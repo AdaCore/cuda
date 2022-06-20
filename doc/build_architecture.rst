@@ -2,6 +2,9 @@
 Build Architecture
 **************************************
 
+Overall Model
+=============
+
 A GNAT for CUDA® application is a distributed application which contains two main
 components:
 
@@ -20,7 +23,9 @@ metal environment with no run-time. For example, Ada tasking is not available.
 
 A typical project contains two projects files, one for each part of the 
 application. The first project to be compiled is the device project. A typical
-device project file will look like this::
+device project file will look like this:
+
+.. code-block:: ada
 
    with "cuda_device.gpr";
 
@@ -68,7 +73,9 @@ to be loaded to the GPU.
 An important limitation is that at this stage, a GNAT CUDA application can
 only link against one fatbinary at most.
 
-A typical host project file will look like this::
+A typical host project file will look like this:
+
+.. code-block:: ada
 
   with "cuda_host.gpr";
 
@@ -124,3 +131,14 @@ Note the addition of the fatbinary on the linker line. This comes from the
 previous step.
 
 Once built, the resulting binary can be run similar to any regular binary.
+
+Building for Tegra®
+===================
+
+Tegra® is an NVIDIA SoC that conbines together ARM cores and NVIDIA GPUs. GNAT
+for CUDA® allow to target this SoC through a cross compiler. The toolchain is
+hosted on a x86 64 bits Linux system and will generate both ARM 64 bits code
+targeting the Linux environment installed on Tegra together with the necessary
+PTX code.
+
+TODO

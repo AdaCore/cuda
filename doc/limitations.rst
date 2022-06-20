@@ -9,3 +9,4 @@ Current Limitations
  - Tagged types cannot be passed between the host and the device.
  - Parameters that can be passed to a ``CUDA_Execute`` calls are limited to
    scalars in input mode and accesses.
+ - The toolchain is only Linux hosted, Windows ports are not available.

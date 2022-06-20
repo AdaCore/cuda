@@ -9,27 +9,35 @@ Just as a typical CUDA program, programming in GNAT for CUDA requires the
 developper to identify in its application entry point to the GPU code called
 kernels. In Ada, this is done by associating a procedure with the ``CUDA_Global``
 aspect, which serves the same role as the CUDA ``__global__`` modifier. For 
-example::
+example:
+
+.. code-block:: ada
 
     procedure My_Kernel (X : Some_Array_Access)
     with CUDA_Global;
 
 Kernels are compiled both for host and device. They can be called as regular
-procedures, e.g::
+procedures, e.g:
+
+.. code-block:: ada
 
     My_Kernel (An_Array_Instance);
 
 Will do a regular single thread call to the kernel, and execute it on the host.
 In some situations, this can be helpful for debugging on the host.
 
-Calling a kernel on the device is done through the CUDA_Execute pragma::
+Calling a kernel on the device is done through the CUDA_Execute pragma:
+
+.. code-block:: ada
 
     pragma CUDA_Execute (My_Kernel (An_Array_Instance), 10, 1);
 
 Note that the procedure call looks the same than in the case of a regular call.
 However, this call is done surrounded by the pragma CUDA_Execute, which has two
 extra parameters, defining respectively number of threads per blocks and number
-of blocks per grid. This is equivalent to a familiar CUDA call::
+of blocks per grid. This is equivalent to a familiar CUDA call:
+
+.. code-block:: c
 
     <<<10, 1>>> myKernel (someArray);
 
@@ -37,6 +45,8 @@ The above calls are launching ten instances of the kernel to the device.
 
 Thread per blocks and blocks per grid can be expressed as a 1 dimention scalar
 or a ``Dim3`` value which will give a dimensionality in x, y and z. For example::
+
+.. code-block:: ada
 
    pragma CUDA_Execute (My_Kernel (An_Array_Instance), (3, 3, 3), (3, 3, 3));
 
@@ -289,3 +299,31 @@ storage model (as opposed to the foreign device one from the host).
 This is the intended way of sharing memory between device and host. Note that
 the storage model can be extended to support capabilities such as streaming or 
 unified memory.
+
+Specifying Compilation Side
+===========================
+
+As for CUDA, a GNAT for CUDA application contains code that may be compiled
+exclusively for the host, the device or both. By default, all code is 
+compiled for both the host and the device. Code can be identifed as only being
+compilable for the device with the ``CUDA_Device`` aspect:
+
+.. code-block:: ada
+
+   procedure Some_Device_Procedure
+      with CUDA_Device;
+
+The above procedure will not exist on the host. Calling it will result in a
+compilation error.
+
+Accessing Blocks and Threads Indexes and Dimensions
+===================================================
+
+GNAT for CUDA® allows to access block and thread indexes and dimensions in a way
+that is similar to CUDA. Notably, the package ``CUDA.Runtime_API`` declares
+``Block_Dim``, ``Grid_Dim``, ``Block_IDx`` and ``Thread_IDx`` which maps 
+directly to the corresponding PTX registers. For example:
+
+.. code-block:: ada
+
+    I : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
