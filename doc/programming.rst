@@ -316,6 +316,8 @@ compilable for the device with the ``CUDA_Device`` aspect:
 The above procedure will not exist on the host. Calling it will result in a
 compilation error.
 
+The correspoinding ``CUDA_Host`` aspect is currently not implemented.
+
 Accessing Blocks and Threads Indexes and Dimensions
 ===================================================
 
@@ -326,4 +328,4 @@ directly to the corresponding PTX registers. For example:
 
 .. code-block:: ada
 
-    I : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
+    I : Integer := Integer (Block_Dim.X * Block_IDx.Y + Thread_IDx.X);

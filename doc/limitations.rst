@@ -10,3 +10,5 @@ Current Limitations
  - Parameters that can be passed to a ``CUDA_Execute`` calls are limited to
    scalars in input mode and accesses.
  - The toolchain is only Linux hosted, Windows ports are not available.
+ - Debugging is currently not supported on the device, including compilation 
+   with ``-g``.
