@@ -1,6 +1,37 @@
 **************************************
-Programming with GNAT for CUDA
+Programming with GNAT for CUDA®
 **************************************
+
+CUDA API
+========
+
+The CUDA API available from GNAT for CUDA® is a binding to the CUDA API 
+provided by NVIDIA, installed with the CUDA driver. Is is accessed by the host
+by adding a reference to ``cuda_host.gpr`` on the host and ``cuda_device.gpr``
+on the target.
+
+The Ada version of the API is generated automatically when running the initial
+installation script, and thus corresponds specifically to the CUDA version that
+is installed on the system.
+
+Two version of the API are available:
+
+ - a "thick" binding version. These units are child units of the CUDA package,
+   the main one being ``CUDA.Runtime_API``. This is the intended API to use.
+   Note that at this stage, this API is still in process of being completed.
+   A number of types and subprogram profiles have not been mapped to higher
+   level Ada constructions. For example, you will still see a lot of references
+   to ``System.Address`` where Ada would call for specific types.
+ - a "thin" binding version. These units are typically identified by their 
+   suffix "_h" and are direct bindings to the underlying C APIs. These bindings
+   are functional and complete, they can be used as a low level alternative
+   to the thick binding. However, they do not expose an interface consistent 
+   with the Ada programming patterns and may require more work at the user level.
+
+At any time, these bindings can be regenerated. That can be useful for example
+if a new version of CUDA is installed. To generate these bindings, you can 
+execute the the "bind.sh" script locaed under 
+<your GNAT for CUDA installation>/cuda/api/.
 
 Defining and calling Kernels
 ============================
