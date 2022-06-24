@@ -29,7 +29,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with System.Atomic_Primitives; --  use System.Atomic_Primitives;
+with System.Atomic_Primitives; use System.Atomic_Primitives;
 with Interfaces.C;
 
 package body System.Atomic_Operations.Exchange is
@@ -46,26 +46,22 @@ package body System.Atomic_Operations.Exchange is
       function Atomic_Exchange_1
         (Ptr   : System.Address;
          Val   : Atomic_Type;
-         Model : System.Atomic_Primitives.Mem_Model
-                  := System.Atomic_Primitives.Seq_Cst) return Atomic_Type;
+         Model : Mem_Model := Seq_Cst) return Atomic_Type;
       pragma Import (Intrinsic, Atomic_Exchange_1, "__atomic_exchange_1");
       function Atomic_Exchange_2
         (Ptr   : System.Address;
          Val   : Atomic_Type;
-         Model : System.Atomic_Primitives.Mem_Model
-                  := System.Atomic_Primitives.Seq_Cst) return Atomic_Type;
+         Model : Mem_Model := Seq_Cst) return Atomic_Type;
       pragma Import (Intrinsic, Atomic_Exchange_2, "__atomic_exchange_2");
       function Atomic_Exchange_4
         (Ptr   : System.Address;
          Val   : Atomic_Type;
-         Model : System.Atomic_Primitives.Mem_Model
-               := System.Atomic_Primitives.Seq_Cst) return Atomic_Type;
+         Model : Mem_Model := Seq_Cst) return Atomic_Type;
       pragma Import (Intrinsic, Atomic_Exchange_4, "__atomic_exchange_4");
       function Atomic_Exchange_8
         (Ptr   : System.Address;
          Val   : Atomic_Type;
-         Model : System.Atomic_Primitives.Mem_Model
-               := System.Atomic_Primitives.Seq_Cst) return Atomic_Type;
+         Model : Mem_Model := Seq_Cst) return Atomic_Type;
       pragma Import (Intrinsic, Atomic_Exchange_8, "__atomic_exchange_8");
       pragma Warnings (On);
 
@@ -75,7 +71,7 @@ package body System.Atomic_Operations.Exchange is
          when 16     => return Atomic_Exchange_2 (Item'Address, Value);
          when 32     => return Atomic_Exchange_4 (Item'Address, Value);
          when 64     => return Atomic_Exchange_8 (Item'Address, Value);
-         when others => return Atomic_Exchange_1 (Item'Address, Value);
+         when others => raise Program_Error;
       end case;
    end Atomic_Exchange;
 
@@ -94,10 +90,8 @@ package body System.Atomic_Operations.Exchange is
          Expected      : System.Address;
          Desired       : Atomic_Type;
          Weak          : Boolean := False;
-         Success_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst;
-         Failure_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst) return Boolean;
+         Success_Model : Mem_Model := Seq_Cst;
+         Failure_Model : Mem_Model := Seq_Cst) return Boolean;
       pragma Import
         (Intrinsic, Atomic_Compare_Exchange_1, "__atomic_compare_exchange_1");
       function Atomic_Compare_Exchange_2
@@ -105,10 +99,8 @@ package body System.Atomic_Operations.Exchange is
          Expected      : System.Address;
          Desired       : Atomic_Type;
          Weak          : Boolean := False;
-         Success_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst;
-         Failure_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst) return Boolean;
+         Success_Model : Mem_Model := Seq_Cst;
+         Failure_Model : Mem_Model := Seq_Cst) return Boolean;
       pragma Import
         (Intrinsic, Atomic_Compare_Exchange_2, "__atomic_compare_exchange_2");
       function Atomic_Compare_Exchange_4
@@ -116,10 +108,8 @@ package body System.Atomic_Operations.Exchange is
          Expected      : System.Address;
          Desired       : Atomic_Type;
          Weak          : Boolean := False;
-         Success_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst;
-         Failure_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst) return Boolean;
+         Success_Model : Mem_Model := Seq_Cst;
+         Failure_Model : Mem_Model := Seq_Cst) return Boolean;
       pragma Import
         (Intrinsic, Atomic_Compare_Exchange_4, "__atomic_compare_exchange_4");
       function Atomic_Compare_Exchange_8
@@ -127,10 +117,8 @@ package body System.Atomic_Operations.Exchange is
          Expected      : System.Address;
          Desired       : Atomic_Type;
          Weak          : Boolean := False;
-         Success_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst;
-         Failure_Model : System.Atomic_Primitives.Mem_Model
-                           := System.Atomic_Primitives.Seq_Cst) return Boolean;
+         Success_Model : Mem_Model := Seq_Cst;
+         Failure_Model : Mem_Model := Seq_Cst) return Boolean;
       pragma Import
         (Intrinsic, Atomic_Compare_Exchange_8, "__atomic_compare_exchange_8");
       pragma Warnings (On);
@@ -150,8 +138,7 @@ package body System.Atomic_Operations.Exchange is
             return Atomic_Compare_Exchange_8
                 (Item'Address, Prior'Address, Desired);
          when others =>
-            return Atomic_Compare_Exchange_1
-                (Item'Address, Prior'Address, Desired);
+            raise Program_Error;
       end case;
    end Atomic_Compare_And_Exchange;
 
@@ -163,8 +150,7 @@ package body System.Atomic_Operations.Exchange is
       pragma Unreferenced (Item);
       use type Interfaces.C.size_t;
    begin
-      return System.Atomic_Primitives.Atomic_Always_Lock_Free
-         (Atomic_Type'Object_Size / 8);
+      return Atomic_Always_Lock_Free (Atomic_Type'Object_Size / 8);
    end Is_Lock_Free;
 
 end System.Atomic_Operations.Exchange;
