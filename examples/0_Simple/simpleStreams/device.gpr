@@ -18,7 +18,7 @@ library project Device is
    Cubin_Version : Cubin_Version_Option := external ("cubin_version", "sm_75");
    
    package Compiler is
-      for Switches ("ada") use ("--RTS=../lib/rts-device-cuda", "-gnatX", "-O2", "-gnatn", "-mcpu=" & Cubin_Version);     
+      for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-mcpu=" & Cubin_Version);     
    end Compiler;
 
    type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
