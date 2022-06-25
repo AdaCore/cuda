@@ -16,6 +16,9 @@ with CUDA.Runtime_Api;
 
 with Graphic;
 
+with Ada.Numerics; use Ada.Numerics;
+with Ada.Numerics.Generic_Elementary_Functions;
+
 package body Bilateral_Kernel is
 
    package G renames Graphic;
@@ -42,38 +45,23 @@ package body Bilateral_Kernel is
       Img          : G.Image (1 .. Width, 1 .. Height) with Address => Img_Addr;
       Filtered_Img : G.Image (1 .. Width, 1 .. Height) with Address => Filtered_Img_Addr;
 
-      function Exponential (N : Integer; X : Float) return Float is
-         Sum : Float := 1.0;
-      begin
-         for I in reverse 1 .. N loop
-            Sum := 1.0 + X * Sum / Float (I);
-         end loop;
-         return Sum;
-      end;
-
-      function Sqrt (X : Float; T : Float) return Float is
-         Y : Float := 1.0;
-      begin
-         while abs (X / Y - Y) > T loop
-            Y := (Y + X / Y) / 2.0;
-         end loop;
-         return Y;
-      end;
+      package Elementary_Functions is new
+         Ada.Numerics.Generic_Elementary_Functions (Float);
 
       function Compute_Spatial_Gaussian (M : Float; N : Float) return Float is
          Spatial_Variance : constant Float := Spatial_Stdev * Spatial_Stdev;
          Two_Pi_Variance  : constant Float := 2.0 * 3.141_6 * Spatial_Variance;
-         Exp              : constant Float := Exponential (10, -0.5 * ((M * M + N * N) / Spatial_Variance));
+         Expo             : constant Float := Elementary_Functions.Exp (-0.5 * ((M * M + N * N) / Spatial_Variance));
       begin
-         return (1.0 / (Two_Pi_Variance)) * Exp;
+         return (1.0 / (Two_Pi_Variance)) * Expo;
       end;
 
       function Compute_Color_Dist_Gaussian (K : Float) return Float is
          Color_Dist_Variance : constant Float := Color_Dist_Stdev * Color_Dist_Stdev;
       begin
          return
-           (1.0 / (Sqrt (2.0 * 3.141_6, 0.001) * Color_Dist_Stdev)) *
-           Exponential (10, -0.5 * ((K * K) / Color_Dist_Variance));
+           (1.0 / (Elementary_Functions.Sqrt (2.0 * 3.141_6) * Color_Dist_Stdev)) *
+           Elementary_Functions.Exp (-0.5 * ((K * K) / Color_Dist_Variance));
       end;
 
       -- Compute Kernel Bounds
@@ -88,7 +76,7 @@ package body Bilateral_Kernel is
          for Y in Yb .. Ye loop
             if X >= 1 and X <= Width and Y >= 1 and Y <= Height then
                -- Compute Color Distance
-               Rgb_Dist := Sqrt (distance_square (Img (I, J), Img (X, Y)), 0.001);
+               Rgb_Dist := Elementary_Functions.Sqrt (distance_square (Img (I, J), Img (X, Y)));
 
                -- Compute Gaussians
                Spatial_Gaussian    := Compute_Spatial_Gaussian (Float (I - X), Float (J - Y));

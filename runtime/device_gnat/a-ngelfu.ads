@@ -41,30 +41,43 @@ package Ada.Numerics.Generic_Elementary_Functions with
 is
    pragma Pure;
 
-   function Sin (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_fast_sinf";
+   function Sin (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_fast_sinf";
 
-   function Cos (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_fast_cosf";
+   function Cos (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_fast_cosf";
 
-   function Tan (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_fast_tanf";
+   function Tan (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_fast_tanf";
 
-   function Exp (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_fast_expf";
+   function Exp (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_fast_expf";
 
-   function Sqrt (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_sqrtf";
+   function Sqrt (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_sqrtf";
 
-   function Log (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_logf";
+   function Log (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_logf";
 
-   function Acos (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_acosf";
+   function Acos (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_acosf";
 
-   function Asin (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_asinf";
+   function Asin (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_asinf";
 
-   function Atan (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_atanf";
+   function Atan (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_atanf";
 
-   function Sinh (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_sinhf";
+   function Sinh (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_sinhf";
 
-   function Cosh (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_coshf";
+   function Cosh (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_coshf";
 
-   function Tanh (X : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_tanhf";
+   function Tanh (X : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_tanhf";
 
-   function Pow (X, Y : Float_Type'Base) return Float_Type'Base with Import, External_Name => "__nv_powf";
+   function Pow (X, Y : Float_Type'Base) return Float_Type'Base
+      with Import, External_Name => "__nv_powf";
 
 end Ada.Numerics.Generic_Elementary_Functions;

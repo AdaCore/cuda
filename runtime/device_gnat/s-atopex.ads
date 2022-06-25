@@ -2,12 +2,15 @@
 --                                                                          --
 --                         GNAT RUN-TIME COMPONENTS                         --
 --                                                                          --
---       A D A . N U M E R I C S . A U X _ G E N E R I C _ F L O A T        --
+--                    System.Atomic_Operations.Exchange                     --
 --                                                                          --
 --                                 S p e c                                  --
---                            (Generic Wrapper)                             --
 --                                                                          --
---          Copyright (C) 1992-2022, Free Software Foundation, Inc.         --
+--                 Copyright (C) 2019-2020, Free Software Foundation, Inc.  --
+--                                                                          --
+-- This specification is derived from the Ada Reference Manual for use with --
+-- GNAT. The copyright notice above, and the license provisions that follow --
+-- apply solely to the  contents of the part following the private keyword. --
 --                                                                          --
 -- GNAT is free software;  you can  redistribute it  and/or modify it under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -30,46 +33,25 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  This package provides the basic computational interface for the generic
---  elementary functions. The C library version interfaces with the routines
---  in the C mathematical library.
-
---  This version here is for use with normal Unix math functions.
-
 generic
-   type T is digits <>;
-package Ada.Numerics.Aux_Generic_Float is
-   pragma Pure;
+   type Atomic_Type is private with Atomic;
+package System.Atomic_Operations.Exchange
+  with Pure
+is
+   function Atomic_Exchange
+     (Item  : aliased in out Atomic_Type;
+      Value : Atomic_Type) return Atomic_Type with Convention => Intrinsic;
 
-   function Sin (X : T) return T
-      with Import, External_Name => "__nv_fast_sinf";
+   function Atomic_Compare_And_Exchange
+     (Item    : aliased in out Atomic_Type;
+      Prior   : aliased in out Atomic_Type;
+      Desired : Atomic_Type) return Boolean with Convention => Intrinsic;
 
-   function Cos (X : T) return T
-      with Import, External_Name => "__nv_fast_cosf";
+   function Is_Lock_Free
+     (Item : aliased Atomic_Type) return Boolean with Convention => Intrinsic;
 
-   function Tan (X : T) return T
-      with Import, External_Name => "__nv_fast_tanf";
-
-   function Exp (X : T) return T
-      with Import, External_Name => "__nv_fast_expf";
-
-   function Sqrt (X : T) return T
-      with Import, External_Name => "__nv_rsqrtf";
-
-   function Log (X : T) return T with Import, External_Name => "__nv_logf";
-
-   function Acos (X : T) return T with Import, External_Name => "__nv_acosf";
-
-   function Asin (X : T) return T with Import, External_Name => "__nv_asinf";
-
-   function Atan (X : T) return T with Import, External_Name => "__nv_atanf";
-
-   function Sinh (X : T) return T with Import, External_Name => "__nv_sinhf";
-
-   function Cosh (X : T) return T with Import, External_Name => "__nv_coshf";
-
-   function Tanh (X : T) return T with Import, External_Name => "__nv_tanhf";
-
-   function Pow (X, Y : T) return T with Import, External_Name => "__nv_powf";
-
-end Ada.Numerics.Aux_Generic_Float;
+private
+   pragma Inline_Always (Atomic_Exchange);
+   pragma Inline_Always (Atomic_Compare_And_Exchange);
+   pragma Inline_Always (Is_Lock_Free);
+end System.Atomic_Operations.Exchange;

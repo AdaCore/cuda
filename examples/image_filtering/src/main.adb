@@ -16,6 +16,7 @@ with Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Command_Line;
 with Ada.Exceptions;
+with Ada.Unchecked_Deallocation;
 
 with Generic_Line_Parser;
 
@@ -52,6 +53,8 @@ procedure Main is
    Param  : Parameters.User_Parameters;
    Width  : Natural;
    Height : Natural;
+
+   procedure Free is new Ada.Unchecked_Deallocation (G.Image, G.Image_Access);
 begin
    GLP.Parse_Command_Line (Parameters => Descriptors, Result => Param);
    
@@ -87,8 +90,8 @@ begin
 
       AIO.Put_Line ("Result found in " & Param.Output_Image'Image);
 
-      G.Free (Img);
-      G.Free (Filtered_Img);
+      Free (Img);
+      Free (Filtered_Img);
    end;
 exception
    when Msg : GLP.Bad_Command =>
