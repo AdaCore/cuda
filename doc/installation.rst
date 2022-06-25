@@ -17,18 +17,16 @@ Untar the package::
 
  tar -xzf tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
 
-In the extracted directory, execute env.sh::
+In the extracted directory, generate the toolsuite setup for your current 
+installation::
 
   cd cuda_env-[version]-x86_64-linux-bin
+  sh setup.sh
+
+In the same directory, execute env.sh::
   . env.sh
 
 Note that this is needed every time you will need to compile a CUDA application.
-
-Generate Ada bindings that correspond to your current CUDA installation::
-
-  cd cuda/api
-  sh bind.sh
-  cd ../..
 
 This step is only needed once at installation.
 

@@ -1,4 +1,7 @@
 project CUDA_Host is
+   type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
+   Host_Target : Host_Target_Option := external ("host_target", "x86_64-linux");
+
    for Create_Missing_Dirs use "True";
 
    for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "host_static");
@@ -6,17 +9,24 @@ project CUDA_Host is
    for Object_Dir use "obj";
 
    package Compiler is
-      for Switches ("Ada") use ("-gnatp", "-gnat2022");
+      for Switches ("Ada") use ("-gnatX", "-gnatd_c");
    end Compiler;
 
    package Linker is
-      for Default_Switches ("ada") use (
-         "-L/usr/local/cuda/targets/x86_64-linux/lib/stubs", 
-         "-L/usr/local/cuda/targets/x86_64-linux/lib",
-         "-lcudadevrt",
-         "-lcudart_static", 
-         "-lrt", 
-         "-lpthread", 
-         "-ldl");
+      for Switches ("ada") use (
+            "-L/usr/local/cuda/targets/" & Host_Target & "/lib",
+            "-L/usr/local/cuda/targets/" & Host_Target & "/lib/stubs",
+            "-lcudadevrt", 
+            "-lcudart_static", 
+            "-lrt", 
+            "-lpthread", 
+            "-ldl",
+            "-Wl,--unresolved-symbols=ignore-all"
+         );
    end Linker;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-d_c");
+   end Binder;
+   
 end CUDA_Host;

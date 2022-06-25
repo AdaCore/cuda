@@ -1,4 +1,4 @@
-with "../../../api/cuda_host.gpr";
+with "cuda_host.gpr";
 
 project Host is
 
@@ -9,30 +9,18 @@ project Host is
    for Source_Dirs use ("src/common", "src/host");
    for Main use ("main.adb");
 
-   type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
-   Host_Target : Host_Target_Option := external ("host_target", "x86_64-linux");
-
-   for Target use host_target;
+   for Target use CUDA_Host.Host_Target;
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-gnatd_c");
+      for Switches ("ada") use  CUDA_Host.Compiler'Switches ("ada");
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use (
-            "-L/usr/local/cuda/targets/" & Host_Target & "/lib",
-            "-L/usr/local/cuda/targets/" & Host_Target & "/lib/stubs",
-            "-lcudadevrt", 
-            "-lcudart_static", 
-            "-lrt", 
-            "-lpthread", 
-            "-ldl",
-            "-Wl,--unresolved-symbols=ignore-all"
-         );
+      for Switches ("ada") use CUDA_Host.Linker'Switches ("ada");
    end Linker;
 
    package Binder is
-      for Default_Switches ("ada") use ("-d_c");
+       for Default_Switches ("ada") use CUDA_Host.Binder'Default_Switches ("ada");
    end Binder;
 
 end Host;

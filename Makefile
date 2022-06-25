@@ -9,11 +9,15 @@ llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 .PHONY: main install clean
 
 
-main: install/bin libdevice.ads
+main: install/bin wrapper runtime
+
+wrapper:
 	@echo $(PATH)
 	gprbuild -p -P wrapper/wrapper.gpr
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
 	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
+
+runtime: libdevice.ads
 	rm -rf install/include/rts-sources/device_gnat
 	./gen-rts-sources.py --bb-dir $(BB_SRC) --gnat $(GNAT_SRC) --rts-profile=light
 	./build-rts.py --bb-dir $(BB_SRC) --rts-src-descriptor install/lib/gnat/rts-sources.json cuda-device  --force -b

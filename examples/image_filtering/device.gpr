@@ -12,7 +12,7 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with "../../api/cuda_device.gpr";
+with "cuda_device.gpr";
 
 project Device is
 

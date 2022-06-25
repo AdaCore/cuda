@@ -1,4 +1,4 @@
-with "../../../api/cuda_device.gpr";
+with "cuda_device.gpr";
 
 library project Device is
 

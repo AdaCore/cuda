@@ -1,4 +1,4 @@
-with "../../api/cuda_host.gpr";
+with "cuda_host.gpr";
 with "openglada/opengl-glfw.gpr";
 
 project Host is
@@ -16,24 +16,15 @@ project Host is
    for Target use host_target;
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-gnatd_c");
+      for Switches ("ada") use  CUDA_Host.Compiler'Switches ("ada");
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use (
-            "-L/usr/local/cuda/targets/" & Host_Target & "/lib",
-            "-L/usr/local/cuda/targets/" & Host_Target & "/lib/stubs",
-            "-lcudadevrt", 
-            "-lcudart_static", 
-            "-lrt", 
-            "-lpthread", 
-            "-ldl",
-            "-Wl,--unresolved-symbols=ignore-all"
-         );
+      for Switches ("ada") use CUDA_Host.Linker'Switches ("ada");
    end Linker;
 
    package Binder is
-      for Default_Switches ("ada") use ("-d_c");
+       for Default_Switches ("ada") use CUDA_Host.Binder'Default_Switches ("ada");
    end Binder;
 
 end Host;
