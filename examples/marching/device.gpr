@@ -1,4 +1,4 @@
-with "cuda_device.gpr";
+with "cuda_api_device.gpr";
 
 library project Device is
 
@@ -8,15 +8,13 @@ library project Device is
 
    for Target use "cuda";
    for Runtime ("ada") use "device-cuda";
-
    for Library_Name use "kernel";
    for Library_Dir use "lib";
 
    package Compiler is
-      for Switches ("ada") use CUDA_Device.Compiler'Switches ("ada");      
+      for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");      
    end Compiler;
 
-   for Archive_Builder use ("cuda-gcc", "-host-target=" & CUDA_Device.Host_Target, "-mcpu=" & CUDA_Device.Cubin_Version);
+   for Archive_Builder use CUDA_API_Device'Archive_Builder;
    
 end Device;
-

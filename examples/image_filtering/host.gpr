@@ -1,44 +1,24 @@
-------------------------------------------------------------------------------
---                       Copyright (C) 2017, AdaCore                        --
--- This is free software;  you can redistribute it  and/or modify it  under --
--- terms of the  GNU General Public License as published  by the Free Soft- --
--- ware  Foundation;  either version 3,  or (at your option) any later ver- --
--- sion.  This software is distributed in the hope  that it will be useful, --
--- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
--- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
--- License for  more details.  You should have  received  a copy of the GNU --
--- General  Public  License  distributed  with  this  software;   see  file --
--- COPYING3.  If not, go to http://www.gnu.org/licenses for a complete copy --
--- of the license.                                                          --
-------------------------------------------------------------------------------
-
-with "cuda_host.gpr";
+with "cuda_api_host.gpr";
 
 project Host is
-
-   for Create_Missing_Dirs use "True";
 
    for Exec_Dir use ".";
    for Object_Dir use "obj/host";
    for Source_Dirs use ("src/**");
    for Main use ("main.adb");
-
-   for Target use CUDA_Host.Host_Target;
+   
+   for Target use CUDA_API_Host.CUDA_Host;
 
    package Compiler is
-      for Switches ("ada") use  CUDA_Host.Compiler'Switches ("ada");
+      for Switches ("ada") use  CUDA_API_Host.Compiler'Switches ("ada");
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use CUDA_Host.Linker'Switches ("ada");
+      for Switches ("ada") use CUDA_API_Host.Linker'Switches ("ada");
    end Linker;
 
    package Binder is
-       for Default_Switches ("ada") use CUDA_Host.Binder'Default_Switches ("ada");
+       for Default_Switches ("ada") use CUDA_API_Host.Binder'Default_Switches ("ada");
    end Binder;
-
-   package Builder is
-      for Executable ("main.adb") use "filter_img";
-   end Builder;
 
 end Host;
