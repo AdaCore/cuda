@@ -7,7 +7,7 @@ package body Parameters is
    function "+" (Str : Unbounded_String) return String is (To_String (Str));
    function "+" (Str : String) return Unbounded_String is (To_Unbounded_String (Str));
 
-   Image_Type : constant VString_Var := +".ppm";
+   Image_Type : constant VString_Var := +".qoi";
    Pat        : constant Pattern     := +Image_Type;
 
    procedure Set_Input_Image (Name : in Unbounded_String; Value : in Unbounded_String; Result : in out User_Parameters) is
@@ -46,7 +46,7 @@ package body Parameters is
             Input_Image : Unbounded_String := Result.Input_Image;
          begin
             if Match (Input_Image, Pat, "") then
-               Result.Output_Image := Input_Image & "_" & Result.Kernel'Image & ".ppm";
+               Result.Output_Image := Input_Image & "_" & Result.Kernel'Image & ".qoi";
             end if;
          end;
       elsif Match (Value, Pat) then

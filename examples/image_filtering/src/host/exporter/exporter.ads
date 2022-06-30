@@ -17,6 +17,7 @@ with Graphic;
 package Exporter is
 
    package G renames Graphic;
-   procedure Export_Image (File_Path : String; Img : G.Image);
+
+   procedure Dump_QOI (abs_filename : String; Img : G.Image_Access);
 
 end Exporter;
