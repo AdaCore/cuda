@@ -12,95 +12,93 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Text_IO;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with QOI;
 
-with GNAT.Spitbol.Patterns;
+with System;
+
+with GNAT.OS_Lib;
+
+with System.Storage_Elements;
+
+with Ada.Text_IO;
 
 package body Importer is
 
-   procedure Get_Image_Infos (File_Path : String; 
-                              Width     : out Positive; 
-                              Height    : out Positive) is
-      use GNAT.Spitbol.Patterns;
-      use Ada.Text_IO;
-      Input_File : File_Type;
-   begin
-      Width  := 1;
-      Height := 1;
-      Open (Input_File, In_File, File_Path);
-      declare
-         Magic_Number   : constant String  := Get_Line (Input_File);
-         Note           : constant String  := Get_Line (Input_File);
-         Natural_P      : constant Pattern := Span ("0123456789");
-         W, H           : aliased VString_Var;
-         Width_Height_P : constant Pattern := Pos (0) & Natural_P * W & Span (' ') & Natural_P * H;
-         Width_Height   : VString_Var      := To_Unbounded_String (Get_Line (Input_File));
+   package aio renames Ada.Text_IO;
+   package sse renames System.Storage_Elements;
+
+   function Load_QOI (abs_filename : String) return G.Image_Access is
+
+      type Storage_Array_Access is access all sse.Storage_Array;
+      type Input_Data is record
+         Data : Storage_Array_Access;
+         Desc : QOI.QOI_Desc;
+      end record;
+
+      use GNAT.OS_Lib;
+      use sse;
+
+      FD  : File_Descriptor;
+      Ret : Integer;
+
+      Result : Input_Data;
+
+      function to_image return G.Image_Access is
+         w      : Integer := integer (result.Desc.Width);
+         h      : Integer := integer (result.Desc.Height);
+         img    : G.Image_Access := new G.image (1 .. w, 1 .. h);
+         idx    : sse.storage_count;
+         offset : Natural;
+         test   : Float;
       begin
-         if Match (Width_Height, Width_Height_P, "") then
-            Width  := Natural'Value (To_String (W));
-            Height := Natural'Value (To_String (H));
-         end if;
-      end;
-      Close (Input_File);
-   exception
-      when Name_Error =>
-         raise Bad_filename;
-   end;
-
-   procedure Import_Image (File_Path : String; 
-                           Width     : Positive; 
-                           Height    : Positive;
-                           Img       : out G.Image) is
-      use GNAT.Spitbol.Patterns;
-      use Ada.Text_IO;
-      Input_File : File_Type;
-   begin
-      Open (Input_File, In_File, File_Path);
-      declare
-         Color_Value   : VString_Var;
-         Color_Value_P : constant Pattern := Span ("0123456789") * Color_Value;
-
-         Magic_Number : constant String := Get_Line (Input_File);
-         Note         : constant String := Get_Line (Input_File);
-         Width_Height : constant String := Get_Line (Input_File);
-         Max_Value    : constant String := Get_Line (Input_File);
-
-         Component_Counter : Natural := 0;
-         Done              : Boolean := False;
-
-         Col, Row : Natural;
-      begin
-         while not Done loop
-            Component_Counter := Component_Counter + 1;
-            Col               := ((Component_Counter - 1) mod Width) + 1;
-            Row               := (Component_Counter + (Width - 1)) / Width;
-            for I in 1 .. 3 loop
-               declare
-                  Vline : VString_Var := To_Unbounded_String (Get_Line (Input_File));
-               begin
-                  if Match (Vline, Color_Value_P, "") then
-                     null;
-                     case I is
-                        when 1 =>
-                           Img (Col, Row).R := Float'Value (To_String (Color_Value));
-                        when 2 =>
-                           Img (Col, Row).G := Float'Value (To_String (Color_Value));
-                        when 3 =>
-                           Img (Col, Row).B := Float'Value (To_String (Color_Value));
-                     end case;
-                  end if;
-               end;
+         for j in img'Range (2) loop
+            offset := (j - 1) * w;
+            for i in img'Range (1) loop
+               idx := sse.Storage_Count (((offset + (i - 1)) * 3) + 1);
+               img (i,j) := (float(Result.Data(idx + 0)), float(Result.Data(idx + 1)), float(Result.Data(idx + 2)));
             end loop;
-            if End_Of_File (Input_File) then
-               Done := True;
-            end if;
          end loop;
+         return img;
+      end to_image;
+
+   begin
+
+      aio.Put_Line ("LOAD_QOI : " & abs_filename);
+
+      FD := GNAT.OS_Lib.Open_Read (abs_filename, Binary);
+
+      if FD = Invalid_FD then
+         aio.Put_Line (aio.Standard_Error, GNAT.OS_Lib.Errno_Message);
+         GNAT.OS_Lib.OS_Exit (1);
+      end if;
+
+      declare
+         Len : constant sse.Storage_Count := sse.Storage_Count (File_Length (FD));
+         In_Data : constant Storage_Array_Access := new sse.Storage_Array (1 .. Len);
+      begin
+         Ret := Read (FD, In_Data.all'Address, In_Data.all'Length);
+
+         if Ret /= In_Data'Length then
+            aio.Put_Line (GNAT.OS_Lib.Errno_Message);
+            GNAT.OS_Lib.OS_Exit (1);
+         end if;
+
+         Close (FD);
+
+         QOI.Get_Desc (In_Data.all, Result.Desc);
+
+         declare
+            use sse;
+            Out_Len : constant sse.Storage_Count := Result.Desc.Width * Result.Desc.Height * Result.Desc.Channels;
+            Out_Data : constant Storage_Array_Access := new sse.Storage_Array (1 .. Out_Len);
+            Output_Size : sse.Storage_Count;
+         begin
+            QOI.Decode (In_Data.all, Result.Desc, Out_Data.all, Output_Size);
+            Result.Data := Out_Data;
+
+            return to_image;
+         end;
       end;
-      Close (Input_File);
-   exception
-      when Name_Error =>
-         raise Bad_filename;
-   end;
+   end Load_QOI;
 
 end Importer;

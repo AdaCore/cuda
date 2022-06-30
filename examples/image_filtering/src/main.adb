@@ -17,6 +17,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Command_Line;
 with Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
+with Ada.Real_Time; use Ada.Real_Time;
 
 with Generic_Line_Parser;
 
@@ -51,56 +52,56 @@ procedure Main is
                                                     (+"device",           +"gpu",       GLP.Use_Default, True, P.Set_Device'Access),
                                                     (+"out",              +"",          GLP.Use_Default, True, P.Set_Output_Image'Access));
    Param  : Parameters.User_Parameters;
-   Width  : Natural;
-   Height : Natural;
+
+   Original_Img : G.Image_Access;
+   Filtered_Img : G.Image_Access;
+   Start_Time   : Time;
+   Elapsed_Time : Time_Span;
 
    procedure Free is new Ada.Unchecked_Deallocation (G.Image, G.Image_Access);
+
 begin
    GLP.Parse_Command_Line (Parameters => Descriptors, Result => Param);
+   Original_Img := Importer.Load_QOI (+Param.Input_Image);
+   Filtered_Img := new G.Image (1 .. Original_Img'Length (1), 1 .. Original_Img'Length (2));
+
+   Start_Time := Clock;
    
-   Importer.Get_Image_Infos (+Param.Input_Image, Width, Height);
+   case Param.Device is
+      when P.Cpu =>
+         BH.Bilateral_Cpu (Host_Img          => Original_Img, 
+                           Host_Filtered_Img => Filtered_Img,
+                           Width             => Original_Img'Length (1), 
+                           Height            => Original_Img'Length (2),
+                           Spatial_Stdev     => Param.Spatial_Stdev,
+                           Color_Dist_Stdev  => Param.Color_Dist_Stdev);
+      when P.Gpu =>
+         BH.Bilateral_CUDA (Host_Img          => Original_Img, 
+                            Host_Filtered_Img => Filtered_Img,
+                            Width             => Original_Img'Length (1), 
+                            Height            => Original_Img'Length (2),
+                            Spatial_Stdev     => Param.Spatial_Stdev,
+                            Color_Dist_Stdev  => Param.Color_Dist_Stdev);
+   end case;
 
-   declare
-      Img              : G.Image_Access := new G.Image (1 .. Width, 1 .. Height);
-      Filtered_Img     : G.Image_Access := new G.Image (1 .. Width, 1 .. Height);
-   begin
-      Importer.Import_Image (+Param.Input_Image, Width, Height, Img.all);
-      AIO.Put_Line ("Import done");
+   Elapsed_Time := Clock - Start_Time;
+   AIO.Put_Line ("Filtering time (" & Param.Device'Image & "): " & Duration'Image (To_Duration (Elapsed_Time)) & " seconds");
 
-      case Param.Device is
-         when P.Cpu =>
-            BH.Bilateral_Cpu (Host_Img          => Img, 
-                              Host_Filtered_Img => Filtered_Img,
-                              Width             => Width, 
-                              Height            => Height,
-                              Spatial_Stdev     => Param.Spatial_Stdev,
-                              Color_Dist_Stdev  => Param.Color_Dist_Stdev);
-         when P.Gpu =>
-            BH.Bilateral_Cuda (Host_Img          => Img, 
-                               Host_Filtered_Img => Filtered_Img,
-                               Width             => Width, 
-                               Height            => Height,
-                               Spatial_Stdev     => Param.Spatial_Stdev,
-                               Color_Dist_Stdev  => Param.Color_Dist_Stdev);
-      end case;
-      AIO.Put_Line ("Filtering done");
+   Exporter.Dump_QOI (+Param.Output_Image, Filtered_Img);
 
-      Exporter.Export_Image (+Param.Output_Image, Filtered_Img.all);
-      AIO.Put_Line ("Export done");
+   AIO.Put_Line ("Result found in " & Param.Output_Image'Image);
 
-      AIO.Put_Line ("Result found in " & Param.Output_Image'Image);
+   Free (Original_Img);
+   Free (Filtered_Img);
 
-      Free (Img);
-      Free (Filtered_Img);
-   end;
 exception
    when Msg : GLP.Bad_Command =>
       AIO.Put_Line (File => AIO.Standard_Error,
                     Item => "Bad command line: " & E.Exception_Message (Msg));
-      AIO.Put_Line ("Try: ./filter_img in=./data/ada_lovelace_photo.ppm kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
+      AIO.Put_Line ("Try: ./filter_img in=./data/ada_lovelace_photo.qoi kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    when I.Bad_filename =>
       AIO.Put_Line ("Input file does not exists.");
    when P.Bad_extension =>
-      AIO.Put_Line ("Only *.ppm images are supported.");
+      AIO.Put_Line ("Only *.qoi images are supported.");
 end Main;
