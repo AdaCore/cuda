@@ -12,7 +12,11 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 with Qoi;
+=======
+with QOI;
+>>>>>>> changes to make it work
 
 with System;
 

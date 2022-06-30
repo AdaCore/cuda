@@ -38,8 +38,8 @@ package Graphic is
       (Left.G - Right.G) * (Left.G - Right.G) +
       (Left.B - Right.B) * (Left.B - Right.B));
 
-   type Image is array (Natural range <>, Natural range <>) of Rgb;
-   type Image_Access is access all Image;
+  type Image is array (Natural range <>, Natural range <>) of Rgb;
+  type Image_Access is access all Image;
 
    type Image_Device_Access is access Image
          with Designated_Storage_Model => CSM.Model;
