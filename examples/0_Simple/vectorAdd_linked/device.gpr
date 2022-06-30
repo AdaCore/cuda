@@ -7,7 +7,6 @@ library project Device is
    for Object_Dir use "obj/device";
 
    for Target use "cuda";
-   for Runtime ("ada") use "device-cuda";
    for Library_Name use "kernel";
    for Library_Dir use "lib";
 

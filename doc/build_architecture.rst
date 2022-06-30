@@ -27,7 +27,7 @@ device project file will look like this:
 
 .. code-block:: ada
 
-   with "cuda_device.gpr";
+   with "cuda_api_device.gpr";
 
    library project Device is
 
@@ -36,35 +36,37 @@ device project file will look like this:
       for Object_Dir use "obj/device";
 
       for Target use "cuda";
-      for Runtime ("ada") use "device-cuda";
-
-      for Create_Missing_Dirs use "True";
-
       for Library_Name use "kernel";
       for Library_Dir use "lib";
-   
+
       package Compiler is
-         for Switches ("ada") use ("-gnatX", "-O2", "-gnatn");      
+         for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");      
       end Compiler;
+
+      for Archive_Builder use CUDA_API_Device'Archive_Builder;
    
    end Device;
 
 A few things are noteworthy here:
 
+ - The project depends on ``cuda_api_device.gpr``, which contains various configuration
+   elements related to CUDA.
  - The target is identified as being ``cuda``. This is what will be needed by
    gprbuild to know which compiler is to be used.
- - The runtime is set to ``device-cuda``. This is the specific restricted
-   Ada run-time that contains specifically capabilities available for the 
-   device.
- - The compiler switches include ``-O2`` and ``-gnatn``, as to ensure maximum 
-   performances on the device.
- - The compiler switches also include ``-gnatX``. While not strictly necessary, 
-   a number of capabilites are being added to the Ada programming language
-   to make it easier to develop cuda applications.
+ - The compiler switches are coming from the package CUDA_API_Device, and 
+   include specialized switches necessary for CUDA. User can add to these 
+   switches.
+ - The archive builder is coming from CUDA_API_Device.
 
 This project can be easily built with a gprbuild command::
 
-  $> gprbuild -P device.gpr
+  $> gprbuild -P device.gpr -Xgpu_arch=sm_75
+
+Note the additional parameter on the command line ``-Xgpu_arch=sm_75``. It is
+necessary to specify the GPU architecture for which you're compiling to. In 
+this case, ``sm_75`` corresponds to the Turning family of GPUs. You will want
+to adjust depending on the actual hardware that you're targetting. Supported 
+options are docmented in the project ``cuda_api_device.gpr``.
 
 The result of this is the creation of a library in the form of a fatbinary
 under lib/libkernel.fatbin.o. This fatbinary contains the device code ready
@@ -77,51 +79,40 @@ A typical host project file will look like this:
 
 .. code-block:: ada
 
-  with "cuda_host.gpr";
+   with "cuda_api_host.gpr";
 
-  project Host is
+   project Host is
 
       for Exec_Dir use ".";
       for Object_Dir use "obj/host";
-      for Source_Dirs use ("src/common", "src/host");
+      for Source_Dirs use ("src/**");
       for Main use ("main.adb");
-
-      for Create_Missing_Dirs use "True";
+   
+      for Target use CUDA_API_Host.CUDA_Host;
 
       package Compiler is
-         for Switches ("ada") use ("-gnatX", "-gnatd_c");
+         for Switches ("ada") use  CUDA_API_Host.Compiler'Switches ("ada");
       end Compiler;
 
       package Linker is
-         for Switches ("ada") use (
-            "-L/usr/lib/cuda/targets/x86_64-linux/lib/stubs", 
-            "-L/usr/lib/cuda/targets/x86_64-linux/lib", 
-            "-lcudadevrt", 
-            "-lcudart_static", 
-            "-lrt", 
-            "-lpthread", 
-            "- ldl",
-            "-Wl,--unresolved-symbols=ignore-all");
-         for Default_Switches ("ada") use ();
-       end Linker;
+         for Switches ("ada") use CUDA_API_Host.Linker'Switches ("ada");
+      end Linker;
 
       package Binder is
-         for Default_Switches ("ada") use ("-d_c");
+          for Default_Switches ("ada") use CUDA_API_Host.Binder'Default_Switches ("ada");
       end Binder;
    end Host;
 
 A few things are noteworthy here:
 
- - The project depends on cuda_host.gpr, which contains the binding to the CUDA
-   API generated during the installation step.
- - The compiler switches contains ``-gnatX`` to enable additional features 
-   provided to ease the development of CUDA applications.
- - The compiler switches contains ``-gnatd_c`` to enable CUDA-specific 
-   instrumentation.
- - The linker switches includes the list of librairies that needs to be linked
-   against to resolve all cuda symbols.
- - The binder switches include ``-d_c`` to enable CUDA-speific instrumentation
-   at program initialization
+ - The project depends on ``cuda_api_host.gpr``, which contains the binding to the CUDA
+   API generated during the installation step as well as various configuration
+   elements related to CUDA.
+ - The compiler, binder and linker switches are coming from the package 
+   CUDA_API_Device, and include specialized switches necessary for CUDA. User
+   can add to these switches. Note that amongst these switches, the compiler
+   needs ``-gnatd_c`` and the binder ``-d_c`` in order to enable CUDA specific 
+   capbilities.
 
 This project can the be build by::
 
