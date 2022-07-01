@@ -8,11 +8,11 @@ Overall Model
 A GNAT for CUDA® application is a distributed application which contains two main
 components:
 
- - A host application, which is responsible for running overall orchestration
-   of various kernels to be executed on the device. This application can run
-   from either an x86 Linux or an ARM Linux environment.
- - A library of device kernels that can be called from the host application, 
-   loaded with the host code.
+- A host application, which is responsible for running overall orchestration
+  of various kernels to be executed on the device. This application can run
+  from either an x86 Linux or an ARM Linux environment.
+- A library of device kernels that can be called from the host application, 
+  loaded with the host code.
 
 The host application is compiled as a regular host executable, with special 
 switches that identifies that it needs to include specific CUDA instrumentation.
@@ -30,10 +30,7 @@ device project file will look like this:
    with "cuda_api_device.gpr";
 
    library project Device is
-
-      for Languages use ("Ada");
-      for Source_Dirs use ("src/common");
-      for Object_Dir use "obj/device";
+      for Languages use ("Ada");      
 
       for Target use "cuda";
       for Library_Name use "kernel";
@@ -49,18 +46,18 @@ device project file will look like this:
 
 A few things are noteworthy here:
 
- - The project depends on ``cuda_api_device.gpr``, which contains various configuration
-   elements related to CUDA.
- - The target is identified as being ``cuda``. This is what will be needed by
-   gprbuild to know which compiler is to be used.
- - The compiler switches are coming from the package CUDA_API_Device, and 
-   include specialized switches necessary for CUDA. User can add to these 
-   switches.
- - The archive builder is coming from CUDA_API_Device.
+- The project depends on ``cuda_api_device.gpr``, which contains various configuration
+  elements related to CUDA.
+- The target is identified as being ``cuda``. This is what will be needed by
+  gprbuild to know which compiler is to be used.
+- The compiler switches are coming from the package CUDA_API_Device, and 
+  include specialized switches necessary for CUDA. User can add to these 
+  switches.
+- The archive builder is coming from CUDA_API_Device.
 
 This project can be easily built with a gprbuild command::
 
-  $> gprbuild -P device.gpr -Xgpu_arch=sm_75
+  gprbuild -P device.gpr -Xgpu_arch=sm_75
 
 Note the additional parameter on the command line ``-Xgpu_arch=sm_75``. It is
 necessary to specify the GPU architecture for which you're compiling to. In 
@@ -82,10 +79,6 @@ A typical host project file will look like this:
    with "cuda_api_host.gpr";
 
    project Host is
-
-      for Exec_Dir use ".";
-      for Object_Dir use "obj/host";
-      for Source_Dirs use ("src/**");
       for Main use ("main.adb");
    
       for Target use CUDA_API_Host.CUDA_Host;
@@ -105,18 +98,18 @@ A typical host project file will look like this:
 
 A few things are noteworthy here:
 
- - The project depends on ``cuda_api_host.gpr``, which contains the binding to the CUDA
-   API generated during the installation step as well as various configuration
-   elements related to CUDA.
- - The compiler, binder and linker switches are coming from the package 
-   CUDA_API_Device, and include specialized switches necessary for CUDA. User
-   can add to these switches. Note that amongst these switches, the compiler
-   needs ``-gnatd_c`` and the binder ``-d_c`` in order to enable CUDA specific 
-   capbilities.
+- The project depends on ``cuda_api_host.gpr``, which contains the binding to the CUDA
+  API generated during the installation step as well as various configuration
+  elements related to CUDA.
+- The compiler, binder and linker switches are coming from the package 
+  CUDA_API_Device, and include specialized switches necessary for CUDA. User
+  can add to these switches. Note that amongst these switches, the compiler
+  needs ``-gnatd_c`` and the binder ``-d_c`` in order to enable CUDA specific 
+  capbilities.
 
 This project can the be build by::
 
-  $> gprbuild -P host.gpr -largs $(PWD)/lib/kernel.fatbin.o 
+  gprbuild -P host.gpr -largs $(PWD)/lib/kernel.fatbin.o 
 
 Note the addition of the fatbinary on the linker line. This comes from the 
 previous step.

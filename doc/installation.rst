@@ -30,10 +30,12 @@ Note that this is needed every time you will need to compile a CUDA application.
 
 This step is only needed once at installation.
 
-Try the first example::
+You then need to identify the GPU architecture that you're targetting. 
+You can get details `here <https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/>`_.
+The following example is assuming sm_75::
 
   cd cuda/examples/0_Simple/vectorAdd
-  make
+  make GPU_ARCH=sm_75
   ./main
 
 You should see::

@@ -13,10 +13,10 @@ Compiler Switches
 
 The following switches can be considered:
 
- - ``-gnatp`` will remove checks automatically added by the Ada language, and will
-   make the application run faster.
- - at least ``-O2`` optimization levels is recommended
- - ``-gnatn`` will enable inlining.
+- ``-gnatp`` will remove checks automatically added by the Ada language, and will
+  make the application run faster.
+- at least ``-O2`` optimization levels is recommended
+- ``-gnatn`` will enable inlining.
 
 Unconstrained Arrays
 ====================

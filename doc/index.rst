@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to GNAT for CUDA®!
-=========================
+==========================
 
 .. toctree::
    :numbered:

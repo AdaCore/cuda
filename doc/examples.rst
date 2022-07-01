@@ -2,6 +2,35 @@
 Examples
 **************************************
 
+Examples Structure
+==================
+
+Examples are located under the ``cuda/examples/`` directory. They are all 
+structured more or less the same:
+
+- two projects at the root level, ``device.gpr`` that controls the device code
+  compilation, and ``host.gpr`` that controls host code compilation.
+- a Makefile that compile the whole program and generates a main at the root
+- an obj/ directory to store the output of compilation process (automatically
+  generated at first make)
+- a src/ directory that contains sources
+
+In an example directory, a project can be made by the following command::
+
+    make GPU_ARCH=<your GPU target>
+
+For example::
+
+    make GPU_ARCH=sm_75
+
+Note that you need to know which GPU architecture code your hardware support. 
+You can get some insights `here <https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/>`_.
+
+By default, examples are build for the native environment. If you want to target
+a cross ARM Linux, you can also change the ``CUDA_HOST`` value, e.g.::
+
+    make GPU_ARCH=sm_75 CUDA_HOST=aarch64-linux
+
 Vector Add
 ==========
 
@@ -22,8 +51,8 @@ In this example, we'll define a density function through `Metaballs <https://en.
 To be able to build and run the example, make sure that you have on your system 
 the following dependencies installed:
 
- - SDL
- - OpenGL
+- SDL
+- OpenGL
 
 Building the example should be similiar to building vectorAdd in the 
 installation step. Remember that if not already done, you need to have
