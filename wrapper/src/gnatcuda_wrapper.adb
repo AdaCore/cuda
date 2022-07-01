@@ -298,7 +298,7 @@ begin
             end if;
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
             GPU_Name := new String'(To_String (Sub_Arg));
-         elsif Get_Argument (Arg, "-host-target=", Sub_Arg) then
+         elsif Get_Argument (Arg, "-cuda-host=", Sub_Arg) then
             declare
                Ht_Str : String := To_String (Sub_Arg);
             begin
@@ -309,8 +309,8 @@ begin
                   HT := X86_64_Linux;
                   LD := To_Unbounded_String ("ld");
                else
-                  Put_Line ("-host-target " & Ht_Str & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
-                  Put_Line ("Proceeding with -host-target=x86_64-linux.");
+                  Put_Line ("-cuda-host " & Ht_Str & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+                  Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
                end if;
             end;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
@@ -408,8 +408,8 @@ begin
             Nvlink_Args : constant Argument_List :=
             (new String'("--arch=sm_" & GPU_Name.all),
                new String'("-m64"),
-               new String'("-L" & CUDA_Root & "targets/x86_64-linux/lib/stubs"),
-               new String'("-L" & CUDA_Root & "targets/x86_64-linux/lib"))
+               new String'("-L" & CUDA_Root & "targets/" & HT & "/lib/stubs"),
+               new String'("-L" & CUDA_Root & "targets/" & HT & "/lib"))
             & Input_Files (2 .. Input_File_Number)
             &(new String'("-lcudadevrt"),
                new String'("-o"),

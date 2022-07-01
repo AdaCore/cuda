@@ -1,28 +1,19 @@
-with "../../api/cuda_device.gpr";
+with "cuda_api_device.gpr";
 
 library project Device is
 
    for Languages use ("Ada");
-   for Source_Dirs use ("src/device_code", "src/common");
+   for Source_Dirs use ("src/", "src/common");
    for Object_Dir use "obj/device";
 
    for Target use "cuda";
-   for Runtime ("ada") use "device-cuda";
-
    for Library_Name use "kernel";
    for Library_Dir use "lib";
 
-   type Cubin_Version_Option is ("sm_53", "sm_61", "sm_75"); 
-   Cubin_Version : Cubin_Version_Option := external ("cubin_version", "sm_75");
-   
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-mcpu=" & Cubin_Version);      
+      for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");      
    end Compiler;
 
-   type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
-   Host_Target : Host_Target_Option := external ("host_target", "x86_64-linux");
-
-   for Archive_Builder use ("cuda-gcc", "-host-target=" & Host_Target, "-mcpu=" & Cubin_Version);
+   for Archive_Builder use CUDA_API_Device'Archive_Builder;
    
 end Device;
-
