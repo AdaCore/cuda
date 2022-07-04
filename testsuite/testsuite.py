@@ -7,12 +7,9 @@ Usage::
 
 Run the CUDA testsuite.
 """
-import os
 import sys
 from pathlib import Path
-import shutil
-import subprocess
-from e3.testsuite import Testsuite, logger
+from e3.testsuite import Testsuite
 from e3.testsuite.driver.classic import TestAbortWithError, ClassicTestDriver
 from e3.fs import sync_tree
 
