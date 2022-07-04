@@ -3,4 +3,4 @@ CUDA_HOST=x86_64-linux
 
 example_build:
 	gprbuild -Xcuda_host=$(CUDA_HOST) -Xgpu_arch=$(GPU_ARCH) -P device 
-	gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(PWD)/lib/*.fatbin.o
+	gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o
