@@ -12,7 +12,7 @@ package body Kernels is
       Idx : Integer := Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X);
    begin
       for I in 1 .. Num_Iterations loop
-         G_Data (From) := @ + Factor (Factor'First);
+         G_Data (From + Idx) := @ + Factor (Factor'First);
       end loop;
    end Init_Array;
 
