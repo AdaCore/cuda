@@ -148,16 +148,24 @@ function GNATCUDA_Wrapper return Integer is
       return C = Directory_Separator or else C = '/';
    end Is_Directory_Separator;
 
-   GPU_Name   : String_Access;
-   Count     : constant Natural := Argument_Count;
-   Path_Val  : constant String  := Value ("PATH", "");
+   type Host_Target is (X86_64_Linux, Aarch64_Linux);
+   type Operation   is (Compile, Link, Other);
 
-   LLVM_Args : Argument_List (1 .. Count + 1);
+   HT         : Host_Target := x86_64_linux;
+   Op         : Operation   := Link;
+
+   GPU_Name   : String_Access;
+   Ld         : Unbounded_String := To_Unbounded_String ("ld");
+   Count      : constant Natural := Argument_Count;
+   Path_Val   : constant String  := Value ("PATH", "");
+   HT_Str     : String_Access := new String'("x86_64-linux");
+
+   LLVM_Args  : Argument_List (1 .. Count + 1);
    --  We usually have to add -mcuda-libdevice= on top of the regular switches,
    --  so adding one to the input count.
 
    LLVM_Arg_Number : Integer := 0;
-   Compile   : Boolean := False;
+
    Verbose   : Boolean := False;
 
    Prefix_LLVM_ARGS : constant Argument_List :=
@@ -271,7 +279,7 @@ begin
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-c" or else Arg = "-S" then
-            Compile := True;
+            Op := Compile;
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-v" or Arg = "--version" then
@@ -291,6 +299,21 @@ begin
             end if;
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
             GPU_Name := new String'(To_String (Sub_Arg));
+         elsif Get_Argument (Arg, "-cuda-host=", Sub_Arg) then
+            HT_Str := new String'(To_String (Sub_Arg));
+
+            if Ht_Str.all = "aarch64-linux" then
+               HT := Aarch64_Linux;
+               LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
+            elsif Ht_Str.all = "x86_64-linux" then
+               HT := X86_64_Linux;
+               LD := To_Unbounded_String ("ld");
+            else
+               Put_Line ("-cuda-host " & Ht_Str.all & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+               Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
+
+               HT_Str := new String'("x86_64-linux");
+            end if;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
             Libdevice_Path := new String'(To_String (Sub_Arg));
          else
@@ -328,125 +351,121 @@ begin
       GPU_Name := new String'("75");
    end if;
 
-   if Compile then
-      LLVM_Arg_Number := @ + 1;
-      LLVM_Args (LLVM_Arg_Number) := new String'
-        ("-mcuda-libdevice=" & Libdevice_Path.all);
+   case Op is
+      when Compile =>
+         LLVM_Arg_Number             := @ + 1;
+         LLVM_Args (LLVM_Arg_Number) := new String'("-mcuda-libdevice=" & Libdevice_Path.all);
 
-      if Input_File_Number /= 1 then
-         Put_Line ("error: expected one compilation file, got"
-                   & Input_File_Number'Img);
-         return 1;
-      end if;
-
-      declare
-         File_Name : constant String :=
-           Base_Name
-             (Input_Files (1).all, File_Extension (Input_Files (1).all));
-         PTX_Name : aliased String := File_Name & ".s";
-         Obj_Name : aliased String := File_Name & ".cubin";
-
-         PTXAS_Args : constant Argument_List :=
-           (new String'("-arch=sm_" & GPU_Name.all),
-            new String'("-m64"),
-            new String'("--compile-only"),
-            new String'("-v"),
-            PTX_Name'Unchecked_Access,
-            new String'("--output-file"),
-            Obj_Name'Unchecked_Access);
-      begin
-         Status := Spawn
-           (Locate_And_Check ("llvm-gcc").all,
-            Prefix_LLVM_ARGS &
-              new String'("-mcpu=sm_" & GPU_Name.all) &
-              LLVM_Args (1 .. LLVM_Arg_Number));
-
-         if Status /= 0 then
-            Put_Line ("llvm-gcc failture");
-            return Status;
+         if Input_File_Number /= 1 then
+            Put_Line ("error: expected one compilation file, got"
+                     & Input_File_Number'Img);
+            return 1;
          end if;
 
-         Status := Spawn
-           (Locate_And_Check ("ptxas").all,
-            PTXAS_Args);
+         declare
+            File_Name : constant String :=
+            Base_Name
+               (Input_Files (1).all, File_Extension (Input_Files (1).all));
+            PTX_Name : aliased String := File_Name & ".s";
+            Obj_Name : aliased String := File_Name & ".cubin";
 
-         if Status /= 0 then
-            Put_Line ("ptxas failture");
-            return Status;
-         end if;
-      end;
-   else
-      declare
-         Kernel_Object : constant String := Input_Files (1).all;
-         Kernel_Fat : constant String := Kernel_Object
-           (Kernel_Object'First .. Kernel_Object'Last - 2);
-         Kernel_Linked : constant String := Kernel_Object
-           (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
+            PTXAS_Args : constant Argument_List :=
+            (new String'("-arch=sm_" & GPU_Name.all),
+               new String'("-m64"),
+               new String'("--compile-only"),
+               new String'("-v"),
+               PTX_Name'Unchecked_Access,
+               new String'("--output-file"),
+               Obj_Name'Unchecked_Access);
+         begin
+            Status := Spawn
+            (Locate_And_Check ("llvm-gcc").all,
+               Prefix_LLVM_ARGS &
+               new String'("-mcpu=sm_" & GPU_Name.all) &
+               LLVM_Args (1 .. LLVM_Arg_Number));
 
-         Nvlink_Args : constant Argument_List :=
-           (new String'("--arch=sm_" & GPU_Name.all),
-            new String'("-m64"),
-            new String'("-L" & CUDA_Root & "targets/x86_64-linux/lib/stubs"),
-            new String'("-L" & CUDA_Root & "targets/x86_64-linux/lib"))
-           & Input_Files (2 .. Input_File_Number)
-           &(new String'("-lcudadevrt"),
-             new String'("-o"),
-             new String'(Kernel_Linked));
+            if Status /= 0 then
+               Put_Line ("llvm-gcc failture");
+               return Status;
+            end if;
 
-         Fatbinary_Args : constant Argument_List :=
-           (new String'("-64"),
-            new String'("--create"),
+            Status := Spawn
+            (Locate_And_Check ("ptxas").all,
+               PTXAS_Args);
 
-            --  We currently only support one SAL per host application, with a
-            --  fatbinary name hardcoded in gnatbind. We should eventually move
-            --  to a scheme where we can have more than one. See U503-012
-            --  new String'(Kernel_Fat),
-            new String'("main.fatbin"),
+            if Status /= 0 then
+               Put_Line ("ptxas failture");
+               return Status;
+            end if;
+         end;
+      when Link =>
+         declare
+            Kernel_Object : constant String := Input_Files (1).all;
+            Kernel_Fat : constant String := Kernel_Object
+            (Kernel_Object'First .. Kernel_Object'Last - 2);
+            Kernel_Linked : constant String := Kernel_Object
+            (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
 
-            new String'("-link"),
-            new String'("--image3=kind=elf,sm="
-              & GPU_Name.all & ",file=" & Kernel_Linked));
+            Nvlink_Args : constant Argument_List :=
+            (new String'("--arch=sm_" & GPU_Name.all),
+               new String'("-m64"),
+               new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
+               new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
+            & Input_Files (2 .. Input_File_Number)
+            &(new String'("-lcudadevrt"),
+               new String'("-o"),
+               new String'(Kernel_Linked));
 
-         Ld_Args : constant Argument_List :=
-           (new String'("-r"),
-            new String'("-b"),
-            new String'("binary"),
+            Fatbinary_Args : constant Argument_List :=
+            (new String'("-64"),
+               new String'("--create"),
 
-            new String'("main.fatbin"),
-            --new String'(Kernel_Fat),
+               --  We currently only support one SAL per host application, with a
+               --  fatbinary name hardcoded in gnatbind. We should eventually move
+               --  to a scheme where we can have more than one. See U503-012
+               --  new String'(Kernel_Fat),
+               new String'("main.fatbin"),
 
-            new String'("-o"),
+               new String'("-link"),
+               new String'("--image3=kind=elf,sm="
+               & GPU_Name.all & ",file=" & Kernel_Linked));
 
-            new String'(Kernel_Object)
-            --new String'("main.fatbin.o")
-           );
-      begin
-         Status := Spawn
-           (Locate_And_Check ("nvlink").all,
-            Nvlink_Args);
+            Ld_Args : constant Argument_List :=
+            (new String'("-r"),
+               new String'("-b"),
+               new String'("binary"),
+               new String'("main.fatbin"),
+               new String'("-o"),
+               new String'(Kernel_Object)
+            );
+         begin
+            Status := Spawn
+            (Locate_And_Check ("nvlink").all,
+               Nvlink_Args);
 
-         if Status /= 0 then
-            Put_Line ("nvlink failure");
-            return Status;
-         end if;
+            if Status /= 0 then
+               Put_Line ("nvlink failure");
+               return Status;
+            end if;
 
-         Status := Spawn
-           (Locate_And_Check ("fatbinary").all,
-            Fatbinary_Args);
+            Status := Spawn
+            (Locate_And_Check ("fatbinary").all,
+               Fatbinary_Args);
 
-         if Status /= 0 then
-            Put_Line ("fatbinary failure");
-            return Status;
-         end if;
+            if Status /= 0 then
+               Put_Line ("fatbinary failure");
+               return Status;
+            end if;
 
-         Status := Spawn (Locate_And_Check ("ld").all, Ld_Args);
+            Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
 
-         if Status /= 0 then
-            Put_Line ("ld failure");
-            return Status;
-         end if;
-      end;
-   end if;
+            if Status /= 0 then
+               Put_Line ("ld failure");
+               return Status;
+            end if;
+         end;
+      when Other => null;
+   end case;
 
    return 0;
 exception

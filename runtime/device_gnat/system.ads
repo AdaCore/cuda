@@ -34,8 +34,8 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-pragma Restrictions (No_Exceptions);
---  No exceptions are support on this target
+pragma Restrictions (No_Exception_Propagation);
+--  No exceptions propagation are support on this target
 
 pragma Restrictions (No_Finalization);
 --  Controlled types are not supported in this run time

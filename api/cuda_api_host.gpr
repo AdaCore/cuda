@@ -1,0 +1,30 @@
+project CUDA_API_Host is
+   type CUDA_Host_Option is ("x86_64-linux", "aarch64-linux");
+   CUDA_Host : CUDA_Host_Option := external ("cuda_host", "x86_64-linux");
+
+   for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "host_static");
+
+   for Object_Dir use "obj";
+
+   package Compiler is
+      for Switches ("Ada") use ("-gnatX", "-gnatd_c");
+   end Compiler;
+
+   package Linker is
+      for Switches ("ada") use (
+            "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib",
+            "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib/stubs",
+            "-lcudadevrt", 
+            "-lcudart_static", 
+            "-lrt", 
+            "-lpthread", 
+            "-ldl",
+            "-Wl,--unresolved-symbols=ignore-all"
+         );
+   end Linker;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-d_c");
+   end Binder;
+   
+end CUDA_API_Host;

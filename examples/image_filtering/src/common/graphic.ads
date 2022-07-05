@@ -12,8 +12,6 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Unchecked_Deallocation;
-
 package Graphic is
    
    type Rgb is record
@@ -38,8 +36,6 @@ package Graphic is
 
    type Image is array (Natural range <>, Natural range <>) of Rgb;
    type Image_Access is access all Image;
-
-   procedure Free is new Ada.Unchecked_Deallocation (Image, Image_Access);
 
    procedure Normalize (Img : Image_Access);
 end Graphic;
