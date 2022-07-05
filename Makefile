@@ -12,6 +12,7 @@ llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 main: install/bin wrapper runtime
 
 wrapper: FORCE	
+	@echo "======================= WRAPPER BUILDING"
 	@echo $(PATH)
 	gprbuild -p -P wrapper/wrapper.gpr
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
@@ -33,7 +34,7 @@ libdevice.ads:
 	llvm-ads $(shell find -L /usr/local/cuda -iname "libdevice.*.bc" | head -n 1) ./runtime/device_gnat/libdevice.ads
 
 install/bin:
-	@echo "======================= INSTALL"
+	@echo "======================= INSTALL SETUP"
 	mkdir install
 	mkdir install/bin
 
