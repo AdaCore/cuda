@@ -147,17 +147,56 @@ This is the intended way of sharing memory between device and host. Note that
 the storage model can be extended to support capabilities such as streaming or 
 unified memory.
 
-Using Storage Model with Streams
---------------------------------
-
-CUDA streams allow to launch several operations in parallel. This allows to
-specify which execution write and read operation have to wait for. In order
-to use stream, a developer has to create a specific Storage Model
-
 Using Unified Storage Model
 ---------------------------
 
-TODO
+An alternative to using the default CUDA Storage model is to use so-called 
+unified memory. When using such memory model, the device memory is mapped 
+directly on to host memory, and therefore no specific copy operation is 
+necessary. The factors that may lead to one model or the other are outside of 
+the scope of this manual. A specific model called ``Unified_Model`` can be used
+in replacement of the default one:
+
+.. code-block:: ada
+
+    type Int_Array is array (Integer range <>) of Integer;
+
+    type Int_Array_Device_Access is access Int_Array
+       with Designated_Storage_Model => CUDA.Storage_Model.Unified_Model;
+
+Using Storage Model with Streams
+--------------------------------
+
+CUDA streams allows to launch several operations in parallel. This allows to
+specify which execution write and read operation have to wait for. The Ada CUDA
+API doesn't provide a pre-allocated stream memory model. Instead, it provides
+a type that can be instantiated, and for which the specific stream can be 
+specified, e.g.:
+
+.. code-block:: ada
+
+    My_Stream_Model : CUDA.Storage_Model.CUDA_Async_Storage_Model
+      (Stream => Stream_Create);
+
+    type Int_Array is array (Integer range <>) of Integer;
+
+    type Int_Array_Device_Access is access Int_Array
+       with Designated_Storage_Model => My_Stream_Model;
+
+Note that the value of the stream associated to a specific model can vary over
+time, allowing different parts of a given object to be used by different 
+streams, e.g.:
+
+.. code-block:: ada
+
+       X : Int_Array_Device_Access := new Int_Array (1 .. 10_000);
+       Stream_1 : Stream_T := Stream_Create;
+       Stream_2 : Stream_T := Stream_Create;
+    begin
+       My_Stream_Model.Stream := Stream_1;
+       X (1 .. 5_000) := 0;
+       My_Stream_Model.Stream := Stream_2;
+       X (5_001 .. 10_000) := 0;
 
 Low Level Data Transfer
 -----------------------

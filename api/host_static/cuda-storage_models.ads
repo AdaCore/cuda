@@ -32,7 +32,7 @@ package CUDA.Storage_Models is
         Null_Address => CUDA_Null_Address);
 
    type CUDA_Unified_Storage_Model is limited record
-      Stream : CUDA.Driver_Types.Stream_T;
+      null;
    end record
      with Storage_Model_Type =>
        (Allocate   => CUDA_Unified_Allocate,
