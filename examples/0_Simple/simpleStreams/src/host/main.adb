@@ -161,8 +161,8 @@ begin
          for I in Streams'Range loop
             Stream_Model.Stream := Streams (I);
 
-            Host_A (I * N / Streams'Length .. (I + 1) * N / Streams'Length - 1) :=
-              Device_A (I * N / Streams'Length .. (I + 1) * N / Streams'Length - 1);
+            Host_A (Low_Bound (I) .. High_Bound (I)) :=
+              Device_A (Low_Bound (I) .. High_Bound (I));
          end loop;
       end loop;
    end;
