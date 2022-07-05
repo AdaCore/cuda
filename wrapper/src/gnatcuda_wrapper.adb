@@ -158,6 +158,7 @@ function GNATCUDA_Wrapper return Integer is
    Ld         : Unbounded_String := To_Unbounded_String ("ld");
    Count      : constant Natural := Argument_Count;
    Path_Val   : constant String  := Value ("PATH", "");
+   HT_Str     : String_Access := new String'("x86_64-linux");
 
    LLVM_Args  : Argument_List (1 .. Count + 1);
    --  We usually have to add -mcuda-libdevice= on top of the regular switches,
@@ -299,20 +300,20 @@ begin
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
             GPU_Name := new String'(To_String (Sub_Arg));
          elsif Get_Argument (Arg, "-cuda-host=", Sub_Arg) then
-            declare
-               Ht_Str : String := To_String (Sub_Arg);
-            begin
-               if Ht_Str = "aarch64-linux" then
-                  HT := Aarch64_Linux;
-                  LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
-               elsif Ht_Str = "x86_64-linux" then
-                  HT := X86_64_Linux;
-                  LD := To_Unbounded_String ("ld");
-               else
-                  Put_Line ("-cuda-host " & Ht_Str & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
-                  Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
-               end if;
-            end;
+            HT_Str := new String'(To_String (Sub_Arg));
+
+            if Ht_Str.all = "aarch64-linux" then
+               HT := Aarch64_Linux;
+               LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
+            elsif Ht_Str.all = "x86_64-linux" then
+               HT := X86_64_Linux;
+               LD := To_Unbounded_String ("ld");
+            else
+               Put_Line ("-cuda-host " & Ht_Str.all & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+               Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
+
+               HT_Str := new String'("x86_64-linux");
+            end if;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
             Libdevice_Path := new String'(To_String (Sub_Arg));
          else
@@ -408,8 +409,8 @@ begin
             Nvlink_Args : constant Argument_List :=
             (new String'("--arch=sm_" & GPU_Name.all),
                new String'("-m64"),
-               new String'("-L" & CUDA_Root & "targets/" & HT & "/lib/stubs"),
-               new String'("-L" & CUDA_Root & "targets/" & HT & "/lib"))
+               new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
+               new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
             & Input_Files (2 .. Input_File_Number)
             &(new String'("-lcudadevrt"),
                new String'("-o"),
