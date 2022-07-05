@@ -4,9 +4,9 @@ with Interfaces.C;     use Interfaces.C; -- Operators for Block_Dim, Block_IDx, 
 package body Kernel is
    
    procedure Vector_Add
-     (A : Access_Host_Float_Array;
-      B : Access_Host_Float_Array;
-      C : Access_Host_Float_Array)
+     (A : Array_Device_Access;
+      B : Array_Device_Access;
+      C : Array_Device_Access)
    is      
       I : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
    begin

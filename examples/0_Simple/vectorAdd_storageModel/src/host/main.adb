@@ -7,7 +7,7 @@ with Ada.Text_IO;               use Ada.Text_IO;
 with CUDA.Driver_Types;         use CUDA.Driver_Types;
 with CUDA.Runtime_Api;          use CUDA.Runtime_Api;
 with CUDA.Stddef;
-with CUDA.Storage_Model;        use CUDA.Storage_Model;
+with CUDA.Storage_Models;        use CUDA.Storage_Models;
 
 with Kernel; use Kernel;
 
@@ -16,19 +16,18 @@ with Ada.Unchecked_Conversion;
 
 procedure Main is
 
-   type Access_Device_Float_Array is access Float_Array
-     with Designated_Storage_Model => CUDA.Storage_Model.Model;
+   type Array_Host_Access is access all Float_Array;
 
-   procedure Free  is new Ada.Unchecked_Deallocation
-     (Float_Array, Access_Device_Float_Array);
+   procedure Free is new
+     Ada.Unchecked_Deallocation (Float_Array, Array_Host_Access);
 
-   function Convert is new Ada.Unchecked_Conversion
-     (Access_Device_Float_Array, Access_Host_Float_Array);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Float_Array, Array_Device_Access);
 
    Num_Elements : Integer := 4096;
 
-   H_A, H_B, H_C : Access_Host_Float_Array;
-   D_A, D_B, D_C : Access_Device_Float_Array;
+   H_A, H_B, H_C : Array_Host_Access;
+   D_A, D_B, D_C : Array_Device_Access;
    Array_Size : CUDA.Stddef.Size_T := CUDA.Stddef.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
 
    Threads_Per_Block : Integer := 256;
@@ -37,9 +36,6 @@ procedure Main is
 
    Gen : Generator;
    Err : Error_T;
-
-   procedure Free is new
-     Ada.Unchecked_Deallocation (Float_Array, Access_Host_Float_Array);
 
 begin
    Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
@@ -65,7 +61,7 @@ begin
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
    pragma CUDA_Execute
-     (Vector_Add (Convert (D_A), Convert (D_B), Convert (D_C)),
+     (Vector_Add (D_A, D_B, D_C),
       Threads_Per_Block,
       Blocks_Per_Grid);
 

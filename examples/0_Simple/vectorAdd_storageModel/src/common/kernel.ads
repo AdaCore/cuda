@@ -1,15 +1,18 @@
 with System;
 
+with CUDA.Storage_Models; use CUDA.Storage_Models;
+
 package Kernel is
 
    type Float_Array is array (Integer range <>) of Float;
 
-   type Access_Host_Float_Array is access all Float_Array;
+   type Array_Device_Access is access Float_Array
+     with Designated_Storage_Model => CUDA.Storage_Models.Model;
 
    procedure Vector_Add
-     (A : Access_Host_Float_Array;
-      B : Access_Host_Float_Array;
-      C : Access_Host_Float_Array)
+     (A : Array_Device_Access;
+      B : Array_Device_Access;
+      C : Array_Device_Access)
      with CUDA_Global;
 
 end Kernel;
