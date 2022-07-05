@@ -1,9 +1,12 @@
 NVCC=`which nvcc`
 export CUDA_ROOT=${NVCC%/*/*}
-export GPR_PROJECT_PATH="$PWD/api/:$PWD/uwrap/lang_template/build:$PWD/uwrap/lang_test/build:$PWD/gnat-llvm/share/gpr:$GPR_PROJECT_PATH"
-export PYTHONPATH="$PWD/uwrap/lang_template/build/python:$PWD/uwrap/lang_test/build/python:$PYTHONPATH"
-export LD_LIBRARY_PATH="$PWD/uwrap/lang_template/build/lib/relocatable/dev:$PWD/uwrap/lang_test/build/lib/relocatable/dev:$PWD/gnat-llvm/lib:$LD_LIBRARY_PATH"
-export PATH="$PWD/uwrap/bin:$PWD/uwrap/lang_template/build/lib/relocatable/dev:$PWD/uwrap/lang_template/build/obj-mains:$PWD/uwrap/lang_template/build/scripts:$PWD/uwrap/lang_test/build/lib/relocatable/dev:$PWD/uwrap/lang_test/build/obj-mains:$PWD/uwrap/lang_test/build/scripts:$PWD/install/cuda/wrapper/obj:$PWD/gnat-llvm/bin:$PATH"
-export C_INCLUDE_PATH="$PWD/uwrap/lang_template/build:$PWD/uwrap/lang_test/build:$C_INCLUDE_PATH"
-export DYLD_LIBRARY_PATH="$PWD/uwrap/lang_template/build/lib/relocatable/dev:$PWD/uwrap/lang_test/build/lib/relocatable/dev:$DYLD_LIBRARY_PATH"
-export MYPYPATH="$PWD/uwrap/lang_template/build/python:$PWD/uwrap/lang_test/build/python:$MYPYPATH"
+
+ROOT="$PWD/.."
+
+export GPR_PROJECT_PATH="$ROOT/cuda/api/:$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$ROOT/gnat-llvm/share/gpr:$GPR_PROJECT_PATH"
+export PYTHONPATH="$ROOT/uwrap/lang_template/build/python:$ROOT/uwrap/lang_test/build/python:$PYTHONPATH"
+export LD_LIBRARY_PATH="$ROOT/uwrap/lang_template/build/lib/relocatable/dev:$ROOT/uwrap/lang_test/build/lib/relocatable/dev:$ROOT/gnat-llvm/lib:$LD_LIBRARY_PATH"
+export PATH="$ROOT/uwrap/bin:$ROOT/uwrap/lang_template/build/lib/relocatable/dev:$ROOT/uwrap/lang_template/build/obj-mains:$ROOT/uwrap/lang_template/build/scripts:$ROOT/uwrap/lang_test/build/lib/relocatable/dev:$ROOT/uwrap/lang_test/build/obj-mains:$ROOT/uwrap/lang_test/build/scripts:$ROOT/gnat-llvm/bin:$PATH"
+export C_INCLUDE_PATH="$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$C_INCLUDE_PATH"
+export DYLD_LIBRARY_PATH="$ROOT/uwrap/lang_template/build/lib/relocatable/dev:$ROOT/uwrap/lang_test/build/lib/relocatable/dev:$DYLD_LIBRARY_PATH"
+export MYPYPATH="$ROOT/uwrap/lang_template/build/python:$ROOT/uwrap/lang_test/build/python:$MYPYPATH"
