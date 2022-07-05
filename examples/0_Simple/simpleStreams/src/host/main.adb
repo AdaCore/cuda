@@ -8,13 +8,10 @@ with Interfaces; use Interfaces;
 with Interfaces.C; use Interfaces.C;
 with Interfaces.C.Strings; use Interfaces.C.Strings;
 
-with Storage_Models;
-with Storage_Models.Arrays;
-
-with CUDA_Storage_Models; use CUDA_Storage_Models;
-
 with Support; use Support;
 with Kernels; use Kernels;
+
+with Ada.Unchecked_Deallocation;
 
 procedure Main is
    S_SDK_Sample : String := "simpleStreams";
@@ -31,25 +28,20 @@ procedure Main is
    Device_Properties : CUDA.Driver_Types.Device_Prop;
    C : Integer := 5;
 
-   package Device_Int_Array is new CUDA_Storage_Models.Malloc_Storage_Model.Arrays
-     (Integer, Natural, Integer_Array, Integer_Array_Access);
-
-   package Host_Int_Array is new CUDA_Storage_Models.Malloc_Host_Storage_Model.Arrays
-     (Integer, Natural, Integer_Array, Integer_Array_Access);
-
-   use Device_Int_Array;
-   use Host_Int_Array;
-
-   Device_A : Device_Int_Array.Foreign_Array_Access;
-   Device_C : Device_Int_Array.Foreign_Array_Access;
-   Host_A : Host_Int_Array.Foreign_Array_Access;
+   Device_A : Integer_Array_Device_Access;
+   Device_C : Integer_Array_Device_Access;
+   Host_A : Integer_Array_Host_Access;
 
    Streams : array (0 .. N_Streams - 1) of CUDA.Driver_Types.Stream_T;
-   Device_A_Slices : array (0 .. N_Streams - 1) of Device_Int_Array.Foreign_Array_Slice_Access;
-   Host_A_Slices : array (0 .. N_Streams - 1) of Host_Int_Array.Foreign_Array_Slice_Access;
 
    Start_Event, Stop_Event : CUDA.Driver_Types.Event_T;
    Event_Flags : unsigned;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Integer_Array, Integer_Array_Host_Access);
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Integer_Array, Integer_Array_Device_Access);
 
 begin
    Put_Line ("[ " & S_SDK_Sample & " ]");
@@ -77,13 +69,11 @@ begin
 
    Set_Device_Flags (Device_Sync_Method or (if B_Pin_Generic_Memory then cudaDeviceMapHost else 0));
 
-   Host_A := Allocate (0, N - 1);
-   Assign (Host_A, 0);
+   Host_A := new Integer_Array'(0 .. N - 1 => 0);
+   Device_A := new Integer_Array'(0 .. N - 1 => 0);
 
-   Device_A := Allocate (0, N - 1);
-   Assign (Device_A, 0);
-   Device_C := Allocate (0, N - 1);
-   Assign (Device_C, C);
+   -- TODO: This may be slow, we may need to implement a bulk copy instead
+   Device_C := new Integer_Array'(0 .. N - 1 => C);
 
    Put_Line ("Starting Test");
 
@@ -101,8 +91,9 @@ begin
 
    pragma CUDA_Execute
      (Init_Array
-        (Uncheck_Convert (Device_A),
-         Uncheck_Convert (Device_C),
+        (Device_A,
+         0, N - 1,
+         Device_C,
          N_Iterations),
       Blocks,
       Threads,
@@ -120,8 +111,9 @@ begin
    for K in 1 .. N_Reps loop
       pragma CUDA_Execute
         (Init_Array
-           (Uncheck_Convert (Device_A),
-            Uncheck_Convert (Device_C),
+           (Device_A,
+            0, N - 1,
+            Device_C,
             N_Iterations),
          Blocks,
          Threads);
@@ -135,34 +127,43 @@ begin
 
    Threads := (512, 1, 1);
    Blocks := (unsigned (N) / (unsigned (Streams'Length) * Threads.X), 1, 1);
-   Assign (Host_A, 255);
-   Assign (Device_A, 0);
+
+   -- TODO: These may be slow, we may need to implement a bulk copy instead
+   Host_A.all := (others => 255);
+   Device_A.all := (others => 255);
+
    Event_Record (Start_Event, null);
 
-   for I in Streams'Range loop
-      Device_A_Slices (I) := Allocate (Device_A, I * N / Streams'Length, N - 1);
-      Host_A_Slices (I) := Allocate (Host_A, I * N / Streams'Length, N - 1);
-   end loop;
+   declare
+      function Low_Bound (Id : Integer) return Integer
+      is (Id * N / Streams'Length);
 
-   for K in 1 .. N_Reps loop
-      for I in Streams'Range loop
-         pragma CUDA_Execute
-           (Init_Array
-              (Uncheck_Convert (Device_A_Slices (I)),
-               Uncheck_Convert (Device_C),
-               N_Iterations),
-            Blocks,
-            Threads,
-            0,
-            Streams (I));
-      end loop;
+      function High_Bound (Id : Integer) return Integer
+      is (Low_Bound (Id + 1) - 1);
+   begin
+      for K in 1 .. N_Reps loop
+         for I in Streams'Range loop
+            pragma CUDA_Execute
+              (Init_Array
+                 (Device_A,
+                  Low_Bound (I),
+                  High_Bound (I),
+                  Device_C,
+                  N_Iterations),
+               Blocks,
+               Threads,
+               0,
+               Streams (I));
+         end loop;
 
-      for I in Streams'Range loop
-         Assign (Uncheck_Convert (Host_A_Slices (I)).all,
-                 Device_A_Slices (I),
-                 (True, Streams (I)));
+         for I in Streams'Range loop
+            Stream_Model.Stream := Streams (I);
+
+            Host_A (I * N / Streams'Length .. (I + 1) * N / Streams'Length - 1) :=
+              Device_A (I * N / Streams'Length .. (I + 1) * N / Streams'Length - 1);
+         end loop;
       end loop;
-   end loop;
+   end;
 
    Event_Record (Stop_Event, null);
    Event_Synchronize (Stop_Event);
@@ -175,10 +176,10 @@ begin
       Expected : Integer := C * N_Reps * N_Iterations;
    begin
       for I in 0 .. N - 1 loop
-         if Uncheck_Convert (Host_A) (I) /= Expected then
+         if Host_A (I) /= Expected then
             Put_Line
               ("ERROR, EXPECTED " & Expected'Img
-               & ", GOT" & Uncheck_Convert (Host_A)(I)'Img
+               & ", GOT" & Host_A (I)'Img
                & " ON" & I'Img);
 
             exit;
@@ -188,14 +189,12 @@ begin
 
    for I in Streams'Range loop
       Stream_Destroy (Streams (I));
-      Deallocate (Device_A_Slices (I));
-      Deallocate (Host_A_Slices (I));
    end loop;
 
    Event_Destroy (Start_Event);
    Event_Destroy (Stop_Event);
 
-   Deallocate (Host_A);
-   Deallocate (Device_A);
-   Deallocate (Device_C);
+   Free (Host_A);
+   Free (Device_A);
+   Free (Device_C);
 end Main;
