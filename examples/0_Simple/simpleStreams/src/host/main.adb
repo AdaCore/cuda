@@ -43,6 +43,10 @@ procedure Main is
    procedure Free is new Ada.Unchecked_Deallocation
      (Integer_Array, Integer_Array_Device_Access);
 
+   procedure Host_Memset
+     (Dst : System.Address; Val : Interfaces.C.int; N : Interfaces.C.size_t);
+   pragma Import (C, Host_Memset, "memset");
+
 begin
    Put_Line ("[ " & S_SDK_Sample & " ]");
    New_Line;
@@ -71,9 +75,8 @@ begin
 
    Host_A := new Integer_Array'(0 .. N - 1 => 0);
    Device_A := new Integer_Array'(0 .. N - 1 => 0);
-
-   -- TODO: This may be slow, we may need to implement a bulk copy instead
-   Device_C := new Integer_Array'(0 .. N - 1 => C);
+   Device_C := new Integer_Array (0 .. N - 1);
+   Device_C (0) := C;
 
    Put_Line ("Starting Test");
 
@@ -128,9 +131,8 @@ begin
    Threads := (512, 1, 1);
    Blocks := (unsigned (N) / (unsigned (Streams'Length) * Threads.X), 1, 1);
 
-   -- TODO: These may be slow, we may need to implement a bulk copy instead
-   Host_A.all := (others => 255);
-   Device_A.all := (others => 255);
+   Host_Memset (Host_A.all'Address, 255, Host_A.all'Size);
+   CUDA.Runtime_Api.Memset (Device_A.all'Address, 0, Host_A.all'Size);
 
    Event_Record (Start_Event, null);
 
