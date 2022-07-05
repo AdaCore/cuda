@@ -87,6 +87,78 @@ kernel on the device.
 Passing Data between Device and Host
 ====================================
 
+Using Storage Model Aspect
+--------------------------
+
+Storage Model is an extension to the Ada language that is currently under 
+implementation. Discussion around the generic capability 
+can be found `here <https://github.com/AdaCore/ada-spark-rfcs/pull/76>`_.
+
+GNAT for CUDA provides a storage model that maps to CUDA primitives for allocation,
+deallocation and copy. It is declared in the package ``CUDA.Storage_Models``.
+Users may used directly ``CUDA.Storage_Models.Model`` or create their own
+instances.
+
+When a pointer type is associated with a CUDA storage model, memory allocation
+will happen on the device. This allocation can be a single operation, or multiple
+allocations and copies as it is the case in GNAT for unconstrained arrays. For 
+example:
+
+.. code-block:: ada
+
+    type Int_Array is array (Integer range <>) of Integer;
+
+    type Int_Array_Device_Access is access Int_Array
+       with Designated_Storage_Model => CUDA.Storage_Model.Model;
+
+    Device_Array : Int_Array_Device_Access := new Int_Array (1 .. 100);    
+
+Moreover, copies between host and device will be instrumented to call proper
+CUDA memory copy operations. The code can now be written:
+
+.. code-block:: ada
+
+    procedure Main is
+       type Int_Array_Host_Access is access Int_Array;
+
+       Host_Array : Int_Array_Host_Access := new Int_Array (1 .. 100);
+       Device_Array : Int_Array_Device_Access := new Int_Array'(Host_Array.all);
+    begin
+       pragma Kernel_Execute (
+           Some_Kernel (Device_Array),
+           Host_Array.all'Length,
+           1);
+
+       Host_Array.all := Device_Array.all;
+    end Main;
+
+On the kernel side, CUDA.Storage_Model.Model is implemented as being the native
+storage model (as opposed to the foreign device one from the host). 
+``Int_Array_Device_Access`` can be used directly:
+
+.. code-block:: ada
+
+    procedure Kernel (Device_Array : Int_Array_Device_Access) is
+    begin
+       Device_Array (Thread_IDx.X) := Device_Array (Thread_IDx.X) + 10;
+    end Kernel;
+
+This is the intended way of sharing memory between device and host. Note that
+the storage model can be extended to support capabilities such as streaming or 
+unified memory.
+
+Using Storage Model with Streams
+--------------------------------
+
+CUDA streams allow to launch several operations in parallel. This allows to
+specify which execution write and read operation have to wait for. In order
+to use stream, a developer has to create a specific Storage Model
+
+Using Unified Storage Model
+---------------------------
+
+TODO
+
 Low Level Data Transfer
 -----------------------
 
@@ -157,179 +229,6 @@ satisfactory and should be reserved for cases where not alternative exist (yet).
 In particular, typing is lost at the interface, and the developer is left with
 manual means of verification.
 
-Using Storage Model Library
----------------------------
-
-Note - this method is experimental and is provided to bridge the gap pending 
-implementation of the storage model aspect described later.
-
-One of the most useful thing to do in CUDA is to pass arrays back and forth
-and to compute values on them. Unfortunately, an Ada array is more complex than
-a C array and cannot be allocated using a simple malloc invocation. Notably,
-Ada array (or more specifically Ada unconstrained arrays) carry data and 
-boundaries. The structure of such types in memory is implementation-dependent,
-and can vary on many factors.
-
-GNAT for CUDA currently provides a storage model library that allows to allocate
-uni-dimensional arrays and to copy them back and forth easily. This is done
-through the generic package ``CUDA_Storage_Models.Malloc_Host_Storage_Model.Arrays``
-which can be instantiated with for generic formal parameters:
-
-.. code-block:: ada
-
-   type Typ is private; -- the type of component
-   type Index_Typ is (<>); -- the type of indexes
-   type Array_Typ is array (Index_Typ range <>) of Typ; -- the array type
-   type Array_Access is access all Array_Typ; -- a pointer type to the array
-
-For example:
-
-.. code-block:: ada
-
-   type Int_Array is array (Integer range <>) of Integer;
-   type Int_Array_Access is access all Int_Array;
-
-   package Int_Device_Arrays is new CUDA_Storage_Models.Malloc_Storage_Model.Arrays 
-    (Integer, Integer, Int_Array, Int_Array_Access);
-
-Once instantiated, the newly created package exports a type ``Foreign_Access``
-which designates a handle to the array in device memory, together with 
-allocation, assignment and deallocation functions:
-
-.. code-block:: ada
-
-   type Foreign_Array_Access is record
-      Data   : Foreign_Address;
-      Bounds : Foreign_Address;
-   end record;
-
-   function Allocate (First, Last : Index_Typ) return Foreign_Array_Access;
-   function Allocate_And_Init (Src : Array_Typ) return Foreign_Array_Access;
-
-   procedure Assign
-     (Dst : Foreign_Array_Access; Src : Array_Typ);
-   procedure Assign
-     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Array_Typ);
-   procedure Assign
-     (Dst : Foreign_Array_Access; Src : Typ);
-   procedure Assign
-     (Dst : Foreign_Array_Access; First, Last : Index_Typ; Src : Typ);
-   procedure Assign
-     (Dst : in out Array_Typ; Src : Foreign_Array_Access);
-   procedure Assign
-     (Dst : in out Array_Typ; Src : Foreign_Array_Access; First, Last : Index_Typ);
-
-   procedure Deallocate (Src : in out Foreign_Array_Access);
-
-Note that the above declaration is a simplification of the full package.
-
-This can then be used to allocate memory, and perform back and forth copies from
-host to device:
-
-.. code-block:: ada
-
-    procedure Main is
-       Host_Array : Int_Array_Access := new Int_Array (1 .. 100);
-       Device_Array : Int_Device_Arrays.Foreign_Access;
-    begin
-       Host_Array.all := (others => 0);
-       Device_Array := Allocate (1, 100);
-
-       Assign (Device_Array, Host_Array.all)
-       
-       pragma Kernel_Execute (
-           Some_Kernel (Uncheck_Convert (Device_Array)),
-           Host_Array.all'Length,
-           1);
-
-       Assign (Host_Array.all, Device_Array)
-    end Main;
-
-Note the call of ``Uncheck_Convert`` when calling the kernel. This function is 
-declared as such:
-
-.. code-block:: ada
-
-    function Uncheck_Convert (Src : Foreign_Access) return Typ_Access;
-
-It allows to convert a ``Foreign_Access`` to a regular access to array. However, the
-memory accessed by this pointer is located on the device, not the host, so any
-direct access from the host will lead to memory errors.
-
-The device code can now rely on an actual array access:
-
-.. code-block:: ada
-
-    procedure Kernel (Device_Array : Int_Array_Access) is
-    begin
-       Device_Array (Thread_IDx.X) := Device_Array (Thread_IDx.X) + 10;
-    end Kernel;
-
-While this is clearly an improvement over the low level data transfer method, 
-this is clearly not satisfactory. Notably, the ``Uncheck_Convert`` creates an
-object that looks usable from the host, but which usage there will lead to memory
-errors.
-
-Using Storage Model Aspect
---------------------------
-
-Storage Model is an extension to the Ada language that is currently under 
-implementation. It is not yet available as part of the current version of the 
-product but is on the close roadmap. Discussion around the generic capability 
-can be found `here <https://github.com/AdaCore/ada-spark-rfcs/pull/76>`_.
-
-GNAT for CUDA provides a storage model that maps to CUDA primitives for allocation,
-deallocation and copy. It is declared in the package ``CUDA.Storage_Models``.
-Users may used directly ``CUDA.Storage_Models.Model`` or create their own
-instances.
-
-When a pointer type is associated with a CUDA storage model, memory allocation
-will happen on the device. This allocation can be a single operation, or multiple
-allocations and copies as it is the case in GNAT for unconstrained arrays. For 
-example:
-
-.. code-block:: ada
-
-    type Int_Array is array (Integer range <>) of Integer;
-
-    type Int_Array_Device_Access is access Int_Array
-       with Designated_Storage_Model => CUDA.Storage_Model.Model;
-
-    Device_Array : Int_Array_Device_Access := new Int_Array (1 .. 100);    
-
-Moreover, copies between host and device will be instrumented to call proper
-CUDA memory copy operations. The code can now be written:
-
-.. code-block:: ada
-
-    procedure Main is
-       type Int_Array_Host_Access is access Int_Array;
-
-       Host_Array : Int_Array_Host_Access := new Int_Array (1 .. 100);
-       Device_Array : Int_Array_Device_Access := new Int_Array'(Host_Array.all);
-    begin
-       pragma Kernel_Execute (
-           Some_Kernel (Device_Array),
-           Host_Array.all'Length,
-           1);
-
-       Host_Array.all := Device_Array.all;
-    end Main;
-
-On the kernel side, CUDA.Storage_Model.Model is implemented as being the native
-storage model (as opposed to the foreign device one from the host). 
-``Int_Array_Device_Access`` can be used directly:
-
-.. code-block:: ada
-
-    procedure Kernel (Device_Array : Int_Array_Device_Access) is
-    begin
-       Device_Array (Thread_IDx.X) := Device_Array (Thread_IDx.X) + 10;
-    end Kernel;
-
-This is the intended way of sharing memory between device and host. Note that
-the storage model can be extended to support capabilities such as streaming or 
-unified memory.
 
 Specifying Compilation Side
 ===========================

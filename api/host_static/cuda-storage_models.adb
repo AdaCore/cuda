@@ -157,4 +157,32 @@ package body CUDA.Storage_Models is
       return 0;
    end CUDA_Async_Storage_Size;
 
+   ----------------------------
+   -- CUDA_Unfified_Allocate --
+   ----------------------------
+
+   procedure CUDA_Unified_Allocate
+     (Model           : in out CUDA_Async_Storage_Model;
+      Storage_Address : out System.Address;
+      Size            : Storage_Count;
+      Alignment       : Storage_Count)
+   is
+   begin
+      Storage_Address := Malloc_Managed (CUDA.Stddef.Size_T (Size), 1); -- cudaMemAttachGlobal
+   end CUDA_Unified_Allocate;
+
+   -----------------------------
+   -- CUDA_Unified_Deallocate --
+   -----------------------------
+
+   procedure CUDA_Unified_Deallocate
+     (Model           : in out CUDA_Async_Storage_Model;
+      Storage_Address : System.Address;
+      Size            : Storage_Count;
+      Alignment       : Storage_Count)
+   is
+   begin
+      Free (Storage_Address);
+   end CUDA_Unified_Deallocate;
+
 end CUDA.Storage_Models;
