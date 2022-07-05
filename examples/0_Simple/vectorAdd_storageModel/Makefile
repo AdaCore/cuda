@@ -1,3 +1,3 @@
-build:
-	gprbuild -P device
-	gprbuild -P host -largs $(PWD)/lib/*.fatbin.o
+include ../../Makefile.include
+
+build: example_build
