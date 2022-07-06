@@ -15,8 +15,8 @@ wrapper: FORCE
 	@echo "======================= WRAPPER BUILDING"
 	@echo $(PATH)
 	gprbuild -p -P wrapper/wrapper.gpr
-	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
-	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
+	cp ./wrapper/obj/gnatcuda_wrapper ./install/bin/cuda-gcc
+	cp ./install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
 
 runtime: libdevice.ads
 	@echo "======================= RUNTIME BUILDING"
@@ -35,8 +35,8 @@ libdevice.ads:
 
 install/bin:
 	@echo "======================= INSTALL SETUP"
-	mkdir install
-	mkdir install/bin
+	mkdir -p install
+	mkdir -p install/bin
 
 uninstall:
 	rm $(llvm_dir)/bin/cuda-gcc
