@@ -39,6 +39,10 @@ For that to work, you need a recent gnat, langkit and libadalang installation, e
 Set CUDA_ROOT to point to your cuda installation. For example:
 	
 	export CUDA_ROOT=/usr/local/cuda-10.0
+
+Alternatively you can set and check it by calling
+
+    . locate_cuda_root.sh /usr/local/cuda-10.0
 	
 Next you will run the cuda bind.sh script. ("cuda" is from the AdaCore github project, there's a link above.) However, this must be done from the directory it appears in, so use
 

@@ -1,7 +1,7 @@
-NVCC=`which nvcc`
-export CUDA_ROOT=${NVCC%/*/*}
+CURRENT=$(dirname $0)
+ROOT="$CURRENT/.."
 
-ROOT="$PWD/.."
+. $CURRENT/locate_cuda_root.sh >/dev/null
 
 export GPR_PROJECT_PATH="$ROOT/cuda/api/:$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$ROOT/gnat-llvm/share/gpr:$GPR_PROJECT_PATH"
 export PYTHONPATH="$ROOT/uwrap/lang_template/build/python:$ROOT/uwrap/lang_test/build/python:$PYTHONPATH"
