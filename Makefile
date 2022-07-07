@@ -35,8 +35,8 @@ libdevice.ads:
 
 install/bin:
 	@echo "======================= INSTALL SETUP"
-	mkdir install
-	mkdir install/bin
+	mkdir -p install
+	mkdir -p install/bin
 
 uninstall:
 	rm $(llvm_dir)/bin/cuda-gcc
