@@ -6,12 +6,12 @@ GNAT_SRC := ../gnat
 local_llvm := $(shell which llvm-gcc)
 llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 
-.PHONY: main install clean
+.PHONY: main install clean wrapper runtime
 
 
 main: install/bin wrapper runtime
 
-wrapper: FORCE	
+wrapper:
 	@echo "======================= WRAPPER BUILDING"
 	@echo $(PATH)
 	gprbuild -p -P wrapper/wrapper.gpr
@@ -45,5 +45,3 @@ uninstall:
 clean:
 	rm -rf install
 	gprclean -P wrapper/wrapper.gpr
-
-FORCE:
