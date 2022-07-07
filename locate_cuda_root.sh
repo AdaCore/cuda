@@ -49,8 +49,8 @@ elif [ ! -z "$CUDA_ROOT" ]; then
     ## Use already set value
     break
 else
-    ## Heuristic: parent dir of nvcc
-    CUDA_ROOT="$(dirname $(which nvcc))"
+    ## Heuristic: $CUDA_ROOT/bin/nvcc
+    CUDA_ROOT="$(dirname $(dirname $(which nvcc)))"
 fi
 
 # Check root seems correct
