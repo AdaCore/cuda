@@ -8,9 +8,10 @@ Usage::
 Run the CUDA testsuite.
 """
 import sys
+import logging
 from pathlib import Path
 from e3.testsuite import Testsuite
-from e3.testsuite.driver.classic import TestAbortWithError, ClassicTestDriver
+from e3.testsuite.driver.classic import TestAbortWithError, TestAbortWithFailure, ClassicTestDriver
 from e3.fs import sync_tree
 
 
@@ -36,6 +37,15 @@ class CUDAExamplesDriver(ClassicTestDriver):
             self.do_run()
         except AssertionError as ae:
             raise TestAbortWithError(ae) from ae
+        except TestAbortWithFailure as e:
+            logging.error(f"test caused failure: {e}")
+            logging.error(self.output)
+            raise
+        except Exception as e:
+            # those are test failures
+            logging.error(f"test raised an exception {e.__class__}: {e}")
+            logging.error(self.output)
+            raise TestAbortWithFailure(e) from e
 
 
 class CUDATestsuite(Testsuite):
