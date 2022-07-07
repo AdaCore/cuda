@@ -6,7 +6,7 @@ GNAT_SRC := ../gnat
 local_llvm := $(shell which llvm-gcc)
 llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 
-.PHONY: main install clean wrapper runtime
+.PHONY: main clean wrapper runtime
 
 
 main: install/bin wrapper runtime
