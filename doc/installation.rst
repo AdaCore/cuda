@@ -23,8 +23,9 @@ installation::
   cd cuda_env-[version]-x86_64-linux-bin
   sh setup.sh
 
-In the same directory, execute env.sh::
-  . env.sh
+In the same directory, execute::
+  
+  source ./env.sh
 
 Note that this is needed every time you will need to compile a CUDA application.
 

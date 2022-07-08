@@ -109,7 +109,7 @@ A few things are noteworthy here:
 
 This project can the be build by::
 
-  gprbuild -P host.gpr -largs $(PWD)/lib/kernel.fatbin.o 
+  gprbuild -P host.gpr -largs $PWD/lib/kernel.fatbin.o 
 
 Note the addition of the fatbinary on the linker line. This comes from the 
 previous step.
@@ -119,10 +119,18 @@ Once built, the resulting binary can be run similar to any regular binary.
 Building for Tegra®
 ===================
 
-Tegra® is an NVIDIA SoC that conbines together ARM cores and NVIDIA GPUs. GNAT
+Tegra® is an NVIDIA® SoC that combines together ARM cores and NVIDIA GPUs. GNAT
 for CUDA® allow to target this SoC through a cross compiler. The toolchain is
-hosted on a x86 64 bits Linux system and will generate both ARM 64 bits code
-targeting the Linux environment installed on Tegra together with the necessary
-PTX code.
+hosted on a x86 64 bits Linux system (Host) and will generate both ARM 64 bits code
+targeting the Linux environment installed on Tegra® (CUDA_Host) together with the necessary
+PTX code running over the GPU (Device).
 
-TODO
+To cross build valid (CUDA_Host and Device) object code from your (Host) you will need:
+
+- This project, GNAT for CUDA: A specialized Ada runtime leveraging Ada bindings for CUDA running on the (Device).
+- A GNAT ``aarch64-linux`` cross-compiler toolchain on your (Host) and targeting the (CUDA_Host). 
+- The CUDA libraries of the (CUDA_Host). We recommend you network access those installed on your (CUDA_Host) from the (HOST).
+- Set the ``cuda_host`` and ``gpu_arch`` scenario variables matching the TEGRA configuration for both the ``device`` and ``host`` build project. The definition of possible values for both scenario variables are found in ``cuda_api_device.gpr``.
+- Finally deploy to, then execute the built executable at the (CUDA_HOST).
+
+For a detailed and contextualized instruction set, please consult the git repository front-facing README.md section about `cross-compilation <https://github.com/AdaCore/cuda#cross-compilation>`_.
