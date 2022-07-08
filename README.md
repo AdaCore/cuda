@@ -1,5 +1,19 @@
 # GNAT for CUDA
 
+GNAT for CUDA® is a toolsuite that allows to compile Ada and SPARK code directly for NVIDIA GPUs.
+
+## Documentation
+
+For a thorough discussion about `GNAT for CUDA` please consult the official documentation. A html version can be built like so:
+
+```
+cd doc
+make hmtl
+```
+
+## Status
+Beta
+
 ## Quickstart
 
 ### End user - archive distribution
@@ -33,7 +47,7 @@ chmod +x setup.sh
 source ./env.sh 
 ```
 
-### Build cuda-gcc
+### Build cuda-gcc (optional)
 - First [Setup GNAT for CUDA](#setup-gnat-for-cuda). Then:
 ```
 make
@@ -67,12 +81,11 @@ $ echo $ENV_PREFIX
 sudo apt install sshfs
 ```
 
-- Create folders     
+- Create folders. On **host**:   
 		 `/usr/lib/aarch64-linux-gnu/`        
        `/usr/local/cuda/targets/aarch64-linux/lib`       
 		 `/usr/local/cuda/targets/aarch64-linux/lib/stubs`    
 
-On **host**:
 ```
 sudo mkdir -p /usr/lib/aarch64-linux-gnu/
 sudo mkdir -p /usr/local/cuda/targets/aarch64-linux/lib/stubs
