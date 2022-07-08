@@ -6,12 +6,12 @@ GNAT_SRC := ../gnat
 local_llvm := $(shell which llvm-gcc)
 llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 
-.PHONY: main install clean
+.PHONY: main clean wrapper runtime
 
 
 main: install/bin wrapper runtime
 
-wrapper: FORCE	
+wrapper:
 	@echo "======================= WRAPPER BUILDING"
 	@echo $(PATH)
 	gprbuild -p -P wrapper/wrapper.gpr
@@ -35,8 +35,8 @@ libdevice.ads:
 
 install/bin:
 	@echo "======================= INSTALL SETUP"
-	mkdir install
-	mkdir install/bin
+	mkdir -p install
+	mkdir -p install/bin
 
 uninstall:
 	rm $(llvm_dir)/bin/cuda-gcc
@@ -45,5 +45,3 @@ uninstall:
 clean:
 	rm -rf install
 	gprclean -P wrapper/wrapper.gpr
-
-FORCE:
