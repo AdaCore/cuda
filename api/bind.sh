@@ -1,5 +1,6 @@
 set -ex
 export CUDA_PATH=$CUDA_ROOT/include/
+test -d "$CUDA_PATH"
 
 rm -rf host device
 
