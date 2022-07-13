@@ -1,4 +1,21 @@
-CURRENT=$(dirname $0)
+set -e
+
+# https://stackoverflow.com/a/28776166
+is_sourced() {
+    if [ -n "$ZSH_VERSION" ]; then
+        case $ZSH_EVAL_CONTEXT in *:file:*) return 0;; esac
+    else  # Add additional POSIX-compatible shell names here, if needed.
+        case ${0##*/} in dash|-dash|bash|-bash|ksh|-ksh|sh|-sh) return 0;; esac
+    fi
+    return 1  # NOT sourced.
+}
+
+if ! is_sourced || ! [ -f $PWD/env.sh ] ; then
+    echo "This script is meant to be sourced from its own directory"
+    exit 2
+fi
+
+CURRENT=$(pwd)
 ROOT="$CURRENT/.."
 
 . $CURRENT/locate_cuda_root.sh >/dev/null
