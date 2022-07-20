@@ -48,11 +48,14 @@ if [ ! -z "$1" ]; then
 elif [ ! -z "$CUDA_ROOT" ]; then
     ## Use already set value
     break
-else
+elif [ ! -z "$(which nvcc)" ]; then
     ## Heuristic: $CUDA_ROOT/bin/nvcc
     nvcc = $(readlink -f $(which nvcc))
     assert test -f "$nvcc"
     CUDA_ROOT="$(dirname $(dirname $nvcc))"
+else
+    ## Try a "standard" directory
+    CUDA_ROOT="/usr/local/cuda"
 fi
 
 # Check root seems correct
