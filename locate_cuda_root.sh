@@ -50,7 +50,9 @@ elif [ ! -z "$CUDA_ROOT" ]; then
     break
 else
     ## Heuristic: $CUDA_ROOT/bin/nvcc
-    CUDA_ROOT="$(dirname $(dirname $(which nvcc)))"
+    nvcc = $(readlink -f $(which nvcc))
+    assert test -f "$nvcc"
+    CUDA_ROOT="$(dirname $(dirname $nvcc))"
 fi
 
 # Check root seems correct
