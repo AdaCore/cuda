@@ -3,7 +3,7 @@ export PATH := install/bin:$(PATH)
 BB_SRC   := ../bb-runtimes
 GNAT_SRC := ../gnat
 
-local_llvm := $(shell which llvm-gcc)
+local_llvm := $(shell command -v llvm-gcc)
 llvm_dir   := $(shell dirname $(dir $(local_llvm)))
 
 .PHONY: main clean wrapper runtime

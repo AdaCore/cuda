@@ -48,9 +48,9 @@ if [ ! -z "$1" ]; then
 elif [ ! -z "$CUDA_ROOT" ]; then
     ## Use already set value
     break
-elif [ ! -z "$(which nvcc)" ]; then
+elif [ ! -z "$(command -v nvcc)" ]; then
     ## Heuristic: $CUDA_ROOT/bin/nvcc
-    nvcc = $(readlink -f $(which nvcc))
+    nvcc=$(readlink -f $(command -v nvcc))
     assert test -f "$nvcc"
     CUDA_ROOT="$(dirname $(dirname $nvcc))"
 else
