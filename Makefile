@@ -4,7 +4,28 @@ BB_SRC   := ../bb-runtimes
 GNAT_SRC := ../gnat
 
 local_llvm := $(shell which llvm-gcc)
+ifeq (, $(local_llvm))
+ $(error "No llvm-gcc in PATH")
+endif
+$(info "LLVM's GCC    : $(local_llvm)")
+
 llvm_dir   := $(shell dirname $(dir $(local_llvm)))
+ifeq (, $(llvm_dir))
+ $(error "Could not locate LLVM's directory")
+endif
+$(info "LLVM directory: $(llvm_dir)")
+
+cuda_dir := $(shell sh locate_cuda_root.sh)
+ifeq (, $(cuda_dir))
+ $(error "Could not locate CUDA's directory")
+endif
+$(info "CUDA directory: $(cuda_dir)")
+
+libdevice.bc := $(shell find -L $(cuda_dir) -iname "libdevice.*.bc" | head -n 1)
+ifeq (, $(libdevice.bc))
+ $(error "Could not locate libdevice.*.bc")
+endif
+$(info "libdevice.bc  : $(libdevice.bc)")
 
 .PHONY: main clean wrapper runtime
 
@@ -31,7 +52,7 @@ runtime: libdevice.ads
 
 
 libdevice.ads:
-	llvm-ads $(shell find -L /usr/local/cuda -iname "libdevice.*.bc" | head -n 1) ./runtime/device_gnat/libdevice.ads
+	llvm-ads $(libdevice.bc) ./runtime/device_gnat/libdevice.ads
 
 install/bin:
 	@echo "======================= INSTALL SETUP"
