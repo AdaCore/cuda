@@ -61,6 +61,8 @@ fi
 # Check root seems correct
 assert test -d $(realpath "$CUDA_ROOT")
 assert test -d "$CUDA_ROOT/include"
+assert test -f "$CUDA_ROOT/bin/ptxas"
+assert test -f "$CUDA_ROOT/bin/nvcc"
 assert "find -L '$CUDA_ROOT' -iname 'libdevice.*.bc' -print -quit | grep lib" 
 
 # Result
