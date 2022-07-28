@@ -1,4 +1,10 @@
 set -ex
+
+CURRENT_DIR=$(dirname $(realpath $0))
+ROOT=$(dirname $CURRENT_DIR)
+
+. "$ROOT/locate_cuda_root.sh"
+
 export CUDA_PATH=$CUDA_ROOT/include/
 test -d "$CUDA_PATH"
 
