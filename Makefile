@@ -27,6 +27,8 @@ ifeq (, $(libdevice.bc))
 endif
 $(info "libdevice.bc  : $(libdevice.bc)")
 
+export PATH := $(cuda_dir)/bin:$(PATH)
+
 .PHONY: main clean wrapper runtime
 
 
@@ -34,7 +36,6 @@ main: install/bin wrapper runtime
 
 wrapper:
 	@echo "======================= WRAPPER BUILDING"
-	@echo $(PATH)
 	gprbuild -p -P wrapper/wrapper.gpr
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
 	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
