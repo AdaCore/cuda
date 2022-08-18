@@ -47,7 +47,7 @@ if [ ! -z "$1" ]; then
     CUDA_ROOT="$1"
 elif [ ! -z "$CUDA_ROOT" ]; then
     ## Use already set value
-    break
+    true # no-op
 elif command -v nvcc >/dev/null; then
     ## Heuristic: $CUDA_ROOT/bin/nvcc
     nvcc=$(readlink -f $(command -v nvcc))
