@@ -20,10 +20,11 @@ Untar the package::
 In the extracted directory, generate the toolsuite setup for your current 
 installation::
 
-  cd cuda_env-[version]-x86_64-linux-bin
+  cd cuda_env-[version]-x86_64-linux-bin/cuda
   sh setup.sh
 
 In the same directory, execute env.sh::
+
   . env.sh
 
 Note that this is needed every time you will need to compile a CUDA application.
