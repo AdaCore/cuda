@@ -2,11 +2,11 @@
 Performance Considerations
 **************************************
 
-GNAT for CUDA relies on the backend technology from the CUDA toolchain, and
+GNAT for CUDA relies on the CUDA toolchain backend technology, and
 offers a very similar compilation model. There is no fundamental reason why 
-a program in Ada would be significantely different than a program in C from
+a program in Ada would be significantly different than a program in C from
 a performance and resource consumption point of view. However, usage of some
-capabilities or pattern may alter performances.
+capabilities or patterns may alter performances.
 
 Compiler Switches
 =================
@@ -15,7 +15,7 @@ The following switches can be considered:
 
 - ``-gnatp`` will remove checks automatically added by the Ada language, and will
   make the application run faster.
-- at least ``-O2`` optimization levels is recommended
+- at least ``-O2`` optimization level is recommended
 - ``-gnatn`` will enable inlining.
 
 Unconstrained Arrays
@@ -34,14 +34,14 @@ E.g.:
     begin
        V (6) := 0;
 
-When computing the memory location of item 6 in the array, the code must furst
-load from memory the lowerbound (5), then substract the index to this lower 
+When computing the memory location of item 6 in the array, the code must first
+load from memory the lowerbound (5), then subtract the index to this lower 
 bound to compute the memory offset from the array starting point.
 
 To solve this issue, an Ada extension is available when compiling with ``-gnatX``.
-This allows to fix the lower bound of the array. If this lower bound is zero,
-it will remove the need for both loading that lower bound and adding a value
-when computing the offset. E.g.:
+This fixes the lower bound of the array. If this lower bound is zero, it will
+remove the need for both loading that lower bound and adding a value when
+computing the offset. E.g.:
 
 .. code-block:: ada
 
