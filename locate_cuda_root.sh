@@ -47,15 +47,22 @@ if [ ! -z "$1" ]; then
     CUDA_ROOT="$1"
 elif [ ! -z "$CUDA_ROOT" ]; then
     ## Use already set value
-    break
-else
+    true # no-op
+elif command -v nvcc >/dev/null; then
     ## Heuristic: $CUDA_ROOT/bin/nvcc
-    CUDA_ROOT="$(dirname $(dirname $(which nvcc)))"
+    nvcc=$(readlink -f $(command -v nvcc))
+    assert test -f "$nvcc"
+    CUDA_ROOT="$(dirname $(dirname $nvcc))"
+else
+    ## Try a "standard" directory
+    CUDA_ROOT="/usr/local/cuda"
 fi
 
 # Check root seems correct
 assert test -d $(realpath "$CUDA_ROOT")
 assert test -d "$CUDA_ROOT/include"
+assert test -f "$CUDA_ROOT/bin/ptxas"
+assert test -f "$CUDA_ROOT/bin/nvcc"
 assert "find -L '$CUDA_ROOT' -iname 'libdevice.*.bc' -print -quit | grep lib" 
 
 # Result
