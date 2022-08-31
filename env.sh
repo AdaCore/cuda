@@ -1,6 +1,8 @@
 set -e
 
 # https://stackoverflow.com/a/28776166
+# Cannot detect if the script is being sourced from within a script
+# in that case set the env var NO_SOURCED_CHECK
 is_sourced() {
     if [ -n "$ZSH_VERSION" ]; then
         case $ZSH_EVAL_CONTEXT in *:file:*) return 0;; esac
@@ -10,9 +12,11 @@ is_sourced() {
     return 1  # NOT sourced.
 }
 
-if ! is_sourced || ! [ -f $PWD/env.sh ] ; then
-    echo "This script is meant to be sourced from its own directory"
-    exit 2
+if [ -z "$NO_SOURCED_CHECK" ]; then
+    if ! is_sourced || ! [ -f $PWD/env.sh ] ; then
+        echo "This script is meant to be sourced from its own directory"
+        exit 2
+    fi
 fi
 
 CURRENT=$(pwd)
