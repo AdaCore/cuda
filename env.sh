@@ -1,4 +1,4 @@
-set -e
+# no set -e because this is supposed to be sourced!
 
 # https://stackoverflow.com/a/28776166
 # Cannot detect if the script is being sourced from within a script
@@ -22,7 +22,9 @@ fi
 CURRENT=$(pwd)
 ROOT="$CURRENT/.."
 
-. $CURRENT/locate_cuda_root.sh >/dev/null
+# being sourced, must be super careful with error return value
+CUDA_ROOT=$($SHELL $CURRENT/locate_cuda_root.sh) || return 2
+export CUDA_ROOT # direct export would gobble up eventual error
 
 export GPR_PROJECT_PATH="$ROOT/cuda/api/:$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$ROOT/gnat-llvm/share/gpr:$GPR_PROJECT_PATH"
 export PYTHONPATH="$ROOT/uwrap/lang_template/build/python:$ROOT/uwrap/lang_test/build/python:$PYTHONPATH"
