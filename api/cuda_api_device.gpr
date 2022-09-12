@@ -34,7 +34,10 @@ project CUDA_API_Device is
    package Compiler is
       for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-mcpu=" & GPU_Arch);
    end Compiler;
-   
+
+   package Binder is
+      for Default_Switches ("ada") use ("-d_d");
+   end Binder;
 
    for Archive_Builder use ("cuda-gcc", "-cuda-host=" & CUDA_Host, "-mcpu=" & GPU_Arch);
 
