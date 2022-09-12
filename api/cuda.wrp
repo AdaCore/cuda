@@ -47,7 +47,7 @@ match s: SubpDecl()
 wrap chars_into_string ();
 
 match ObjectDecl(child (DefiningName (x"^cuda(Error.*)$")))
-wrap error_code_into_exception ("CUDA", "Exception_Registry", "\1");
+wrap error_code_into_exception ("CUDA.Exceptions", "Exception_Registry", "\1");
 
 match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) do
     match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$") do
@@ -97,7 +97,7 @@ match SubpDecl ()
    and child (f_subp_kind ("function"))
    and p_subp_decl_spec ().p_returns ().filter (x"driver_types_h.cudaError_t")
    and not p_defining_name ().filter (x"cudaPeekAtLastError|cudaGetLastError")
-wrap return_into_exception ("CUDA", "Exception_Registry");
+wrap return_into_exception ("CUDA.Exceptions", "Exception_Registry");
 
 match ParamSpec (x"access .*")
    and not parent (SubpDecl (p_defining_name ().filter (x"atomic")))
@@ -143,6 +143,9 @@ wrap address_into_return ("System.Address");
 
 match ParamSpec (not prev (ParamSpec ())) and parent (SubpDecl (x"cudaEventElapsedTime"))
 wrap access_into_return ();
+
+match u: w_PackageDecl (origin (PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))))
+pick  u.child (new (w_WithClause (ref => "CUDA.Exceptions")));
 
 match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
 weave w_PackageDecl (
