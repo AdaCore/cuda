@@ -39,6 +39,7 @@ wrapper:
 	gprbuild -p -P wrapper/wrapper.gpr
 	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
 	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
+	cp $(llvm_dir)/bin/llvm-gnatbind $(llvm_dir)/bin/cuda-gnatbind
 
 runtime: libdevice.ads
 	@echo "======================= RUNTIME BUILDING"
