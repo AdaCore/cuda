@@ -279,7 +279,9 @@ begin
             --  format
             Input_File_Number := Input_File_Number + 1;
 
-            if Arg (Arg'Last - 1 .. Arg'Last) = ".o" then
+            if Arg (Arg'First .. Arg'First +  2) = "b__"
+              and then Arg (Arg'Last - 1 .. Arg'Last) = ".o"
+            then
                --  There is a bug in gprlib that ignore gprconfig suffix for
                --  object files when it comes to binder files. As a temporary
                --  hack, changing the suffix here.
