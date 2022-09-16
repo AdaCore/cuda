@@ -1,27 +1,17 @@
 with "cuda_api_device.gpr";
+        
+aggregate library project Device is
+    for Project_Files use ("../../../api/cuda_api_device.gpr", "device_code.gpr");
+    for Library_Name use "device";
+    for Library_Dir use "lib";
+    for Library_Interface use ("kernel");
 
-library project Device is
+    for Target use "cuda";
 
-   for Library_Interface use ("kernel");
+    for Archive_Builder use CUDA_API_Device'Archive_Builder;
 
+    package Binder is
+      for Default_Switches ("ada") use CUDA_API_Device.Binder'Default_Switches ("ada") & ("-t");
+    end Binder;        
 
-   for Languages use ("Ada");
-   for Source_Dirs use ("src/common");
-   for Object_Dir use "obj/device";
-
-   for Target use "cuda";
-   for Library_Name use "kernel";
-   for Library_Dir use "lib";
-
-   package Compiler is
-      for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");      
-   end Compiler;
-
-   package Binder is
-      for Driver ("ada") use "llvm-gnatbind";
-      for Default_Switches ("ada") use CUDA_API_Device.Binder'Default_Switches ("ada");
-   end Binder;
-
-   for Archive_Builder use CUDA_API_Device'Archive_Builder;
-   
 end Device;
