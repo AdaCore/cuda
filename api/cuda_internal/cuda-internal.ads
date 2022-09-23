@@ -25,10 +25,7 @@ package CUDA.Internal is
       Block_Dim  : Dim3;
       Args       : System.Address;
       Shared_Mem : Interfaces.C.Unsigned_Long;
-      Stream     : CUDA.Driver_Types.Stream_T)
-   with Import => True,
-        Convention => C,
-        External_Name => "cudaLaunchKernel";
+      Stream     : CUDA.Driver_Types.Stream_T);
 
    procedure Register_Function
       (Fat_Binary_Handle : System.Address;
