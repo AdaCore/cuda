@@ -83,8 +83,14 @@ begin
       Count => Array_Size,
       Kind  => Memcpy_Device_To_Host);
 
+   if Elaborated_Value /= 10_000.0 then
+      Put_Line ("Error in computation of Elaborated_Value!");
+
+      return;
+   end if;
+
    for I in 1..Num_Elements loop
-      if abs (H_A (I) + H_B (I) - H_C (I)) > 1.0E-5 then
+      if abs (H_A (I) + H_B (I) + Elaborated_Value - H_C (I)) > 1.0E-5 then
          Put_Line ("Result verification failed at element "& I'Img & "!");
 
          return;

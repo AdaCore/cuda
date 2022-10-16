@@ -14,17 +14,17 @@ project CUDA_API_Host is
       for Switches ("ada") use (
             "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib",
             "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib/stubs",
-            "-lcudadevrt", 
-            "-lcudart_static", 
-            "-lrt", 
-            "-lpthread", 
+            "-lcudadevrt",
+            "-lcudart_static",
+            "-lrt",
+            "-lpthread",
             "-ldl",
             "-Wl,--unresolved-symbols=ignore-all"
          );
    end Linker;
 
    package Binder is
-      for Default_Switches ("ada") use ("-d_c");
+      for Default_Switches ("ada") use ("-d_c=device");
    end Binder;
-   
+
 end CUDA_API_Host;
