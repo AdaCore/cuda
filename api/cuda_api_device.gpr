@@ -8,7 +8,7 @@ project CUDA_API_Device is
 
    for Target use "cuda";
 
-   type GPU_Arch_Option is 
+   type GPU_Arch_Option is
       ("sm_20", --  Fermi
        "sm_30", --  Kepler
        "sm_35", --  Kepler
@@ -25,6 +25,7 @@ project CUDA_API_Device is
        "sm_80", --  Ampere
        "sm_86", --  Ampere
        "sm_87", --  Ampere
+       "sm_89", --  Lovelace
        "sm_90"  --  Hopper
       );
    --  See https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
@@ -34,7 +35,10 @@ project CUDA_API_Device is
    package Compiler is
       for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-mcpu=" & GPU_Arch);
    end Compiler;
-   
+
+   package Binder is
+      for Default_Switches ("ada") use ("-d_d");
+   end Binder;
 
    for Archive_Builder use ("cuda-gcc", "-cuda-host=" & CUDA_Host, "-mcpu=" & GPU_Arch);
 

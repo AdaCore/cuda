@@ -8,9 +8,11 @@ Usage::
 Run the CUDA testsuite.
 """
 import sys
+import logging
 from pathlib import Path
 from e3.testsuite import Testsuite
-from e3.testsuite.driver.classic import TestAbortWithError, ClassicTestDriver
+from e3.testsuite.driver.classic import TestAbortWithError, TestAbortWithFailure
+from e3.testsuite.driver.diff import DiffTestDriver
 from e3.fs import sync_tree
 
 
@@ -18,7 +20,7 @@ ROOT = Path(sys.argv[0]).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 
 
-class CUDAExamplesDriver(ClassicTestDriver):
+class CUDAExamplesDriver(DiffTestDriver):
     def check_file(self, path):
         assert Path(path).is_file, f"Missing file: {path}"
 
@@ -28,7 +30,8 @@ class CUDAExamplesDriver(ClassicTestDriver):
         sync_tree(str(TESTED_SOURCE_DIR), self.working_dir())
 
         self.check_file(Path(self.working_dir()) / "Makefile")
-        self.shell(["make", "-I", str(TESTED_SOURCE_DIR), "-j12"], timeout=10)
+        self.shell(["make", "-I", str(TESTED_SOURCE_DIR), "-j12"], timeout=10,
+                   analyze_output=False)
         self.shell(["./main"])
 
     def run(self):
@@ -36,6 +39,15 @@ class CUDAExamplesDriver(ClassicTestDriver):
             self.do_run()
         except AssertionError as ae:
             raise TestAbortWithError(ae) from ae
+        except TestAbortWithFailure as e:
+            logging.error(f"test caused failure: {e}")
+            logging.error(self.output)
+            raise
+        except Exception as e:
+            # those are test failures
+            logging.error(f"test raised an exception {e.__class__}: {e}")
+            logging.error(self.output)
+            raise TestAbortWithFailure(e) from e
 
 
 class CUDATestsuite(Testsuite):

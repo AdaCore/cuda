@@ -271,10 +271,26 @@ begin
       begin
          if Arg'Length > 0 and then Arg (1) /= '-'
            and then
-             (J = 1 or else Argument (J - 1) /= "-x")
+             (J = 1 or else
+               (Argument (J - 1) /= "-x"
+               and then Argument (J - 1) /= "-o"))
          then
+            --  Ignoring -o for now as we always generate file in the same
+            --  format
             Input_File_Number := Input_File_Number + 1;
-            Input_Files (Input_File_Number) := new String'(Arg);
+
+            if Arg (Arg'First .. Arg'First +  2) = "b__"
+              and then Arg (Arg'Last - 1 .. Arg'Last) = ".o"
+            then
+               --  There is a bug in gprlib that ignore gprconfig suffix for
+               --  object files when it comes to binder files. As a temporary
+               --  hack, changing the suffix here.
+               Input_Files (Input_File_Number) :=
+                 new String'(Arg (Arg'First .. Arg'Last - 2) & ".cubin");
+            else
+               Input_Files (Input_File_Number) :=
+                 new String'(Arg);
+            end if;
 
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
@@ -357,8 +373,19 @@ begin
          LLVM_Args (LLVM_Arg_Number) := new String'("-mcuda-libdevice=" & Libdevice_Path.all);
 
          if Input_File_Number /= 1 then
-            Put_Line ("error: expected one compilation file, got"
-                     & Input_File_Number'Img);
+            Put ("error: expected one compilation file, got"
+                     & Input_File_Number'Img & "(");
+
+            for I in 1 .. Input_File_Number loop
+               if I > 1 then
+                  Put (", ");
+               end if;
+
+               Put (Input_Files (I).all);
+            end loop;
+
+            Put_Line (")");
+
             return 1;
          end if;
 

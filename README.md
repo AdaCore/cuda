@@ -1,223 +1,126 @@
-# cuda
+# GNAT for CUDA
 
-## Building the CUDA compiler tools and runtime
-Prerequisite: gnat-llvm with NVPTX support, python
- 
-To build the CUDA compiler wrapper *llvm-cuda* and the *device-cuda* runtime you will need a copy of the *gnat* and *bb-runtimes* sources in the folder containing the *cuda* project, i.e:
+GNAT for CUDA® is a toolsuite that allows to compile Ada and SPARK code directly for NVIDIA GPUs.
 
-	development/
-      |--> bb-runtimes
-      |--> cuda
-      \--> gnat
-   
-Once set up, you can then build and install *llvm-cuda* and the *device-cuda* runtime by running `make` from the CUDA project directory.
+## Documentation
 
-If required, *llvm-cuda* can be built directly using `wrapper.gpr` project file in the `wrapper` directory. 
-
-## Building the CUDA bindings
-CUDA API changes a lot from version to version, and even within a single version from configuration to configuration. It's not practical to write or keep all possible versions in version control. Instead, we can generate the API with -fdump-ada-specs and Uwrap.
-
-For that to work, you need a recent gnat, langkit and libadalang installation, e.g. using anod:
-
-	anod install libadalang_for_customers
-	anod install langkit
-
-	eval `anod printenv libadalang_for_customers`
-	eval `anod printenv langkit`
-    
-	git clone git@github.com:AdaCore/uwrap.git
-	cd uwrap
-	cd lang_test
-	make
-	cd ../lang_template
-	make
-	cd ..
-	source env.sh
-	gprbuild
-	export PATH=`pwd`/obj:$PATH
-
-Set CUDA_ROOT to point to your cuda installation. For example:
-	
-	export CUDA_ROOT=/usr/local/cuda-10.0
-	
-Next you will run the cuda bind.sh script. ("cuda" is from the AdaCore github project, there's a link above.) However, this must be done from the directory it appears in, so use
-
-	cd cuda/api
-	sh ./bind.sh
-
-This should create CUDA bindings under `cuda/api`.
-
-## Using CUDA with your Ada application
-
-### Device Code
-
-A minimal project file for the device target **(device.gpr)** takes the following form:
-- Where you replace `[common_sources]` with the path to your Ada source files common to the **host** and **device**.
-- Where you need to specify the **cubin version** matching your CUDA device. By default it is set to `sm_75`.   
-  You can find the proper cubin version, `sm_XY`, for your device at https://developer.nvidia.com/cuda-gpus.    
-  Once your device found, `XY` = Compute Capability * 10.
-  Note: if your **cubin version** is not in the `Cubin_Version_Option` type definition defined in the `.gpr` file, you need to add it.
-- Where you need to specify your **host_target** for running the application. By default it is set to `x86_64-linux`.
-
-Eg. With Ada application source code inside `src/common` folder, to build your project running over a `x86_64-linux` **host_target**, targeting a `GeForce GTX 1080 Ti` CUDA **device**, you would:     
-1. Replace `[common_sources]` by `"src/common"` inside the following `device.gpr` file content:
+For a thorough discussion about `GNAT for CUDA` please consult the official documentation. A html version can be built like so:
 
 ```
-with "../../../api/cuda_device.gpr";
-
-library project Device is
-
-   for Create_Missing_Dirs use "True";
-
-   for Languages use ("Ada");
-   for Source_Dirs use ([common_sources]);
-
-   for Target use "cuda";
-   for Runtime ("ada") use "device-cuda";
-   for Library_Name use "kernel";
-
-   type Cubin_Version_Option is ("sm_53", "sm_61", "sm_75"); 
-   Cubin_Version : Cubin_Version_Option := external ("cubin_version", "sm_75");
-   
-   package Compiler is
-      for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-mcpu=" & Cubin_Version);          
-   end Compiler;
-
-   type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
-   Host_Target : Host_Target_Option := external ("host_target", "x86_64-linux");
-
-   for Archive_Builder use ("cuda-gcc", "-host-target=" & Host_Target, "-mcpu=" & Cubin_Version);
-   
-end Device;
+cd doc
+make hmtl
 ```
 
-2. Build: 
+## Status
+Beta
+
+## Quickstart
+
+### End user - archive distribution
+**Note**: During beta phase this package is available on request/invitation only.
+
+#### Prerequisites
+
+- GNAT toolchain - AdaCore client portal
+- CUDA libraries - eg. apt-get
+- GNAT aarch64-linux cross compiler toolchain - AdaCore client portal (optional)
+
+### Developper - git repository clone
+**Note**: During beta phase this repo can only be built by AdaCore engineers with `anod` acces.
+
+#### Prerequisites
+
+- GNAT toolchain - anod
+- CUDA libraries - eg. apt-get
+- GNAT aarch64-linux cross compiler toolchain - anod (optional)
+- GNAT sources - anod (set root Makefile $GNAT_SRC to it)
+- bb-runtimes - anod (set root Makefile $BB_SRC to it)
+- CUDA_env - anod (set to system environment variables)
+
+### Setup GNAT for CUDA
 ```
-gprbuild -Xcubin_version=sm_61 -Xhost_target=x86_64-linux -P device
+chmod +x setup.sh
+./setup.sh
 ```
-
-### Host Code
-
-Note: We assume your CUDA distribution is installed at `/usr/local/cuda` **or** you have such symbolic link pointing to your concrete CUDA distribution. For *exotic* installation please adapt the following instructions or open an issue for further assistance.
-
-A minimal project file for the host **(host.gpr)** takes the following form:
-- Where you replace `[common_sources]` with the path to your Ada source files common to the **host** and **device**.
-- Where you replace `[host_sources]` with the path to your Ada source files concerning the **host**.
-- Where you need to specify your `host_target` for running the application. By default it is set to `x86_64-linux`.
-
-Eg. With Ada application source code inside `src/common` and `src/host` folders, to build your project running over a `x86_64-linux` **host**, you would:     
-1. Replace `[common_sources]` by `"src/common"` and `[host_sources]` by `"src/host"` inside `host.gpr`.    
-
+- **End user only**:
 ```
-with "../../../api/cuda_host.gpr";
-
-project Host is
-
-   for Create_Missing_Dirs use "True";
-
-   for Object_Dir use "obj/host";
-   for Source_Dirs use ([common_sources], [host_sources]);
-   for Main use ("main.adb");
-
-   type Host_Target_Option is ("x86_64-linux", "aarch64-linux");
-   Host_Target : Host_Target_Option := external ("host_target", "x86_64-linux");
-
-   for Target use host_target;
-
-   package Compiler is
-      for Switches ("ada") use ("-gnatX", "-gnatd_c");
-   end Compiler;
-
-   package Linker is
-      for Switches ("ada") use (
-            "-L/usr/local/cuda/targets/" & Host_Target & "/lib",
-            "-L/usr/local/cuda/targets/" & Host_Target & "/lib/stubs",
-            "-lcudadevrt", "-lcudart_static", 
-            "-lrt", 
-            "-lpthread", 
-            "-ldl",
-            "-Wl,--unresolved-symbols=ignore-all"
-         );
-   end Linker;
-
-   package Binder is
-      for Default_Switches ("ada") use ("-d_c");
-   end Binder;
-
-end Host;
+source ./env.sh 
 ```
 
-2. Build: 
+### Build cuda-gcc (optional)
+- First [Setup GNAT for CUDA](#setup-gnat-for-cuda). Then:
 ```
-gprbuild -Xhost_target=x86_64-linux -P host -largs $(PWD)/lib/*.fatbin.o
+make
 ```
 
-## Cross compilation
+### Compilation of vectorAdd example program
+**Note**: By default we are building for `x86_64,` Turing family GPU `sm_75`
+- First [Setup GNAT for CUDA](#setup-gnat-for-cuda). Then:
+```
+cd examples/0_Simple/vectorAdd
+make
+```
 
-Note: To illustrate concrete cross-compilation steps, the following instructions are contextualized for cross-compiling from an `x86_64-linux` desktop (**host**) to a `aarch64-linux` Jetson Nano (**target**) running an Ubuntu 18.04 derivatives as officialy published by NVIDIA.
+### Cross-compilation of vectorAdd example program
 
-### In a nutshell 
+**Note**: To illustrate concrete cross-compilation steps, the following instructions are contextualized for cross-compiling from a `x86_64-linux` desktop (**host**) to a `aarch64-linux` Jetson Nano (**cuda_host**) Maxwell family GPU `sm_53` running an `Ubuntu 18.04` derivative as officialy published by NVIDIA. The **cuda_host** is located at LAN IP address **192.168.x.y** running as user **alice**:
 
-You will need:
-1. An Ada aarch64-linux cross-compiler. AdaCore client's can have access to such compiler on the GNAT Pro portal.
-2. The CUDA libraries matching the **target** distribution CUDA capabilities and drivers; from `apt-get` the NVIDIA Jetson Nano Ubuntu 18.04 derivative ships CUDA 10.2.
-3. Tell `gprbuild` to build for an `aarch64-linux` host-target with a cubin version of `sm_53`; matching the CUDA compute capability of the Jetson Nano (https://developer.nvidia.com/cuda-gpus).
+- First [Setup GNAT for CUDA](#setup-gnat-for-cuda). 
 
-Note: Because installing CUDA binaries not matching your **host** distribution can be cumbersome, we recommend to install CUDA on the **target** (**Jetson**) and mount the lib binaries to the **host** system using `sshfs`. This way you are sure to cross-compile against proper binaries version and spare your **host** system, here `x86_64`, of potential **target** alien binaries proliferation, here `aarch64`.
+- Make sure your cross toolchain is properly installed.
+```
+$ which aarch64-linux-gnu-gcc
+[somewhere_on_your_disk]/aarch64-linux-linux64/gnat/install/bin/aarch64-linux-gnu-gcc
 
-### Cross building
+$ echo $ENV_PREFIX
+[somewhere_on_your_disk]/aarch64-linux-linux64/system-libs/src/aarch64-linux-system
+```
 
-For a Jetson Nano board available at IP address **192.168.1.1** on LAN running as user **alice**:
-
-- Build  as instructed in preceding section titled [Building the CUDA compiler tools and runtime](#building-the-cuda-compiler-tools-and-runtime) on **host**.
-- Install **AdaCore** `aarch64-linux` cross-compiler on **host**. Make sure it is in your path by following accompanying instructions.
-- Install `sshfs`. On **host**:
+- As we will use the CUDA libraries found on the **cuda_host**, install `sshfs`. On **host**:
 ```
 sudo apt install sshfs
 ```
 
-- Create folders     
-		 `/usr/lib/aarch64-linux-gnu/`    
-         `/usr/local/cuda/targets/aarch64-linux/lib`    
-		 `/usr/local/cuda/targets/aarch64-linux/lib/stubs`
+- Create folders. On **host**:   
+		 `/usr/lib/aarch64-linux-gnu/`        
+       `/usr/local/cuda/targets/aarch64-linux/lib`       
+		 `/usr/local/cuda/targets/aarch64-linux/lib/stubs`    
 
-- On **host**:
 ```
 sudo mkdir -p /usr/lib/aarch64-linux-gnu/
 sudo mkdir -p /usr/local/cuda/targets/aarch64-linux/lib/stubs
 ```
 
-- Mount **target** `aarch64` system libs to newly created **host** directory using sshfs. On **host**:
+- Mount **cuda_host** `aarch64` system libs to newly created **host** directory using sshfs. On **host**:
 ```
-sudo sshfs -o nonempty,allow_other,default_permissions alice@192.168.1.1:/usr/lib/aarch64-linux-gnu/ /usr/lib/aarch64-linux-gnu/
-```
-
-- Mount **target** `aarch64` CUDA libs to newly created **host** directory using sshfs. On **host**:
-```
-sudo sshfs -o nonempty,allow_other,default_permissions alice@192.168.1.1:/usr/local/cuda/targets/aarch64-linux/lib /usr/local/cuda/targets/aarch64-linux/lib
+sudo sshfs -o nonempty,allow_other,default_permissions alice@192.168.x.y:/usr/lib/aarch64-linux-gnu/ /usr/lib/aarch64-linux-gnu/
 ```
 
-- Build `device.gpr` project by specifying the cubin_version and host_target. On **host**:
+- Mount **cuda_host** `aarch64` CUDA libs to newly created **host** directory using sshfs. On **host**:
 ```
-gprbuild -Xcubin_version=sm_53 -Xhost_target=aarch64-linux -P device
-```
-
-- Build `host.gpr` project by specifying the host_target. On **host**:
-```
-gprbuild -Xhost_target=aarch64-linux -P host -largs $(PWD)/lib/*.fatbin.o
+sudo sshfs -o nonempty,allow_other,default_permissions alice@192.168.x.y:/usr/local/cuda/targets/aarch64-linux/lib /usr/local/cuda/targets/aarch64-linux/lib
 ```
 
-- Copy executable to **target**. On **host**:
+- Edit `examples/Makefile.include` to:
 ```
-scp main alice@192.168.1.1:~
-```
-
-- Move to **target**. On **host**:
-```
-ssh alice@192.168.1.1
+GPU_ARCH=sm_53
+CUDA_HOST=aarch64-linux
 ```
 
-- Execute. On **target**:
+- Build example program. On **host**:
 ```
+source ./env.sh
+cd examples/0_Simple/vectorAdd
+make
+```
+
+- Copy executable to **cuda_host**. On **host**:
+```
+scp main alice@192.168.x.y:~
+```
+
+- Move to **cuda_host**. On **host**:
+```
+ssh alice@192.168.x.y:~
 ./main
 ```
