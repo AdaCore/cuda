@@ -487,7 +487,7 @@ begin
                --  object files when it comes to binder files. As a temporary
                --  hack, changing the suffix here.
                Input_Files (Input_File_Number) :=
-                 new String'(Arg (Arg'First .. Arg'Last - 2) & ".cubin");
+                 new String'(Arg (Arg'First .. Arg'Last - 2) & ".s");
             else
                Input_Files (Input_File_Number) :=
                  new String'(Arg);
