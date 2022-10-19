@@ -1,9 +1,11 @@
-project CUDA_API_Device is
+library project CUDA_API_Device is
    type CUDA_Host_Option is ("x86_64-linux", "aarch64-linux");
    CUDA_Host : CUDA_Host_Option := external ("cuda_host", "x86_64-linux");
 
    for Source_Dirs use ("device_static");
 
+   for Library_Name use "cuda_api_device";
+   for Library_Dir use "lib";
    for Object_Dir use "obj";
 
    for Target use "cuda";

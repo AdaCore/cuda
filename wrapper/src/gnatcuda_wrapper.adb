@@ -176,7 +176,16 @@ function GNATCUDA_Wrapper return Integer is
 
    Input_File_Number : Integer := 0;
    Input_Files : String_List (1 .. Argument_Count);
+
+   Library_Path_Number : Integer := 0;
+   Library_Path : String_List (1 .. Argument_Count);
+
+   Libraries_Number : Integer := 0;
+   Libraries : String_List (1 .. Argument_Count);
+
    Libdevice_Path : String_Access;
+
+   Shared : Boolean;
 
    function Spawn (S : String; Args : Argument_List) return Integer;
    --  Call GNAT.OS_Lib.Spawn and take Verbose into account
@@ -263,6 +272,198 @@ function GNATCUDA_Wrapper return Integer is
 
       return To_String (CUDA_Root_Lazy);
    end CUDA_Root;
+
+   ---------------------------
+   -- Filter_Assembly_Files --
+   ---------------------------
+
+   function Filter_Assembly_Files return String_List is
+      N_A : Integer := 0;
+      Assembly_Files : String_List (1 .. Input_File_Number);
+   begin
+      for F in 1 .. Input_File_Number loop
+         declare
+            Filename : String := Input_Files (F).all;
+         begin
+            if Filename (Filename'Last - 1 .. Filename'Last) = ".s" then
+               N_A := @ + 1;
+               Assembly_Files (N_A) := new String'(Filename);
+            end if;
+         end;
+      end loop;
+
+      return Assembly_Files (1 .. N_A);
+   end Filter_Assembly_Files;
+
+   ------------------
+   -- Link_Archive --
+   ------------------
+
+   function Archive_Cubin return String is
+      File_Name : constant String :=
+         Base_Name
+            (Input_Files (1).all, File_Extension (Input_Files (1).all));
+   begin
+      return Dir_Name (Input_Files (1).all) & Directory_Separator & File_Name & ".cubin";
+   end Archive_Cubin;
+
+   ------------------
+   -- Link_Archive --
+   ------------------
+
+   function Link_Archive return Integer is
+      File_Name : constant String :=
+         Base_Name
+            (Input_Files (1).all, File_Extension (Input_Files (1).all));
+      PTX_Name : aliased String := File_Name & ".s";
+      Obj_Name : aliased String := Archive_Cubin;
+
+      PTXAS_Args : constant Argument_List :=
+         (new String'("-arch=sm_" & GPU_Name.all),
+            new String'("-m64"),
+            new String'("--compile-only"),
+            new String'("-v"))
+            & Filter_Assembly_Files
+            & (new String'("--output-file"),
+             Obj_Name'Unchecked_Access);
+
+   begin
+      Status := Spawn
+         (Locate_And_Check ("ptxas").all,
+            PTXAS_Args);
+
+      if Status /= 0 then
+         Put_Line ("ptxas failture");
+         return Status;
+      end if;
+
+      return 0;
+   end Link_Archive;
+
+   -----------------------------
+   -- Compute_Input_Libraries --
+   -----------------------------
+
+   function Compute_Input_Libraries return String_List is
+      R_Number : Integer := 0;
+      Result : String_List (1 .. Libraries_Number);
+   begin
+      for L in Result'Range loop
+         for D in 1 .. Library_Path_Number loop
+            declare
+               Tentative : String :=
+                  Library_Path (D).all &
+                  "/lib" &
+                  Libraries (L).all &
+                  ".cubin";
+            begin
+               if GNAT.IO_Aux.File_Exists (Tentative) then
+                  R_Number := @ + 1;
+                  Result (R_Number) := new String'(Tentative);
+
+                  exit;
+               end if;
+            end;
+         end loop;
+      end loop;
+
+      return Result (1 .. R_Number);
+   end Compute_Input_Libraries;
+
+   -----------------
+   -- Link_Shared --
+   -----------------
+
+   function Link_Shared return Integer is
+      Kernel_Object : constant String := Input_Files (1).all;
+      Kernel_Fat : constant String := Kernel_Object
+         (Kernel_Object'First .. Kernel_Object'Last - 2);
+      Kernel_Linked : constant String := Kernel_Object
+         (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
+
+      Nvlink_Args : constant Argument_List :=
+         (new String'("--arch=sm_" & GPU_Name.all),
+          new String'("-m64"),
+          new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
+          new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
+         & Input_Files (1 .. Input_File_Number)
+         & Compute_Input_Libraries
+         & new String'(Archive_Cubin)
+         &(new String'("-lcudadevrt"),
+            new String'("-o"),
+            new String'(Kernel_Linked));
+
+         Fatbinary_Args : constant Argument_List :=
+            (new String'("-64"),
+             new String'("--create"),
+
+            --  We currently only support one SAL per host application, with a
+            --  fatbinary name hardcoded in gnatbind. We should eventually move
+            --  to a scheme where we can have more than one. See U503-012
+            --  new String'(Kernel_Fat),
+            new String'("main.fatbin"),
+
+            new String'("-link"),
+            new String'("--image3=kind=elf,sm="
+            & GPU_Name.all & ",file=" & Kernel_Linked));
+
+         Ld_Args : constant Argument_List :=
+            (new String'("-r"),
+             new String'("-b"),
+             new String'("binary"),
+             new String'("main.fatbin"),
+             new String'("-o"),
+             new String'(Kernel_Object)
+         );
+      begin
+         for I in 1 .. Input_File_Number loop
+            Put_Line ("INPUT FILE " & I'Img & " => " & Input_Files (I).all);
+         end loop;
+
+         -- First, link the cuda assembly files into an archive (.cubin)
+
+         Status := Link_Archive;
+
+         if Status /= 0 then
+            return Status;
+         end if;
+
+         -- Second, compute other archives passed as library on the command line
+
+         -- Third, call nvlink on all the cubins
+
+         Status := Spawn
+            (Locate_And_Check ("nvlink").all,
+             Nvlink_Args);
+
+         if Status /= 0 then
+            Put_Line ("nvlink failure");
+            return Status;
+         end if;
+
+         -- Generate the fat binary
+
+         Status := Spawn
+            (Locate_And_Check ("fatbinary").all,
+             Fatbinary_Args);
+
+         if Status /= 0 then
+            Put_Line ("fatbinary failure");
+            return Status;
+         end if;
+
+         -- Link all object togethers
+
+         Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
+
+         if Status /= 0 then
+            Put_Line ("ld failure");
+            return Status;
+         end if;
+
+         return 0;
+   end Link_Shared;
+
 begin
    for J in 1 .. Argument_Count loop
       declare
@@ -332,6 +533,14 @@ begin
             end if;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
             Libdevice_Path := new String'(To_String (Sub_Arg));
+         elsif Arg = "--shared" then
+            Shared := True;
+         elsif Arg (Arg'First .. Arg'First + 1) = "-L" then
+            Library_Path_Number := @ + 1;
+            Library_Path (Library_Path_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
+         elsif Arg (Arg'First .. Arg'First + 1) = "-l" then
+            Libraries_Number := @ + 1;
+            Libraries (Libraries_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
          else
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
@@ -393,17 +602,6 @@ begin
             File_Name : constant String :=
             Base_Name
                (Input_Files (1).all, File_Extension (Input_Files (1).all));
-            PTX_Name : aliased String := File_Name & ".s";
-            Obj_Name : aliased String := File_Name & ".cubin";
-
-            PTXAS_Args : constant Argument_List :=
-            (new String'("-arch=sm_" & GPU_Name.all),
-               new String'("-m64"),
-               new String'("--compile-only"),
-               new String'("-v"),
-               PTX_Name'Unchecked_Access,
-               new String'("--output-file"),
-               Obj_Name'Unchecked_Access);
          begin
             Status := Spawn
             (Locate_And_Check ("llvm-gcc").all,
@@ -412,86 +610,18 @@ begin
                LLVM_Args (1 .. LLVM_Arg_Number));
 
             if Status /= 0 then
-               Put_Line ("llvm-gcc failture");
-               return Status;
-            end if;
-
-            Status := Spawn
-            (Locate_And_Check ("ptxas").all,
-               PTXAS_Args);
-
-            if Status /= 0 then
-               Put_Line ("ptxas failture");
+               Put_Line ("llvm-gcc failure");
                return Status;
             end if;
          end;
       when Link =>
-         declare
-            Kernel_Object : constant String := Input_Files (1).all;
-            Kernel_Fat : constant String := Kernel_Object
-            (Kernel_Object'First .. Kernel_Object'Last - 2);
-            Kernel_Linked : constant String := Kernel_Object
-            (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
-
-            Nvlink_Args : constant Argument_List :=
-            (new String'("--arch=sm_" & GPU_Name.all),
-               new String'("-m64"),
-               new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
-               new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
-            & Input_Files (2 .. Input_File_Number)
-            &(new String'("-lcudadevrt"),
-               new String'("-o"),
-               new String'(Kernel_Linked));
-
-            Fatbinary_Args : constant Argument_List :=
-            (new String'("-64"),
-               new String'("--create"),
-
-               --  We currently only support one SAL per host application, with a
-               --  fatbinary name hardcoded in gnatbind. We should eventually move
-               --  to a scheme where we can have more than one. See U503-012
-               --  new String'(Kernel_Fat),
-               new String'("main.fatbin"),
-
-               new String'("-link"),
-               new String'("--image3=kind=elf,sm="
-               & GPU_Name.all & ",file=" & Kernel_Linked));
-
-            Ld_Args : constant Argument_List :=
-            (new String'("-r"),
-               new String'("-b"),
-               new String'("binary"),
-               new String'("main.fatbin"),
-               new String'("-o"),
-               new String'(Kernel_Object)
-            );
-         begin
-            Status := Spawn
-            (Locate_And_Check ("nvlink").all,
-               Nvlink_Args);
-
-            if Status /= 0 then
-               Put_Line ("nvlink failure");
-               return Status;
-            end if;
-
-            Status := Spawn
-            (Locate_And_Check ("fatbinary").all,
-               Fatbinary_Args);
-
-            if Status /= 0 then
-               Put_Line ("fatbinary failure");
-               return Status;
-            end if;
-
-            Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
-
-            if Status /= 0 then
-               Put_Line ("ld failure");
-               return Status;
-            end if;
-         end;
-      when Other => null;
+         if Shared then
+            return Link_Shared;
+         else
+            return Link_Archive;
+         end if;
+      when Other =>
+         null;
    end case;
 
    return 0;
