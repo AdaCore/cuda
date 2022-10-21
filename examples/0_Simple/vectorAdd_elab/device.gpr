@@ -9,7 +9,7 @@ library project Device is
    for Object_Dir use "obj/device";
 
    for Target use "cuda";
-   for Library_Name use "kernel";
+   for Library_Name use "device";
    for Library_Dir use "lib";
    for Library_Standalone use "encapsulated";
    for Library_Kind use "dynamic";

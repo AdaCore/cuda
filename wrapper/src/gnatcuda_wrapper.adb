@@ -184,6 +184,7 @@ function GNATCUDA_Wrapper return Integer is
    Libraries : String_List (1 .. Argument_Count);
 
    Libdevice_Path : String_Access;
+   Output_Argument : String_Access;
 
    Shared : Boolean;
 
@@ -273,6 +274,114 @@ function GNATCUDA_Wrapper return Integer is
       return To_String (CUDA_Root_Lazy);
    end CUDA_Root;
 
+   -----------------
+   -- Archive_Tgz --
+   -----------------
+
+   function Archive_Tgz return String is
+      File_Name : constant String :=
+        Base_Name
+          (Input_Files (1).all, File_Extension (Input_Files (1).all));
+   begin
+      return Dir_Name (Input_Files (1).all) & Directory_Separator & File_Name & ".tgz";
+   end Archive_Tgz;
+
+
+   -------------------
+   -- Compile_Cubin --
+   -------------------
+
+   function Compile_Cubin return Integer is
+   begin
+      if Libdevice_Path = null then
+         --  We don't have a path for libdevice specified on the commande line,
+         --  use heuristics to find the proper one
+
+         declare
+            Path_1 : String := CUDA_Root
+              & "/lib/nvidia-cuda-toolkit/libdevice/libdevice.10.bc";
+            Path_2 : String := CUDA_Root
+              & "/nvvm/libdevice/libdevice.10.bc";
+         begin
+            if GNAT.IO_Aux.File_Exists (Path_1) then
+               Libdevice_Path := new String'(Path_1);
+            elsif GNAT.IO_Aux.File_Exists (Path_2) then
+               Libdevice_Path := new String'(Path_2);
+            else
+               Put_Line
+                 ("error: could not locate libdevice on "
+                  & Path_1 & " or " & Path_2);
+
+               return 1;
+            end if;
+         end;
+      end if;
+
+      LLVM_Arg_Number             := @ + 1;
+      LLVM_Args (LLVM_Arg_Number) := new String'("-mcuda-libdevice=" & Libdevice_Path.all);
+
+      if Input_File_Number /= 1 then
+         Put ("error: expected one compilation file, got"
+              & Input_File_Number'Img & "(");
+
+         for I in 1 .. Input_File_Number loop
+            if I > 1 then
+               Put (", ");
+            end if;
+
+            Put (Input_Files (I).all);
+         end loop;
+
+         Put_Line (")");
+
+         return 1;
+      end if;
+
+      declare
+         File_Name : constant String :=
+           Base_Name
+             (Input_Files (1).all, File_Extension (Input_Files (1).all));
+
+         PTX_Name : aliased String := File_Name & ".s";
+         Obj_Name : aliased String := File_Name & ".cubin";
+
+         PTXAS_Args : constant Argument_List :=
+           (new String'("-arch=sm_" & GPU_Name.all),
+            new String'("-m64"),
+            new String'("--compile-only"),
+            new String'("-v"))
+           & PTX_Name'Unchecked_Access
+           & (new String'("--output-file"),
+              Obj_Name'Unchecked_Access);
+
+      begin
+         Status := Spawn
+           (Locate_And_Check ("llvm-gcc").all,
+            Prefix_LLVM_ARGS &
+              new String'("-mcpu=sm_" & GPU_Name.all) &
+              LLVM_Args (1 .. LLVM_Arg_Number));
+
+         if Status /= 0 then
+            Put_Line ("llvm-gcc failure");
+            return Status;
+         end if;
+
+
+         begin
+            Status := Spawn
+              (Locate_And_Check ("ptxas").all,
+               PTXAS_Args);
+
+            if Status /= 0 then
+               Put_Line ("ptxas failture");
+               return Status;
+            end if;
+
+            return 0;
+         end;
+      end;
+   end Compile_Cubin;
+
    ---------------------------
    -- Filter_Assembly_Files --
    ---------------------------
@@ -299,41 +408,22 @@ function GNATCUDA_Wrapper return Integer is
    -- Link_Archive --
    ------------------
 
-   function Archive_Cubin return String is
-      File_Name : constant String :=
-         Base_Name
-            (Input_Files (1).all, File_Extension (Input_Files (1).all));
-   begin
-      return Dir_Name (Input_Files (1).all) & Directory_Separator & File_Name & ".cubin";
-   end Archive_Cubin;
-
-   ------------------
-   -- Link_Archive --
-   ------------------
-
    function Link_Archive return Integer is
       File_Name : constant String :=
-         Base_Name
-            (Input_Files (1).all, File_Extension (Input_Files (1).all));
-      PTX_Name : aliased String := File_Name & ".s";
-      Obj_Name : aliased String := Archive_Cubin;
-
-      PTXAS_Args : constant Argument_List :=
-         (new String'("-arch=sm_" & GPU_Name.all),
-            new String'("-m64"),
-            new String'("--compile-only"),
-            new String'("-v"))
-            & Filter_Assembly_Files
-            & (new String'("--output-file"),
-             Obj_Name'Unchecked_Access);
-
+        Base_Name
+          (Input_Files (1).all, File_Extension (Input_Files (1).all));
    begin
       Status := Spawn
-         (Locate_And_Check ("ptxas").all,
-            PTXAS_Args);
+        (Locate_And_Check ("tar").all,
+         (new String'("--transform"),
+          new String'("s/.*\///g"),
+          new String'("-cz"))
+         & Input_Files (2 .. Input_File_Number)
+         & new String'("-f")
+         & new String'(Archive_Tgz));
 
       if Status /= 0 then
-         Put_Line ("ptxas failture");
+         Put_Line ("tar failure");
          return Status;
       end if;
 
@@ -341,25 +431,81 @@ function GNATCUDA_Wrapper return Integer is
    end Link_Archive;
 
    -----------------------------
-   -- Compute_Input_Libraries --
+   -- Compute_Input_Cubin --
    -----------------------------
 
-   function Compute_Input_Libraries return String_List is
+   function Compute_Input_Cubin return String_List is
       R_Number : Integer := 0;
-      Result : String_List (1 .. Libraries_Number);
+      Input_Librairies : String_List (1 .. Libraries_Number);
+
+      Cubin_Number : Integer := 0;
+      Cubin_Files : String_List (1 .. 2048);
+      -- We anticipate a reasonably large upper limit for cubin files in
+      -- librairies (2048).
+
+      Tar_Dir : Dir_Type;
+      Cubin_Name : String (1 .. 2048);
+      Cubin_Name_Len : Integer;
+
+      Dir_Name : String_Access;
+
+      function Process_Library (Lib : String) return Integer is
+      begin
+         Dir_Name := new String'(Base_Name (Lib, ".tgz"));
+
+         if not GNAT.IO_Aux.File_Exists (Dir_Name.all) then
+            Make_Dir (Dir_Name.all);
+         end if;
+
+         Status := Spawn
+           (Locate_And_Check ("tar").all,
+            (new String'("-xzf"), new String'(Lib),
+             new String'("-C"), Dir_Name));
+
+         if Status /= 0 then
+            Put_Line ("tar failure on librairy " & Lib);
+
+            return Status;
+         end if;
+
+         Open (Tar_Dir, Dir_Name.all);
+
+         loop
+            Read (Tar_Dir, Cubin_Name, Cubin_Name_Len);
+
+            exit when Cubin_Name_Len = 0;
+
+            if Cubin_Name_Len > 6
+              and then File_Extension
+                (Cubin_Name (1 .. Cubin_Name_Len)) = ".cubin"
+            then
+
+               Cubin_Number:= @ + 1;
+               Cubin_Files (Cubin_Number) :=
+                 new String'
+                   (Dir_Name.all
+                    & "/" & Cubin_Name (1 .. Cubin_Name_Len));
+            end if;
+         end loop;
+
+         Close (Tar_Dir);
+
+         return 0;
+      end Process_Library;
+
    begin
-      for L in Result'Range loop
+      for L in Input_Librairies'Range loop
          for D in 1 .. Library_Path_Number loop
             declare
                Tentative : String :=
-                  Library_Path (D).all &
-                  "/lib" &
-                  Libraries (L).all &
-                  ".cubin";
+                 Library_Path (D).all &
+                 "/lib" &
+                 Libraries (L).all &
+                 ".tgz";
             begin
                if GNAT.IO_Aux.File_Exists (Tentative) then
                   R_Number := @ + 1;
-                  Result (R_Number) := new String'(Tentative);
+                  Input_Librairies (R_Number) := new String'(Tentative);
 
                   exit;
                end if;
@@ -367,37 +513,56 @@ function GNATCUDA_Wrapper return Integer is
          end loop;
       end loop;
 
-      return Result (1 .. R_Number);
-   end Compute_Input_Libraries;
+      for L of Input_Librairies loop
+         Status := Process_Library (L.all);
+
+         if Status /= 0 then
+            return Cubin_Files (1 .. 0);
+         end if;
+      end loop;
+
+      for F in 1 .. Input_File_Number loop
+         if File_Extension (Input_Files (F).all) = ".cubin" then
+            Cubin_Number := @ + 1;
+            Cubin_Files (Cubin_Number):= new String'(Input_Files (F).all);
+         elsif File_Extension (Input_Files (F).all) = ".tgz" then
+            Status := Process_Library (Input_Files (F).all);
+
+            if Status /= 0 then
+               return Cubin_Files (1 .. 0);
+            end if;
+         end if;
+      end loop;
+
+      return Cubin_Files (1 .. Cubin_Number);
+   end Compute_Input_Cubin;
 
    -----------------
    -- Link_Shared --
    -----------------
 
    function Link_Shared return Integer is
-      Kernel_Object : constant String := Input_Files (1).all;
+      Kernel_Object : constant String := Output_Argument.all;
       Kernel_Fat : constant String := Kernel_Object
-         (Kernel_Object'First .. Kernel_Object'Last - 2);
+        (Kernel_Object'First .. Kernel_Object'Last - 2);
       Kernel_Linked : constant String := Kernel_Object
-         (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
+        (Kernel_Object'First .. Kernel_Object'Last - 2) & ".linked";
 
       Nvlink_Args : constant Argument_List :=
-         (new String'("--arch=sm_" & GPU_Name.all),
-          new String'("-m64"),
-          new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
-          new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
-         & Input_Files (1 .. Input_File_Number)
-         & Compute_Input_Libraries
-         & new String'(Archive_Cubin)
-         &(new String'("-lcudadevrt"),
+        (new String'("--arch=sm_" & GPU_Name.all),
+         new String'("-m64"),
+         new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
+         new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
+         & Compute_Input_Cubin
+         & (new String'("-lcudadevrt"),
             new String'("-o"),
             new String'(Kernel_Linked));
 
          Fatbinary_Args : constant Argument_List :=
-            (new String'("-64"),
-             new String'("--create"),
+           (new String'("-64"),
+            new String'("--create"),
 
-            --  We currently only support one SAL per host application, with a
+              --  We currently only support one SAL per host application, with a
             --  fatbinary name hardcoded in gnatbind. We should eventually move
             --  to a scheme where we can have more than one. See U503-012
             --  new String'(Kernel_Fat),
@@ -405,51 +570,38 @@ function GNATCUDA_Wrapper return Integer is
 
             new String'("-link"),
             new String'("--image3=kind=elf,sm="
-            & GPU_Name.all & ",file=" & Kernel_Linked));
+              & GPU_Name.all & ",file=" & Kernel_Linked));
 
          Ld_Args : constant Argument_List :=
-            (new String'("-r"),
-             new String'("-b"),
-             new String'("binary"),
-             new String'("main.fatbin"),
-             new String'("-o"),
-             new String'(Kernel_Object)
-         );
-      begin
-         for I in 1 .. Input_File_Number loop
-            Put_Line ("INPUT FILE " & I'Img & " => " & Input_Files (I).all);
-         end loop;
+           (new String'("-r"),
+            new String'("-b"),
+            new String'("binary"),
+            new String'("main.fatbin"),
+            new String'("-o"),
+            new String'(Kernel_Object)
+           );
+         begin
 
-         -- First, link the cuda assembly files into an archive (.cubin)
-
-         Status := Link_Archive;
-
-         if Status /= 0 then
-            return Status;
-         end if;
-
-         -- Second, compute other archives passed as library on the command line
-
-         -- Third, call nvlink on all the cubins
+         -- Call nvlink on all the cubins
 
          Status := Spawn
-            (Locate_And_Check ("nvlink").all,
-             Nvlink_Args);
+           (Locate_And_Check ("nvlink").all,
+            Nvlink_Args);
 
          if Status /= 0 then
             Put_Line ("nvlink failure");
-            return Status;
+         return Status;
          end if;
 
          -- Generate the fat binary
 
          Status := Spawn
-            (Locate_And_Check ("fatbinary").all,
-             Fatbinary_Args);
+           (Locate_And_Check ("fatbinary").all,
+            Fatbinary_Args);
 
          if Status /= 0 then
             Put_Line ("fatbinary failure");
-            return Status;
+         return Status;
          end if;
 
          -- Link all object togethers
@@ -458,174 +610,119 @@ function GNATCUDA_Wrapper return Integer is
 
          if Status /= 0 then
             Put_Line ("ld failure");
-            return Status;
+         return Status;
          end if;
 
          return 0;
-   end Link_Shared;
+         end Link_Shared;
 
-begin
-   for J in 1 .. Argument_Count loop
-      declare
+         begin
+         for J in 1 .. Argument_Count loop
+         declare
          Arg  : constant String := Argument (J);
          Sub_Arg : Unbounded_String;
-      begin
+         begin
          if Arg'Length > 0 and then Arg (1) /= '-'
-           and then
-             (J = 1 or else
-               (Argument (J - 1) /= "-x"
-               and then Argument (J - 1) /= "-o"))
+         and then
+           (J = 1 or else
+                (Argument (J - 1) /= "-x"
+                 and then Argument (J - 1) /= "-o"))
          then
-            --  Ignoring -o for now as we always generate file in the same
-            --  format
+         --  Ignoring -o for now as we always generate file in the same
+         --  format
             Input_File_Number := Input_File_Number + 1;
 
-            if Arg (Arg'First .. Arg'First +  2) = "b__"
-              and then Arg (Arg'Last - 1 .. Arg'Last) = ".o"
-            then
-               --  There is a bug in gprlib that ignore gprconfig suffix for
-               --  object files when it comes to binder files. As a temporary
-               --  hack, changing the suffix here.
-               Input_Files (Input_File_Number) :=
-                 new String'(Arg (Arg'First .. Arg'Last - 2) & ".s");
-            else
-               Input_Files (Input_File_Number) :=
-                 new String'(Arg);
-            end if;
+         if Arg (Arg'First .. Arg'First +  2) = "b__"
+         and then Arg (Arg'Last - 1 .. Arg'Last) = ".o"
+         then
+         --  There is a bug in gprlib that ignore gprconfig suffix for
+         --  object files when it comes to binder files. As a temporary
+         --  hack, changing the suffix here.
+            Input_Files (Input_File_Number) :=
+             new String'(Arg (Arg'First .. Arg'Last - 2) & ".cubin");
+         else
+            Input_Files (Input_File_Number) :=
+             new String'(Arg);
+         end if;
 
-            LLVM_Arg_Number := @ + 1;
-            LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
+         LLVM_Arg_Number := @ + 1;
+         LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-c" or else Arg = "-S" then
             Op := Compile;
-            LLVM_Arg_Number := @ + 1;
-            LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
+         LLVM_Arg_Number := @ + 1;
+         LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-v" or Arg = "--version" then
             Put_Line ("Target: cuda");
-            Put_Line ("cuda-gcc version "
-                      & gnatvsn.Library_Version
-                      & " (for GNAT Pro "
-                      & gnatvsn.Gnat_Static_Version_String
-                      & ")");
-            Put_Line ("CUDA Installation: " & CUDA_Root);
+         Put_Line ("cuda-gcc version "
+           & gnatvsn.Library_Version
+           & " (for GNAT Pro "
+           & gnatvsn.Gnat_Static_Version_String
+           & ")");
+         Put_Line ("CUDA Installation: " & CUDA_Root);
 
-            Verbose := True;
-            LLVM_Arg_Number := @ + 1;
-            LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
-            if Argument_Count = 1 then
-               GNAT.OS_Lib.OS_Exit (0);
-            end if;
+         Verbose := True;
+         LLVM_Arg_Number := @ + 1;
+         LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
+         if Argument_Count = 1 then
+            GNAT.OS_Lib.OS_Exit (0);
+         end if;
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
-            GPU_Name := new String'(To_String (Sub_Arg));
+              GPU_Name := new String'(To_String (Sub_Arg));
          elsif Get_Argument (Arg, "-cuda-host=", Sub_Arg) then
-            HT_Str := new String'(To_String (Sub_Arg));
+              HT_Str := new String'(To_String (Sub_Arg));
 
-            if Ht_Str.all = "aarch64-linux" then
-               HT := Aarch64_Linux;
-               LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
-            elsif Ht_Str.all = "x86_64-linux" then
-               HT := X86_64_Linux;
-               LD := To_Unbounded_String ("ld");
-            else
-               Put_Line ("-cuda-host " & Ht_Str.all & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
-               Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
+         if Ht_Str.all = "aarch64-linux" then
+            HT := Aarch64_Linux;
+         LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
+         elsif Ht_Str.all = "x86_64-linux" then
+            HT := X86_64_Linux;
+         LD := To_Unbounded_String ("ld");
+         else
+            Put_Line ("-cuda-host " & Ht_Str.all & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+         Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
 
-               HT_Str := new String'("x86_64-linux");
-            end if;
+         HT_Str := new String'("x86_64-linux");
+         end if;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
-            Libdevice_Path := new String'(To_String (Sub_Arg));
+              Libdevice_Path := new String'(To_String (Sub_Arg));
          elsif Arg = "--shared" then
             Shared := True;
          elsif Arg (Arg'First .. Arg'First + 1) = "-L" then
-            Library_Path_Number := @ + 1;
-            Library_Path (Library_Path_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
+              Library_Path_Number := @ + 1;
+         Library_Path (Library_Path_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
          elsif Arg (Arg'First .. Arg'First + 1) = "-l" then
-            Libraries_Number := @ + 1;
-            Libraries (Libraries_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
+              Libraries_Number := @ + 1;
+         Libraries (Libraries_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
          else
             LLVM_Arg_Number := @ + 1;
-            LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
+         LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
+
+         if J > 1 and then Argument (J - 1) = "-o" then
+              Output_Argument := new String'(Arg);
          end if;
-      end;
-   end loop;
-
-   if Libdevice_Path = null then
-      --  We don't have a path for libdevice specified on the commande line,
-      --  use heuristics to find the proper one
-
-      declare
-         Path_1 : String := CUDA_Root
-           & "/lib/nvidia-cuda-toolkit/libdevice/libdevice.10.bc";
-         Path_2 : String := CUDA_Root
-           & "/nvvm/libdevice/libdevice.10.bc";
-      begin
-         if GNAT.IO_Aux.File_Exists (Path_1) then
-            Libdevice_Path := new String'(Path_1);
-         elsif GNAT.IO_Aux.File_Exists (Path_2) then
-            Libdevice_Path := new String'(Path_2);
-         else
-            Put_Line
-              ("error: could not locate libdevice on "
-               & Path_1 & " or " & Path_2);
-
-            return 1;
          end if;
-      end;
-   end if;
-
-   if GPU_Name = null then
-      GPU_Name := new String'("75");
-   end if;
-
-   case Op is
-      when Compile =>
-         LLVM_Arg_Number             := @ + 1;
-         LLVM_Args (LLVM_Arg_Number) := new String'("-mcuda-libdevice=" & Libdevice_Path.all);
-
-         if Input_File_Number /= 1 then
-            Put ("error: expected one compilation file, got"
-                     & Input_File_Number'Img & "(");
-
-            for I in 1 .. Input_File_Number loop
-               if I > 1 then
-                  Put (", ");
-               end if;
-
-               Put (Input_Files (I).all);
-            end loop;
-
-            Put_Line (")");
-
-            return 1;
-         end if;
-
-         declare
-            File_Name : constant String :=
-            Base_Name
-               (Input_Files (1).all, File_Extension (Input_Files (1).all));
-         begin
-            Status := Spawn
-            (Locate_And_Check ("llvm-gcc").all,
-               Prefix_LLVM_ARGS &
-               new String'("-mcpu=sm_" & GPU_Name.all) &
-               LLVM_Args (1 .. LLVM_Arg_Number));
-
-            if Status /= 0 then
-               Put_Line ("llvm-gcc failure");
-               return Status;
-            end if;
          end;
-      when Link =>
-         if Shared then
-            return Link_Shared;
+         end loop;
+
+         if GPU_Name = null then
+            GPU_Name := new String'("75");
+         end if;
+
+         case Op is
+            when Compile =>
+               return Compile_Cubin;
+            when Link =>
+               if Shared then
+                  return Link_Shared;
          else
             return Link_Archive;
          end if;
-      when Other =>
-         null;
-   end case;
+            when Other =>
+               null;
+         end case;
 
-   return 0;
-exception
-   when Exec_Not_Found =>
-      return 1;
-end GNATCUDA_Wrapper;
+         return 0;
+         exception
+            when Exec_Not_Found =>
+               return 1;
+         end GNATCUDA_Wrapper;
