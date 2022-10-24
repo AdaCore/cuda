@@ -553,176 +553,176 @@ function GNATCUDA_Wrapper return Integer is
          new String'("-m64"),
          new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib/stubs"),
          new String'("-L" & CUDA_Root & "targets/" & HT_Str.all & "/lib"))
-         & Compute_Input_Cubin
-         & (new String'("-lcudadevrt"),
-            new String'("-o"),
-            new String'(Kernel_Linked));
+        & Compute_Input_Cubin
+        & (new String'("-lcudadevrt"),
+           new String'("-o"),
+           new String'(Kernel_Linked));
 
-         Fatbinary_Args : constant Argument_List :=
-           (new String'("-64"),
-            new String'("--create"),
+      Fatbinary_Args : constant Argument_List :=
+        (new String'("-64"),
+         new String'("--create"),
 
-              --  We currently only support one SAL per host application, with a
-            --  fatbinary name hardcoded in gnatbind. We should eventually move
-            --  to a scheme where we can have more than one. See U503-012
-            --  new String'(Kernel_Fat),
-            new String'("main.fatbin"),
+           --  We currently only support one SAL per host application, with a
+         --  fatbinary name hardcoded in gnatbind. We should eventually move
+         --  to a scheme where we can have more than one. See U503-012
+         --  new String'(Kernel_Fat),
+         new String'("main.fatbin"),
 
-            new String'("-link"),
-            new String'("--image3=kind=elf,sm="
-              & GPU_Name.all & ",file=" & Kernel_Linked));
+         new String'("-link"),
+         new String'("--image3=kind=elf,sm="
+           & GPU_Name.all & ",file=" & Kernel_Linked));
 
-         Ld_Args : constant Argument_List :=
-           (new String'("-r"),
-            new String'("-b"),
-            new String'("binary"),
-            new String'("main.fatbin"),
-            new String'("-o"),
-            new String'(Kernel_Object)
-           );
-         begin
+      Ld_Args : constant Argument_List :=
+        (new String'("-r"),
+         new String'("-b"),
+         new String'("binary"),
+         new String'("main.fatbin"),
+         new String'("-o"),
+         new String'(Kernel_Object)
+        );
+   begin
 
-         -- Call nvlink on all the cubins
+      -- Call nvlink on all the cubins
 
-         Status := Spawn
-           (Locate_And_Check ("nvlink").all,
-            Nvlink_Args);
+      Status := Spawn
+        (Locate_And_Check ("nvlink").all,
+         Nvlink_Args);
 
-         if Status /= 0 then
-            Put_Line ("nvlink failure");
+      if Status /= 0 then
+         Put_Line ("nvlink failure");
          return Status;
-         end if;
+      end if;
 
-         -- Generate the fat binary
+      -- Generate the fat binary
 
-         Status := Spawn
-           (Locate_And_Check ("fatbinary").all,
-            Fatbinary_Args);
+      Status := Spawn
+        (Locate_And_Check ("fatbinary").all,
+         Fatbinary_Args);
 
-         if Status /= 0 then
-            Put_Line ("fatbinary failure");
+      if Status /= 0 then
+         Put_Line ("fatbinary failure");
          return Status;
-         end if;
+      end if;
 
-         -- Link all object togethers
+      -- Link all object togethers
 
-         Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
+      Status := Spawn (Locate_And_Check (To_String (Ld)).all, Ld_Args);
 
-         if Status /= 0 then
-            Put_Line ("ld failure");
+      if Status /= 0 then
+         Put_Line ("ld failure");
          return Status;
-         end if;
+      end if;
 
-         return 0;
-         end Link_Shared;
+      return 0;
+   end Link_Shared;
 
-         begin
-         for J in 1 .. Argument_Count loop
-         declare
+begin
+   for J in 1 .. Argument_Count loop
+      declare
          Arg  : constant String := Argument (J);
          Sub_Arg : Unbounded_String;
-         begin
+      begin
          if Arg'Length > 0 and then Arg (1) /= '-'
-         and then
-           (J = 1 or else
+           and then
+             (J = 1 or else
                 (Argument (J - 1) /= "-x"
                  and then Argument (J - 1) /= "-o"))
          then
-         --  Ignoring -o for now as we always generate file in the same
-         --  format
+            --  Ignoring -o for now as we always generate file in the same
+            --  format
             Input_File_Number := Input_File_Number + 1;
 
-         if Arg (Arg'First .. Arg'First +  2) = "b__"
-         and then Arg (Arg'Last - 1 .. Arg'Last) = ".o"
-         then
-         --  There is a bug in gprlib that ignore gprconfig suffix for
-         --  object files when it comes to binder files. As a temporary
-         --  hack, changing the suffix here.
-            Input_Files (Input_File_Number) :=
-             new String'(Arg (Arg'First .. Arg'Last - 2) & ".cubin");
-         else
-            Input_Files (Input_File_Number) :=
-             new String'(Arg);
-         end if;
+            if Arg (Arg'First .. Arg'First +  2) = "b__"
+              and then Arg (Arg'Last - 1 .. Arg'Last) = ".o"
+            then
+               --  There is a bug in gprlib that ignore gprconfig suffix for
+               --  object files when it comes to binder files. As a temporary
+               --  hack, changing the suffix here.
+               Input_Files (Input_File_Number) :=
+                 new String'(Arg (Arg'First .. Arg'Last - 2) & ".cubin");
+            else
+               Input_Files (Input_File_Number) :=
+                 new String'(Arg);
+            end if;
 
-         LLVM_Arg_Number := @ + 1;
-         LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
+            LLVM_Arg_Number := @ + 1;
+            LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-c" or else Arg = "-S" then
             Op := Compile;
-         LLVM_Arg_Number := @ + 1;
-         LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
+            LLVM_Arg_Number := @ + 1;
+            LLVM_Args (LLVM_Arg_Number) := new String'(Arg);
          elsif Arg = "-v" or Arg = "--version" then
             Put_Line ("Target: cuda");
-         Put_Line ("cuda-gcc version "
-           & gnatvsn.Library_Version
-           & " (for GNAT Pro "
-           & gnatvsn.Gnat_Static_Version_String
-           & ")");
-         Put_Line ("CUDA Installation: " & CUDA_Root);
+            Put_Line ("cuda-gcc version "
+                      & gnatvsn.Library_Version
+                      & " (for GNAT Pro "
+                      & gnatvsn.Gnat_Static_Version_String
+                      & ")");
+            Put_Line ("CUDA Installation: " & CUDA_Root);
 
-         Verbose := True;
-         LLVM_Arg_Number := @ + 1;
-         LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
-         if Argument_Count = 1 then
-            GNAT.OS_Lib.OS_Exit (0);
-         end if;
+            Verbose := True;
+            LLVM_Arg_Number := @ + 1;
+            LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
+            if Argument_Count = 1 then
+               GNAT.OS_Lib.OS_Exit (0);
+            end if;
          elsif Get_Argument (Arg, "-mcpu=sm_", Sub_Arg) then
-              GPU_Name := new String'(To_String (Sub_Arg));
+            GPU_Name := new String'(To_String (Sub_Arg));
          elsif Get_Argument (Arg, "-cuda-host=", Sub_Arg) then
-              HT_Str := new String'(To_String (Sub_Arg));
+            HT_Str := new String'(To_String (Sub_Arg));
 
-         if Ht_Str.all = "aarch64-linux" then
-            HT := Aarch64_Linux;
-         LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
-         elsif Ht_Str.all = "x86_64-linux" then
-            HT := X86_64_Linux;
-         LD := To_Unbounded_String ("ld");
-         else
-            Put_Line ("-cuda-host " & Ht_Str.all & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
-         Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
+            if Ht_Str.all = "aarch64-linux" then
+               HT := Aarch64_Linux;
+               LD := To_Unbounded_String ("aarch64-linux-gnu-ld");
+            elsif Ht_Str.all = "x86_64-linux" then
+               HT := X86_64_Linux;
+               LD := To_Unbounded_String ("ld");
+            else
+               Put_Line ("-cuda-host " & Ht_Str.all & " not recognized. Supported: x86_64-linux (default), aarch64-linux.");
+               Put_Line ("Proceeding with -cuda-host=x86_64-linux.");
 
-         HT_Str := new String'("x86_64-linux");
-         end if;
+               HT_Str := new String'("x86_64-linux");
+            end if;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
-              Libdevice_Path := new String'(To_String (Sub_Arg));
+            Libdevice_Path := new String'(To_String (Sub_Arg));
          elsif Arg = "--shared" then
             Shared := True;
          elsif Arg (Arg'First .. Arg'First + 1) = "-L" then
-              Library_Path_Number := @ + 1;
-         Library_Path (Library_Path_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
+            Library_Path_Number := @ + 1;
+            Library_Path (Library_Path_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
          elsif Arg (Arg'First .. Arg'First + 1) = "-l" then
-              Libraries_Number := @ + 1;
-         Libraries (Libraries_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
+            Libraries_Number := @ + 1;
+            Libraries (Libraries_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
          else
             LLVM_Arg_Number := @ + 1;
-         LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
+            LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
 
-         if J > 1 and then Argument (J - 1) = "-o" then
-              Output_Argument := new String'(Arg);
+            if J > 1 and then Argument (J - 1) = "-o" then
+               Output_Argument := new String'(Arg);
+            end if;
          end if;
-         end if;
-         end;
-         end loop;
+      end;
+   end loop;
 
-         if GPU_Name = null then
-            GPU_Name := new String'("75");
-         end if;
+   if GPU_Name = null then
+      GPU_Name := new String'("75");
+   end if;
 
-         case Op is
-            when Compile =>
-               return Compile_Cubin;
-            when Link =>
-               if Shared then
-                  return Link_Shared;
+   case Op is
+      when Compile =>
+         return Compile_Cubin;
+      when Link =>
+         if Shared then
+            return Link_Shared;
          else
             return Link_Archive;
          end if;
-            when Other =>
-               null;
-         end case;
+      when Other =>
+         null;
+   end case;
 
-         return 0;
-         exception
-            when Exec_Not_Found =>
-               return 1;
-         end GNATCUDA_Wrapper;
+   return 0;
+exception
+   when Exec_Not_Found =>
+      return 1;
+end GNATCUDA_Wrapper;
