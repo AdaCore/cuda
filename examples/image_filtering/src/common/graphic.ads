@@ -27,7 +27,7 @@ package Graphic is
   function "+" (Left : Rgb; Right : Rgb) return Rgb is
    (Left.R + Right.R, Left.G + Right.G, Left.B + Right.B);
 
-  function distance_square (Left : Rgb; Right : Rgb) return Float is
+  function Distance_square (Left : Rgb; Right : Rgb) return Float is
    ((Left.R - Right.R) * (Left.R - Right.R) +
     (Left.G - Right.G) * (Left.G - Right.G) +
     (Left.B - Right.B) * (Left.B - Right.B));
