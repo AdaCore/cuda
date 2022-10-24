@@ -56,10 +56,13 @@ package body Bilateral_Host is
                              Spatial_Stdev     : Float;
                              Color_Dist_Stdev  : Float) is
       Image_Bytes       : constant CUDA.Stddef.Size_T     := CUDA.Stddef.Size_T (Host_Img.all'Size / 8);
-      Threads_Per_Block : constant CUDA.Vector_Types.Dim3 := (1, 1, 1);
-      Blocks_Per_Grid   : constant CUDA.Vector_Types.Dim3 := (IC.Unsigned (Width), 
-                                                              IC.Unsigned (Height), 
-                                                              1);
+
+      use IC;
+      Threads_Per_Block : constant CUDA.Vector_Types.Dim3 := (16, 16, 1);
+      Block_X : constant IC.Unsigned := (IC.Unsigned (Width) + Threads_Per_Block.X - 1) / Threads_Per_Block.X;
+      Block_Y : constant IC.Unsigned := (IC.Unsigned (Height) + Threads_Per_Block.Y - 1) / Threads_Per_Block.Y;
+      Blocks_Per_Grid : constant CUDA.Vector_Types.Dim3 := (Block_X, Block_Y, 1);
+
       Device_Img, Device_Filtered_Img : System.Address;
    begin
       -- send input data to device
