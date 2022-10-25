@@ -39,7 +39,7 @@ library project CUDA_API_Device is
    end Compiler;
 
    package Binder is
-      for Default_Switches ("ada") use ("-d_d");
+      for Default_Switches ("ada") use ("-d_d". "-t");
    end Binder;
 
    for Archive_Builder use ("cuda-gcc", "-cuda-host=" & CUDA_Host, "-mcpu=" & GPU_Arch);

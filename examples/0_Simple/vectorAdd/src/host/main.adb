@@ -7,17 +7,27 @@ with Ada.Text_IO;               use Ada.Text_IO;
 with CUDA.Driver_Types;         use CUDA.Driver_Types;
 with CUDA.Runtime_Api;          use CUDA.Runtime_Api;
 with CUDA.Stddef;
+with CUDA.Storage_Models;        use CUDA.Storage_Models;
 
 with Kernel; use Kernel;
 
 with Ada.Unchecked_Deallocation;
+with Ada.Unchecked_Conversion;
 
 procedure Main is
 
+   type Array_Host_Access is access all Float_Array;
+
+   procedure Free is new
+     Ada.Unchecked_Deallocation (Float_Array, Array_Host_Access);
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Float_Array, Array_Device_Access);
+
    Num_Elements : Integer := 4096;
 
-   H_A, H_B, H_C : Access_Host_Float_Array;
-   D_A, D_B, D_C : System.Address;
+   H_A, H_B, H_C : Array_Host_Access;
+   D_A, D_B, D_C : Array_Device_Access;
    Array_Size : CUDA.Stddef.Size_T := CUDA.Stddef.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
 
    Threads_Per_Block : Integer := 256;
@@ -26,9 +36,6 @@ procedure Main is
 
    Gen : Generator;
    Err : Error_T;
-
-   procedure Free is new
-     Ada.Unchecked_Deallocation (Float_Array, Access_Host_Float_Array);
 
 begin
    Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
@@ -46,26 +53,17 @@ begin
    H_A.all := (others => Float (Random (Gen)));
    H_B.all := (others => Float (Random (Gen)));
 
-   D_A := Cuda.Runtime_Api.Malloc (Array_Size);
-   D_B := Cuda.Runtime_Api.Malloc (Array_Size);
-   D_C := Cuda.Runtime_Api.Malloc (Array_Size);
-
-   Cuda.Runtime_Api.Memcpy
-     (Dst   => D_A,
-      Src   => H_A.all'Address,
-      Count => Array_Size,
-      Kind  => Memcpy_Host_To_Device);
-
-   Cuda.Runtime_Api.Memcpy
-     (Dst   => D_B,
-      Src   => H_B.all'Address,
-      Count => Array_Size,
-      Kind  => Memcpy_Host_To_Device);
+   D_A := new Float_Array'(H_A.all);
+   D_B := new Float_Array'(H_B.all);
+   D_C := new Float_Array (H_C.all'Range);
 
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
 
-   pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Threads_Per_Block, Blocks_Per_Grid);
+   pragma CUDA_Execute
+     (Vector_Add (D_A, D_B, D_C),
+      Threads_Per_Block,
+      Blocks_Per_Grid);
 
    Err := Get_Last_Error;
 
@@ -77,11 +75,7 @@ begin
 
    Put_Line ("Copy output data from the CUDA device to the host memory");
 
-   Cuda.Runtime_Api.Memcpy
-     (Dst   => H_C.all'Address,
-      Src   => D_C,
-      Count => Array_Size,
-      Kind  => Memcpy_Device_To_Host);
+   H_C.all := D_C.all;
 
    for I in 1..Num_Elements loop
       if abs (H_A (I) + H_B (I) - H_C (I)) > 1.0E-5 then
