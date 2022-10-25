@@ -1,4 +1,4 @@
-with "cuda_api_device.gpr";
+with "cuda_api_device";
 
 library project Device is
 
@@ -9,8 +9,8 @@ library project Device is
    for Object_Dir use "obj/device";
 
    for Target use "cuda";
-   for Library_Name use "kernel";
-   for Library_Dir use "lib/device_code";
+   for Library_Name use "device";
+   for Library_Dir use "lib";
    for Library_Standalone use "encapsulated";
    for Library_Kind use "dynamic";
 
