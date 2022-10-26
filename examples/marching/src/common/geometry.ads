@@ -24,7 +24,7 @@ package Geometry is
    ----------------
 
    type Point_Real is record
-      X, Y, Z : Float := 0.0;
+      X, Y, Z : Float;
    end record with Convention => C;
 
    function "+" (Left, Right : Point_Real) return Point_Real is
@@ -56,7 +56,7 @@ package Geometry is
    ---------------
 
    type Point_Int is record
-      X, Y, Z : Integer := 0;
+      X, Y, Z : Integer;
    end record;
 
    --------------
@@ -64,7 +64,7 @@ package Geometry is
    --------------
 
    type Triangle is record
-      I1, I2, I3 : Integer := 0;
+      I1, I2, I3 : Integer;
    end record;
 
    type Triangle_Array is array (Natural range <>) of aliased Triangle;
@@ -75,9 +75,9 @@ package Geometry is
    ------------
 
    type Vertex is record
-      Point : Point_Real := (others => 0.0);
-      Normal : Point_Real := (others => 0.0);
-      Color : RGB_T := (others => 0.0);
+      Point : Point_Real;
+      Normal : Point_Real;
+      Color : RGB_T;
    end record;
 
    type Vertex_Array is array (Natural range <>) of aliased Vertex;

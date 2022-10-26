@@ -1,4 +1,4 @@
-with "cuda_api_host.gpr";
+with "cuda_api_host";
 with "openglada/opengl-glfw.gpr";
 
 project Host is
@@ -7,7 +7,7 @@ project Host is
    for Object_Dir use "obj/host";
    for Source_Dirs use ("src/**");
    for Main use ("main.adb");
-   
+
    for Target use CUDA_API_Host.CUDA_Host;
 
    package Compiler is
