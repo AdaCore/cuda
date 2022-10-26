@@ -35,7 +35,7 @@ library project CUDA_API_Device is
    GPU_Arch : GPU_Arch_Option := external ("gpu_arch", "sm_75");
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX", "-O2", "-gnatn", "-mcpu=" & GPU_Arch);
+      for Switches ("ada") use ("-gnatX0", "-O2", "-gnatn", "-mcpu=" & GPU_Arch);
    end Compiler;
 
    package Binder is
