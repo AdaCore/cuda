@@ -186,8 +186,6 @@ function GNATCUDA_Wrapper return Integer is
    Libdevice_Path : String_Access;
    Output_Argument : String_Access;
 
-   Shared : Boolean;
-
    function Spawn (S : String; Args : Argument_List) return Integer;
    --  Call GNAT.OS_Lib.Spawn and take Verbose into account
 
@@ -686,8 +684,6 @@ begin
             end if;
          elsif Get_Argument (Arg, "-mcuda-libdevice=", Sub_Arg) then
             Libdevice_Path := new String'(To_String (Sub_Arg));
-         elsif Arg = "--shared" then
-            Shared := True;
          elsif Arg (Arg'First .. Arg'First + 1) = "-L" then
             Library_Path_Number := @ + 1;
             Library_Path (Library_Path_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
@@ -713,7 +709,12 @@ begin
       when Compile =>
          return Compile_Cubin;
       when Link =>
-         if Shared then
+         if Output_Argument /= null and then
+           Output_Argument.all'Length > 9 and then
+           Output_Argument.all
+             (Output_Argument.all'Last - 8 .. Output_Argument.all'Last)
+           = ".fatbin.o"
+         then
             return Link_Shared;
          else
             return Link_Archive;
