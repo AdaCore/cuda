@@ -1,3 +1,3 @@
 include ../../Makefile.build
 
-build: gnatcuda
+build: gnatcuda_build
