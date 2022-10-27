@@ -488,9 +488,6 @@ is
      (D_Balls             : Device_Ball_Array_Access;
       D_Triangles         : Device_Triangle_Array_Access;
       D_Vertices          : Device_Vertex_Array_Access;
-      Ball_Size           : Integer;
-      Triangles_Size      : Integer;
-      Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
@@ -508,7 +505,7 @@ is
          Stop,
          Lattice_Size,
          Last_Triangle,
-          Last_Vertex,
+         Last_Vertex,
          Interpolation_Steps,
          Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X),
          Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),

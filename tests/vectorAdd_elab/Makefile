@@ -1,3 +1,3 @@
-include ../../examples/Makefile.include
+include ../../Makefile.build
 
 build: example_build

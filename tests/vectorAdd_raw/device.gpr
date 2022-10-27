@@ -19,10 +19,7 @@ library project Device is
    end Compiler;
 
    package Binder is
-      for Driver ("ada") use "llvm-gnatbind";
       for Default_Switches ("ada") use CUDA_API_Device.Binder'Default_Switches ("ada");
    end Binder;
-
-   for Archive_Builder use CUDA_API_Device'Archive_Builder;
 
 end Device;

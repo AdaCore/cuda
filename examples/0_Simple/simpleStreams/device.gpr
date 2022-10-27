@@ -7,13 +7,18 @@ library project Device is
    for Object_Dir use "obj/device";
 
    for Target use "cuda";
-   for Library_Name use "kernel";
+   for Library_Name use "device";
    for Library_Dir use "lib";
+   for Library_Kind use "dynamic";
+   for Library_Interface use ("kernels");
+   for Library_Standalone use "encapsulated";
 
    package Compiler is
-      for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");      
+      for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");
    end Compiler;
 
-   for Archive_Builder use CUDA_API_Device'Archive_Builder;
-   
+   package Binder is
+      for Default_Switches ("ada") use CUDA_API_Device.Binder'Default_Switches ("ada");
+   end Binder;
+
 end Device;

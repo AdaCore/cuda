@@ -61,9 +61,6 @@ package Marching_Cubes is
      (D_Balls             : Device_Ball_Array_Access;
       D_Triangles         : Device_Triangle_Array_Access;
       D_Vertices          : Device_Vertex_Array_Access;
-      Ball_Size           : Integer;
-      Triangles_Size      : Integer;
-      Vertices_Size       : Integer;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;

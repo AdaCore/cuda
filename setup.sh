@@ -1,6 +1,23 @@
 #! /bin/sh
 set -e
 
+
+while [ $# -gt 0 ] ; do
+  case $1 in
+    -mcpu) GPU_ARCH="$2" ;;
+  esac
+  shift
+done
+
+if [ -z $GPU_ARCH ]; then
+    echo "Target CPU not specified"
+    echo "Syntax:"
+    echo "$> sh setup.sh -mcpu <gpu architecture>"
+    echo "For example:"
+    echo "$> sh setup.sh -mcpu sm_75"
+    return 1
+fi
+
 ROOT=$(dirname $(readlink -f "$0"))
 
 (
@@ -15,7 +32,8 @@ echo ""
 echo "Generating Ada runtime for your CUDA installation"
 echo "================================================="
 echo ""
-make runtime
+make runtime GPU_ARCH=$GPU_ARCH
+echo "GPU_ARCH=$GPU_ARCH" >> Makefile.env
 echo ""
 echo "Generating Ada bindings for your CUDA installation"
 echo "=================================================="

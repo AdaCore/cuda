@@ -1,4 +1,4 @@
-with "cuda_api_host.gpr";
+with "cuda_api_host";
 
 project Host is
 

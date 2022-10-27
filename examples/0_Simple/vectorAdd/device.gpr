@@ -1,4 +1,4 @@
-with "cuda_api_device.gpr";
+with "cuda_api_device";
 
 library project Device is
 
@@ -20,7 +20,5 @@ library project Device is
    package Binder is
       for Default_Switches ("ada") use CUDA_API_Device.Binder'Default_Switches ("ada");
    end Binder;
-
-   for Archive_Builder use CUDA_API_Device'Archive_Builder;
 
 end Device;

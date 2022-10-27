@@ -348,8 +348,9 @@ function GNATCUDA_Wrapper return Integer is
          PTXAS_Args : constant Argument_List :=
            (new String'("-arch=sm_" & GPU_Name.all),
             new String'("-m64"),
-            new String'("--compile-only"),
-            new String'("-v"))
+            new String'("--compile-only"))
+           & (if Verbose then (1 => new String'("-v"))
+              else (1 .. 0 => null))
            & PTX_Name'Unchecked_Access
            & (new String'("--output-file"),
               Obj_Name'Unchecked_Access);
