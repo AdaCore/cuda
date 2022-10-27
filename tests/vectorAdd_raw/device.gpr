@@ -15,11 +15,13 @@ library project Device is
    for Library_Kind use "dynamic";
 
    package Compiler is
-      for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");
+      for Switches ("ada") use CUDA_API_Device.Compiler_Options;
    end Compiler;
 
    package Binder is
-      for Default_Switches ("ada") use CUDA_API_Device.Binder'Default_Switches ("ada");
+      for Default_Switches ("ada") use CUDA_API_Device.Binder_Options;
    end Binder;
+
+   for Library_Options use CUDA_API_Device.Library_Options;
 
 end Device;
