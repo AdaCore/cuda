@@ -18,7 +18,7 @@ Untar the package::
  tar -xzf tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
 
 At this stage, you need to know which GPU architecture you're targeting. This
-will typically be a sm\_ prefix followed by a number, for example sm_80 is the
+will typically be a sm\_ prefix followed by a number, for example sm_89 is the
 Ada Lovelace architecture. You can find details
 `on this GPU architecture mapping <https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/>`_.
 This parameter is to be passed to the next script.
