@@ -61,6 +61,7 @@ procedure Main is
    procedure Free is new Ada.Unchecked_Deallocation (G.Image, G.Image_Access);
 
 begin
+
    GLP.Parse_Command_Line (Parameters => Descriptors, Result => Param);
    Original_Img := Importer.Load_QOI (+Param.Input_Image);
    Filtered_Img := new G.Image (1 .. Original_Img'Length (1), 1 .. Original_Img'Length (2));
@@ -98,10 +99,12 @@ exception
    when Msg : GLP.Bad_Command =>
       AIO.Put_Line (File => AIO.Standard_Error,
                     Item => "Bad command line: " & E.Exception_Message (Msg));
-      AIO.Put_Line ("Try: ./filter_img in=./data/ada_lovelace_photo.qoi kernel=bilateral spatial_stdev=0.75 color_dist_stdev=120.0 device=gpu");
+      AIO.Put_Line ("Try: ./main in=./data/noisy_lena.qoi kernel=bilateral spatial_stdev=3.4 color_dist_stdev=100.0 device=gpu");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    when I.Bad_filename =>
       AIO.Put_Line ("Input file does not exists.");
    when P.Bad_extension =>
       AIO.Put_Line ("Only *.qoi images are supported.");
+   when others =>
+      AIO.Put_Line ("Others");
 end Main;

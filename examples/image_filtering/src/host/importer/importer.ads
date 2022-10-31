@@ -18,8 +18,8 @@ package Importer is
 
    package G renames Graphic;
 
-   Bad_filename : exception;
+   Bad_Filename : exception;
 
-   function Load_QOI (abs_filename : String) return G.Image_Access;
-   
+   function Load_Qoi (Abs_Filename : String) return G.Image_Access;
+
 end Importer;
