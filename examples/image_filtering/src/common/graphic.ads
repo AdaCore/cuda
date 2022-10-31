@@ -14,25 +14,25 @@
 
 package Graphic is
 
-  type Rgb is record
-    R, G, B : Float;
-  end record;
+   type Rgb is record
+      R, G, B : Float;
+   end record;
 
-  function "/" (Left : Rgb; Right : Float) return Rgb is
-   (Left.R / Right, Left.G / Right, Left.B / Right);
+   function "/" (Left : Rgb; Right : Float) return Rgb is
+     (Left.R / Right, Left.G / Right, Left.B / Right);
 
-  function "*" (Left : Rgb; Right : Float) return Rgb is
-   (Left.R * Right, Left.G * Right, Left.B * Right);
+   function "*" (Left : Rgb; Right : Float) return Rgb is
+     (Left.R * Right, Left.G * Right, Left.B * Right);
 
-  function "+" (Left : Rgb; Right : Rgb) return Rgb is
-   (Left.R + Right.R, Left.G + Right.G, Left.B + Right.B);
+   function "+" (Left : Rgb; Right : Rgb) return Rgb is
+     (Left.R + Right.R, Left.G + Right.G, Left.B + Right.B);
 
-  function Distance_square (Left : Rgb; Right : Rgb) return Float is
-   ((Left.R - Right.R) * (Left.R - Right.R) +
-    (Left.G - Right.G) * (Left.G - Right.G) +
-    (Left.B - Right.B) * (Left.B - Right.B));
+   function Distance_Square (Left : Rgb; Right : Rgb) return Float is
+     ((Left.R - Right.R) * (Left.R - Right.R) +
+      (Left.G - Right.G) * (Left.G - Right.G) +
+      (Left.B - Right.B) * (Left.B - Right.B));
 
-  type Image is array (Natural range <>, Natural range <>) of Rgb;
-  type Image_Access is access all Image;
+   type Image is array (Natural range <>, Natural range <>) of Rgb;
+   type Image_Access is access all Image;
 
 end Graphic;

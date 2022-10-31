@@ -18,6 +18,6 @@ package Exporter is
 
    package G renames Graphic;
 
-   procedure Dump_QOI (abs_filename : String; Img : G.Image_Access);
+   procedure Dump_Qoi (Abs_Filename : String; Img : G.Image_Access);
 
 end Exporter;

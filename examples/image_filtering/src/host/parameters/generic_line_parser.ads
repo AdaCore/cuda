@@ -80,9 +80,9 @@ package Generic_Line_Parser is
    use Ada.Strings.Unbounded;
 
    type Parameter_Callback is
-     access procedure (Name   : in     Unbounded_String;
-                       Value  : in     Unbounded_String;
-                       Result : in out Config_Data);
+     access procedure
+       (Name   : in     Unbounded_String; Value : in Unbounded_String;
+        Result : in out Config_Data);
 
    type Missing_Action is (Die, Use_Default, Ignore);
    --  Possibile alternatives about what to do if a parameter is missing
@@ -98,14 +98,13 @@ package Generic_Line_Parser is
    --     [Ignore]      The parameter is optional.  If it is missing, nothing
    --                   is done
 
-   type Parameter_Descriptor is
-      record
-         Name       : Unbounded_String;    -- Parameter name
-         Default    : Unbounded_String;    -- Default value used if not on C.L.
-         If_Missing : Missing_Action;      -- What to do if parameter missing
-         Only_Once  : Boolean;             -- Parameter MUST NOT be given more than once
-         Callback   : Parameter_Callback;  -- Called when parameter found
-      end record;
+   type Parameter_Descriptor is record
+      Name       : Unbounded_String;    -- Parameter name
+      Default    : Unbounded_String;    -- Default value used if not on C.L.
+      If_Missing : Missing_Action;      -- What to do if parameter missing
+      Only_Once : Boolean;             -- Parameter MUST NOT be given more than once
+      Callback   : Parameter_Callback;  -- Called when parameter found
+   end record;
    -- <description>Record holding the description of a parameter.  The fields
    --  should be self-explenatory (I hope).  The only field that needs some
    -- explanation is Name since it allows to specify more than one
@@ -117,16 +116,13 @@ package Generic_Line_Parser is
    -- is equivalent to "f ,    filename  ,input "
    -- </description>
 
-
    type Parameter_Descriptor_Array is
      array (Natural range <>) of Parameter_Descriptor;
 
-
    procedure Parse_Command_Line
-     (Parameters  : in     Parameter_Descriptor_Array;
-      Result      :    out Config_Data;
-      Help_Line   : in     String := "";
-      Help_Output : in     Ada.Text_IO.File_Type := Ada.Text_IO.Standard_Error);
+     (Parameters  : in Parameter_Descriptor_Array; Result : out Config_Data;
+      Help_Line   : in String                := "";
+      Help_Output : in Ada.Text_IO.File_Type := Ada.Text_IO.Standard_Error);
    -- Main exported method.  It parses the command line and it writes
    -- the result in Result.  If some error is encountered, Bad_Command
    -- is raised with an explicative exception message.  If Help_Line is
@@ -134,15 +130,11 @@ package Generic_Line_Parser is
 
    Bad_Command : exception;
 
-
-
-   function To_Float (X : Unbounded_String)
-                      return Float;
+   function To_Float (X : Unbounded_String) return Float;
    -- Convenient conversion function to Float that raise Bad_Command if
    -- the argument has not a valid syntax
 
-   function To_Natural (X : Unbounded_String)
-                        return Natural;
+   function To_Natural (X : Unbounded_String) return Natural;
    -- Convenient conversion function to Float that raise Bad_Command if
    -- the argument has not a valid syntax
 
