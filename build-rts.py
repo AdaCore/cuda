@@ -11,9 +11,11 @@ import os
 import sys
 
 # look for --bb-dir to add it to the sys path
+# also extract --mcpu
 path = None
-take_next = False
+gpu_arch = None
 index = 0
+
 while index < len(sys.argv):
     arg = sys.argv[index]
     if arg.startswith('--bb-dir='):
@@ -21,12 +23,13 @@ while index < len(sys.argv):
         sys.argv.remove(arg)
         break
     elif arg == '--bb-dir':
-        take_next = True
+        path = sys.argv[index + 1]
+        sys.argv.remove(sys.argv[index + 1])
         sys.argv.remove(arg)
-    elif take_next:
-        path = arg
+    elif arg == '--mcpu':
+        gpu_arch = sys.argv[index + 1]
+        sys.argv.remove(sys.argv[index + 1])
         sys.argv.remove(arg)
-        break
     else:
         index += 1
 
@@ -45,6 +48,7 @@ def build_configs(target):
     "Customized targets to build specific runtimes"
     if target == 'cuda-device':
         t = CUDADevice()
+        t.gpu_arch = gpu_arch
     else:
         assert False, "unexpected target '%s'" % target
 

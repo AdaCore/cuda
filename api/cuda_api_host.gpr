@@ -6,12 +6,8 @@ project CUDA_API_Host is
 
    for Object_Dir use "obj";
 
-   package Compiler is
-      for Switches ("Ada") use ("-gnatX0", "-gnatd_c");
-   end Compiler;
-
-   package Linker is
-      for Switches ("ada") use (
+   Compiler_Options := ("-gnatX0", "-gnatd_c");
+   Linker_Options := (
             "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib",
             "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib/stubs",
             "-lcudadevrt",
@@ -21,10 +17,10 @@ project CUDA_API_Host is
             "-ldl",
             "-Wl,--unresolved-symbols=ignore-all"
          );
-   end Linker;
+   Binder_Options := ("-d_c=device");
 
-   package Binder is
-      for Default_Switches ("ada") use ("-d_c=device");
-   end Binder;
+   package Compiler is
+      for Switches ("Ada") use Compiler_Options;
+   end Compiler;
 
 end CUDA_API_Host;

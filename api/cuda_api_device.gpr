@@ -1,47 +1,23 @@
+with "architecture";
+
 library project CUDA_API_Device is
+   for Target use "cuda";
+
    type CUDA_Host_Option is ("x86_64-linux", "aarch64-linux");
    CUDA_Host : CUDA_Host_Option := external ("cuda_host", "x86_64-linux");
 
-   for Source_Dirs use ("device_static");
-
-   for Library_Name use "cuda_api_device";
    for Library_Dir use "lib";
+   for Library_Name use "cuda_api_device";
+
+   for Source_Dirs use ("device_static");
    for Object_Dir use "obj";
 
-   for Target use "cuda";
-
-   type GPU_Arch_Option is
-      ("sm_20", --  Fermi
-       "sm_30", --  Kepler
-       "sm_35", --  Kepler
-       "sm_37", --  Kepler
-       "sm_50", --  Maxwell
-       "sm_52", --  Maxwell
-       "sm_53", --  Maxwell
-       "sm_60", --  Pascal
-       "sm_61", --  Pascal
-       "sm_62", --  Pascal
-       "sm_70", --  Volta
-       "sm_72", --  Volta
-       "sm_75", --  Turing
-       "sm_80", --  Ampere
-       "sm_86", --  Ampere
-       "sm_87", --  Ampere
-       "sm_89", --  Lovelace
-       "sm_90"  --  Hopper
-      );
-   --  See https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
-
-   GPU_Arch : GPU_Arch_Option := external ("gpu_arch", "sm_75");
+   Compiler_Options := ("-gnatX0", "-O2", "-gnatn", "-mcpu=" & Architecture.GPU_Arch);
+   Binder_Options := ("-d_d", "-t");
+   Library_Options := ("-mcpu=" & Architecture.GPU_Arch);
 
    package Compiler is
-      for Switches ("ada") use ("-gnatX0", "-O2", "-gnatn", "-mcpu=" & GPU_Arch);
+      for Switches ("ada") use Compiler_Options;
    end Compiler;
-
-   package Binder is
-      for Default_Switches ("ada") use ("-d_d");
-   end Binder;
-
-   for Archive_Builder use ("cuda-gcc", "-cuda-host=" & CUDA_Host, "-mcpu=" & GPU_Arch);
 
 end CUDA_API_Device;

@@ -45,7 +45,7 @@ runtime: libdevice.ads
 	@echo "======================= RUNTIME BUILDING"
 	rm -rf install/include/rts-sources/device_gnat
 	./gen-rts-sources.py --bb-dir $(BB_SRC) --gnat $(GNAT_SRC) --rts-profile=light
-	./build-rts.py --bb-dir $(BB_SRC) --rts-src-descriptor install/lib/gnat/rts-sources.json cuda-device  --force -b
+	./build-rts.py --bb-dir $(BB_SRC) --rts-src-descriptor install/lib/gnat/rts-sources.json cuda-device  --force -b --mcpu $(GPU_ARCH)
 	rm -rf install/lib/rts-device-cuda
 	mv install/device-cuda install/lib/rts-device-cuda
 	cp -R runtime/device_gnat/* install/lib/rts-device-cuda/gnat/

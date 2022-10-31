@@ -1,0 +1,8 @@
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include  $(SELF_DIR)Makefile.env
+
+CUDA_HOST=x86_64-linux
+
+gnatcuda:
+	gprbuild -Xcuda_host=$(CUDA_HOST) -P device
+	gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o

@@ -19,12 +19,29 @@ with Interfaces.C; use Interfaces.C;
 with System; use System;
 with Data; use Data;
 
+with CUDA.Storage_Models; use CUDA.Storage_Models;
+
 package Marching_Cubes is
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
    type Int_Access is access all Integer;
 
    procedure Clear_Lattice (XI : Integer);
+
+   type Device_Ball_Array_Access is access Ball_Array
+     with Designated_Storage_Model => CUDA.Storage_Models.Model;
+
+   type Device_Triangle_Array_Access is access Triangle_Array
+     with Designated_Storage_Model => CUDA.Storage_Models.Model;
+
+   type Device_Vertex_Array_Access is access Vertex_Array
+     with Designated_Storage_Model => CUDA.Storage_Models.Model;
+
+   type Device_Point_Real_Array_Access is access Point_Real_Array
+     with Designated_Storage_Model => CUDA.Storage_Models.Model;
+
+   type Device_Int_Access is access Integer
+     with Designated_Storage_Model => CUDA.Storage_Models.Model;
 
    procedure Mesh
      (Balls               : Ball_Array;
@@ -41,19 +58,16 @@ package Marching_Cubes is
    procedure Clear_Lattice_CUDA with CUDA_Global;
 
    procedure Mesh_CUDA
-     (D_Balls             : Ball_Array_Access;
-      D_Triangles         : Triangle_Array_Access;
-      D_Vertices          : Vertex_Array_Access;
-      Ball_Size           : Integer;
-      Triangles_Size      : Integer;
-      Vertices_Size       : Integer;
+     (D_Balls             : Device_Ball_Array_Access;
+      D_Triangles         : Device_Triangle_Array_Access;
+      D_Vertices          : Device_Vertex_Array_Access;
       Start               : Point_Real;
       Stop                : Point_Real;
       Lattice_Size        : Point_Int;
-      Last_Triangle       : Int_Access;
-      Last_Vertex         : Int_Access;
+      Last_Triangle       : Device_Int_Access;
+      Last_Vertex         : Device_Int_Access;
       Interpolation_Steps : Positive := 4;
-      Debug_Value         : Int_Access)
+      Debug_Value         : Device_Int_Access)
      with CUDA_Global;
 
    procedure Last_Chance_Handler is null;

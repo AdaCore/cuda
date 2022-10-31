@@ -7,3 +7,4 @@ __pycache__/
 .#*
 .clang-format
 doc/_build/
+main

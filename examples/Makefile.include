@@ -1,6 +1,0 @@
-GPU_ARCH=sm_75
-CUDA_HOST=x86_64-linux
-
-example_build:
-	gprbuild -f -Xcuda_host=$(CUDA_HOST) -Xgpu_arch=$(GPU_ARCH) -P device -largs -mcpu=$(GPU_ARCH) --shared
-	gprbuild -f -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o

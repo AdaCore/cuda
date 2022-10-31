@@ -13,7 +13,7 @@ Welcome to GNAT for CUDA®!
 
    intro
    installation
-   examples
+   tutorial
    build_architecture
    programming
    performances
