@@ -47,8 +47,8 @@ procedure Main is
 
    Descriptors : GLP.Parameter_Descriptor_Array := ((+"in",               +"",          GLP.Die,         True, P.Set_Input_Image'Access),
                                                     (+"kernel",           +"bilateral", GLP.Use_Default, True, P.Set_Kernel'Access),
-                                                    (+"spatial_stdev",    +"0.75",      GLP.Use_Default, True, P.Set_Spatial_Stdev'Access),
-                                                    (+"color_dist_stdev", +"120.0",     GLP.Use_Default, True, P.Set_Color_Dist_Stdev'Access),
+                                                    (+"spatial_stdev",    +"3.4",       GLP.Use_Default, True, P.Set_Spatial_Stdev'Access),
+                                                    (+"color_dist_stdev", +"100.0",     GLP.Use_Default, True, P.Set_Color_Dist_Stdev'Access),
                                                     (+"device",           +"gpu",       GLP.Use_Default, True, P.Set_Device'Access),
                                                     (+"out",              +"",          GLP.Use_Default, True, P.Set_Output_Image'Access));
    Param  : Parameters.User_Parameters;
@@ -70,15 +70,15 @@ begin
    
    case Param.Device is
       when P.Cpu =>
-         BH.Bilateral_Cpu (Host_Img          => Original_Img, 
-                           Host_Filtered_Img => Filtered_Img,
+         BH.Bilateral_Cpu (Host_Img          => Original_Img.all, 
+                           Host_Filtered_Img => Filtered_Img.all,
                            Width             => Original_Img'Length (1), 
                            Height            => Original_Img'Length (2),
                            Spatial_Stdev     => Param.Spatial_Stdev,
                            Color_Dist_Stdev  => Param.Color_Dist_Stdev);
       when P.Gpu =>
-         BH.Bilateral_CUDA (Host_Img          => Original_Img, 
-                            Host_Filtered_Img => Filtered_Img,
+         BH.Bilateral_CUDA (Host_Img          => Original_Img.all, 
+                            Host_Filtered_Img => Filtered_Img.all,
                             Width             => Original_Img'Length (1), 
                             Height            => Original_Img'Length (2),
                             Spatial_Stdev     => Param.Spatial_Stdev,

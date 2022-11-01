@@ -14,8 +14,6 @@
 
 with CUDA.Runtime_Api;
 
-with Graphic;
-
 with Ada.Numerics; use Ada.Numerics;
 with Ada.Numerics.Generic_Elementary_Functions;
 
@@ -23,11 +21,10 @@ with Interfaces.C;
 
 package body Bilateral_Kernel is
 
-   package G renames Graphic;
    package CRA renames CUDA.Runtime_Api;
 
-   procedure Bilateral (Img_Addr          : System.Address; 
-                        Filtered_Img_Addr : System.Address;
+   procedure Bilateral (Img               : G.Image; 
+                        Filtered_Img      : in out G.Image;
                         Width             : Integer; 
                         Height            : Integer; 
                         Spatial_Stdev     : Float;
@@ -47,9 +44,6 @@ package body Bilateral_Kernel is
       Rgb_Dist            : Float := 0.0;
       Spatial_Dist        : Float := 0.0;
       Filtered_Rgb        : G.Rgb := (0.0, 0.0, 0.0);
-
-      Img          : G.Image (1 .. Width, 1 .. Height) with Address => Img_Addr;
-      Filtered_Img : G.Image (1 .. Width, 1 .. Height) with Address => Filtered_Img_Addr;
 
       package Fmath is new
          Ada.Numerics.Generic_Elementary_Functions (Float);
@@ -112,8 +106,8 @@ package body Bilateral_Kernel is
       end if;
    end;
 
-   procedure Bilateral_CUDA (Device_Img          : System.Address; 
-                             Device_Filtered_Img : System.Address;
+   procedure Bilateral_CUDA (Device_Img          : G.Image; 
+                             Device_Filtered_Img : in out G.Image;
                              Width               : Integer; 
                              Height              : Integer; 
                              Spatial_Stdev       : Float;

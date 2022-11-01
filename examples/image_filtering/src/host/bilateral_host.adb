@@ -12,6 +12,8 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Unchecked_Deallocation;
+
 with Interfaces.C;
 with System;
 
@@ -19,6 +21,7 @@ with CUDA.Stddef;
 with CUDA.Vector_Types;
 with CUDA.Driver_Types;
 with CUDA.Runtime_Api;
+with CUDA.Storage_Models;
 
 with Bilateral_Kernel;
 
@@ -27,19 +30,20 @@ package body Bilateral_Host is
    package BK renames Bilateral_Kernel;
    package CDT renames CUDA.Driver_Types;
    package CRA renames CUDA.Runtime_Api;
+   package CSM renames CUDA.Storage_Models;
    package IC renames Interfaces.C;
 
-   procedure Bilateral_Cpu (Host_Img          : G.Image_Access; 
-                            Host_Filtered_Img : G.Image_Access;
+   procedure Bilateral_Cpu (Host_Img          : G.Image; 
+                            Host_Filtered_Img : in out G.Image;
                             Width             : Integer; 
                             Height            : Integer; 
                             Spatial_Stdev     : Float;
                             Color_Dist_Stdev  : Float) is
    begin
-      for I in Host_Img.all'Range (1) loop
-         for J in Host_Img.all'Range (2) loop
-            BK.Bilateral (Img_Addr          => Host_Img.all'Address,
-                          Filtered_Img_Addr => Host_Filtered_Img.all'Address,
+      for I in Host_Img'Range (1) loop
+         for J in Host_Img'Range (2) loop
+            BK.Bilateral (Img               => Host_Img,
+                          Filtered_Img      => Host_Filtered_Img,
                           Width             => Width, Height => Height,
                           Spatial_Stdev     => Spatial_Stdev,
                           Color_Dist_Stdev  => Color_Dist_Stdev, 
@@ -49,13 +53,18 @@ package body Bilateral_Host is
       end loop;
    end;
 
-   procedure Bilateral_CUDA (Host_Img          : G.Image_Access; 
-                             Host_Filtered_Img : G.Image_Access;
+   procedure Bilateral_CUDA (Host_Img          : G.Image;
+                             Host_Filtered_Img : in out G.Image;
                              Width             : Integer; 
                              Height            : Integer; 
                              Spatial_Stdev     : Float;
                              Color_Dist_Stdev  : Float) is
-      Image_Bytes       : constant CUDA.Stddef.Size_T     := CUDA.Stddef.Size_T (Host_Img.all'Size / 8);
+      Image_Bytes : constant CUDA.Stddef.Size_T := CUDA.Stddef.Size_T (Host_Img'Size / 8);
+
+      type Image_Device_Access is access G.Image
+         with Designated_Storage_Model => CSM.Model;
+
+      procedure Free is new Ada.Unchecked_Deallocation (G.Image, Image_Device_Access);
 
       use IC;
       Threads_Per_Block : constant CUDA.Vector_Types.Dim3 := (16, 16, 1);
@@ -63,24 +72,14 @@ package body Bilateral_Host is
       Block_Y : constant IC.Unsigned := (IC.Unsigned (Height) + Threads_Per_Block.Y - 1) / Threads_Per_Block.Y;
       Blocks_Per_Grid : constant CUDA.Vector_Types.Dim3 := (Block_X, Block_Y, 1);
 
-      Device_Img, Device_Filtered_Img : System.Address;
+      -- data to device
+      Device_Img : Image_Device_Access := new G.Image'(Host_Img);
+      Device_Filtered_Img : Image_Device_Access := new G.Image'(Host_Filtered_Img);
    begin
-      -- send input data to device
-      Device_Img := CRA.Malloc (Image_Bytes);
-      CRA.Memcpy (Device_Img, 
-                  Host_Img.all'Address, 
-                  Image_Bytes, 
-                  CDT.Memcpy_Host_To_Device);
-
-      Device_Filtered_Img := CRA.Malloc (Image_Bytes);
-      CRA.Memcpy (Device_Filtered_Img, 
-                  Host_Filtered_Img.all'Address, 
-                  Image_Bytes, 
-                  CDT.Memcpy_Host_To_Device);
 
       -- compute filter kernel on device
-      pragma CUDA_Execute (BK.Bilateral_CUDA (Device_Img, 
-                                              Device_Filtered_Img, 
+      pragma CUDA_Execute (BK.Bilateral_CUDA (Device_Img.all, 
+                                              Device_Filtered_Img.all, 
                                               Width, 
                                               Height, 
                                               Spatial_Stdev,
@@ -88,13 +87,10 @@ package body Bilateral_Host is
                            Blocks_Per_Grid, 
                            Threads_Per_Block);
 
-      -- send output data to host
-      CRA.Memcpy (Host_Filtered_Img.all'Address, 
-                  Device_Filtered_Img, 
-                  Image_Bytes,
-                  CDT.Memcpy_Device_To_Host);
+      -- data to host
+      Host_Filtered_Img := Device_Filtered_Img.all;
 
-      CRA.Free (Device_Img);
-      CRA.Free (Device_Filtered_Img);
+      Free (Device_Img);
+      Free (Device_Filtered_Img);
    end;
 end Bilateral_Host;
