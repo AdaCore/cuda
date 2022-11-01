@@ -35,4 +35,7 @@ package Graphic is
    type Image is array (Natural range <>, Natural range <>) of Rgb;
    type Image_Access is access all Image;
 
+   --type Array_Device_Access is access Float_Array
+   --  with Designated_Storage_Model => CUDA.Storage_Models.Model;
+
 end Graphic;

@@ -14,17 +14,23 @@
 
 with System;
 
+with Graphic;
+
 package Bilateral_Kernel is
 
+   package G renames Graphic;
+
    procedure Bilateral
-     (Img_Addr         : System.Address; Filtered_Img_Addr : System.Address;
-      Width            : Integer; Height : Integer; Spatial_Stdev : Float;
-      Color_Dist_Stdev : Float; I : Integer; J : Integer);
+     (Img               : G.Image; 
+      Filtered_Img      : in out G.Image;
+      Width             : Integer; Height : Integer; Spatial_Stdev : Float;
+      Color_Dist_Stdev  : Float; I : Integer; J : Integer);
 
    procedure Bilateral_Cuda
-     (Device_Img       : System.Address; Device_Filtered_Img : System.Address;
-      Width            : Integer; Height : Integer; Spatial_Stdev : Float;
-      Color_Dist_Stdev : Float) with
-     Cuda_Global;
+     (Device_Img                      : G.Image; 
+      Device_Filtered_Img             : in out G.Image;
+      Width, Height                   : Integer; 
+      Spatial_Stdev, Color_Dist_Stdev : Float) 
+        with Cuda_Global;
 
 end Bilateral_Kernel;
