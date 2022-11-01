@@ -105,6 +105,6 @@ exception
       AIO.Put_Line ("Input file does not exists.");
    when P.Bad_extension =>
       AIO.Put_Line ("Only *.qoi images are supported.");
-   when others =>
-      AIO.Put_Line ("Others");
+   --when others =>
+   --   AIO.Put_Line ("Exception : others");
 end Main;
