@@ -19,12 +19,15 @@ package Bilateral_Host is
    package G renames Graphic;
 
    procedure Bilateral_Cpu
-     (Host_Img         : G.Image_Access; Host_Filtered_Img : G.Image_Access;
-      Width            : Integer; Height : Integer; Spatial_Stdev : Float;
-      Color_Dist_Stdev : Float);
+     (Host_Img          : G.Image; 
+      Host_Filtered_Img : in out G.Image;
+      Width             : Integer; Height : Integer; Spatial_Stdev : Float;
+      Color_Dist_Stdev  : Float);
 
    procedure Bilateral_Cuda
-     (Host_Img         : G.Image_Access; Host_Filtered_Img : G.Image_Access;
-      Width            : Integer; Height : Integer; Spatial_Stdev : Float;
-      Color_Dist_Stdev : Float);
+     (Host_Img          : G.Image; 
+      Host_Filtered_Img : in out G.Image;
+      Width             : Integer; Height : Integer; Spatial_Stdev : Float;
+      Color_Dist_Stdev  : Float);
+
 end Bilateral_Host;
