@@ -27,8 +27,8 @@ package Bilateral_Kernel is
       Color_Dist_Stdev  : Float; I : Integer; J : Integer);
 
    procedure Bilateral_Cuda
-     (Device_Img                      : G.Image; 
-      Device_Filtered_Img             : in out G.Image;
+     (Device_Img                      : G.Image_Device_Access; 
+      Device_Filtered_Img             : G.Image_Device_Access;
       Width, Height                   : Integer; 
       Spatial_Stdev, Color_Dist_Stdev : Float) 
         with Cuda_Global;

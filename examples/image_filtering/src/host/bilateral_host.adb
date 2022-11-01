@@ -21,7 +21,7 @@ with CUDA.Stddef;
 with CUDA.Vector_Types;
 with CUDA.Driver_Types;
 with CUDA.Runtime_Api;
-with CUDA.Storage_Models;
+--with CUDA.Storage_Models;
 
 with Bilateral_Kernel;
 
@@ -30,7 +30,7 @@ package body Bilateral_Host is
    package BK renames Bilateral_Kernel;
    package CDT renames CUDA.Driver_Types;
    package CRA renames CUDA.Runtime_Api;
-   package CSM renames CUDA.Storage_Models;
+   --package CSM renames CUDA.Storage_Models;
    package IC renames Interfaces.C;
 
    procedure Bilateral_Cpu (Host_Img          : G.Image; 
@@ -61,10 +61,10 @@ package body Bilateral_Host is
                              Color_Dist_Stdev  : Float) is
       Image_Bytes : constant CUDA.Stddef.Size_T := CUDA.Stddef.Size_T (Host_Img'Size / 8);
 
-      type Image_Device_Access is access G.Image
-         with Designated_Storage_Model => CSM.Model;
+      --type Image_Device_Access is access G.Image
+      --   with Designated_Storage_Model => CSM.Model;
 
-      procedure Free is new Ada.Unchecked_Deallocation (G.Image, Image_Device_Access);
+      procedure Free is new Ada.Unchecked_Deallocation (G.Image, G.Image_Device_Access);
 
       use IC;
       Threads_Per_Block : constant CUDA.Vector_Types.Dim3 := (16, 16, 1);
@@ -73,13 +73,13 @@ package body Bilateral_Host is
       Blocks_Per_Grid : constant CUDA.Vector_Types.Dim3 := (Block_X, Block_Y, 1);
 
       -- data to device
-      Device_Img : Image_Device_Access := new G.Image'(Host_Img);
-      Device_Filtered_Img : Image_Device_Access := new G.Image'(Host_Filtered_Img);
+      Device_Img : G.Image_Device_Access := new G.Image'(Host_Img);
+      Device_Filtered_Img : G.Image_Device_Access := new G.Image'(Host_Filtered_Img);
    begin
 
       -- compute filter kernel on device
-      pragma CUDA_Execute (BK.Bilateral_CUDA (Device_Img.all, 
-                                              Device_Filtered_Img.all, 
+      pragma CUDA_Execute (BK.Bilateral_CUDA (Device_Img, 
+                                              Device_Filtered_Img, 
                                               Width, 
                                               Height, 
                                               Spatial_Stdev,

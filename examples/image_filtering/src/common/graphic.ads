@@ -12,7 +12,13 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+--with Ada.Unchecked_Deallocation;
+
+with CUDA.Storage_Models;
+
 package Graphic is
+
+   package CSM renames CUDA.Storage_Models;
 
    type Rgb is record
       R, G, B : Float;
@@ -35,7 +41,7 @@ package Graphic is
    type Image is array (Natural range <>, Natural range <>) of Rgb;
    type Image_Access is access all Image;
 
-   --type Array_Device_Access is access Float_Array
-   --  with Designated_Storage_Model => CUDA.Storage_Models.Model;
+   type Image_Device_Access is access Image
+         with Designated_Storage_Model => CSM.Model;
 
 end Graphic;

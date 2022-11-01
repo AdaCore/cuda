@@ -106,8 +106,8 @@ package body Bilateral_Kernel is
       end if;
    end;
 
-   procedure Bilateral_CUDA (Device_Img          : G.Image; 
-                             Device_Filtered_Img : in out G.Image;
+   procedure Bilateral_CUDA (Device_Img          : G.Image_Device_Access; 
+                             Device_Filtered_Img : G.Image_Device_Access;
                              Width               : Integer; 
                              Height              : Integer; 
                              Spatial_Stdev       : Float;
@@ -116,8 +116,8 @@ package body Bilateral_Kernel is
       I : constant Integer := Integer (CRA.Block_Dim.X * CRA.Block_Idx.X + CRA.Thread_IDx.X);
       J : constant Integer := Integer (CRA.Block_Dim.Y * CRA.Block_IDx.Y + CRA.Thread_IDx.Y);
    begin
-      Bilateral (Device_Img, 
-                 Device_Filtered_Img, 
+      Bilateral (Device_Img.all, 
+                 Device_Filtered_Img.all, 
                  Width, 
                  Height, 
                  Spatial_Stdev,
