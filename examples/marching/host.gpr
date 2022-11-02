@@ -11,16 +11,17 @@ project Host is
    for Target use CUDA_API_Host.CUDA_Host;
 
    package Compiler is
-      for Switches ("ada") use  CUDA_API_Host.Compiler'Switches ("ada");
+      for Switches ("ada") use  CUDA_API_Host.Compiler_Options;
    end Compiler;
 
    package Linker is
-      for Switches ("ada") use CUDA_API_Host.Linker'Switches ("ada");
+      for Switches ("ada") use CUDA_API_Host.Linker_Options;
    end Linker;
 
    package Binder is
-       for Default_Switches ("ada") use CUDA_API_Host.Binder'Default_Switches ("ada");
+       for Default_Switches ("ada") use CUDA_API_Host.Binder_Options;
    end Binder;
+
 
 end Host;
 
