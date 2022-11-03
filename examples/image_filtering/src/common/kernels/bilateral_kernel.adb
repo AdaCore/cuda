@@ -23,13 +23,13 @@ package body Bilateral_Kernel is
 
    package CRA renames CUDA.Runtime_Api;
 
-   procedure Bilateral (Img               : G.Image; 
+   procedure Bilateral (Img               : G.Image;
                         Filtered_Img      : in out G.Image;
-                        Width             : Integer; 
-                        Height            : Integer; 
+                        Width             : Integer;
+                        Height            : Integer;
                         Spatial_Stdev     : Float;
-                        Color_Dist_Stdev  : Float; 
-                        I                 : Integer; 
+                        Color_Dist_Stdev  : Float;
+                        I                 : Integer;
                         J                 : Integer) is
       Kernel_Size : constant Integer := Integer (2.0 * Spatial_Stdev * 3.0);
       Half_Size   : constant Natural := (Kernel_Size - 1) / 2;
@@ -81,7 +81,7 @@ package body Bilateral_Kernel is
                -- Compute Distances
                Spatial_Dist := Fmath.Sqrt (Distance_square (Float (X - I), Float(Y - J)));
                Rgb_Dist := Fmath.Sqrt (G.Distance_square (Img (I, J), Img (X, Y)));
-               
+
                -- Compute Gaussians
                Spatial_Gaussian    := Compute_Spatial_Gaussian (Spatial_Dist);
                Color_Dist_Gaussian := Compute_Color_Dist_Gaussian (Rgb_Dist);
@@ -106,24 +106,28 @@ package body Bilateral_Kernel is
       end if;
    end;
 
-   procedure Bilateral_CUDA (Device_Img          : G.Image_Device_Access; 
+   procedure Bilateral_CUDA (Device_Img          : G.Image_Device_Access;
                              Device_Filtered_Img : G.Image_Device_Access;
-                             Width               : Integer; 
-                             Height              : Integer; 
+                             Width               : Integer;
+                             Height              : Integer;
                              Spatial_Stdev       : Float;
                              Color_Dist_Stdev    : Float) is
       use Interfaces.C;
       I : constant Integer := Integer (CRA.Block_Dim.X * CRA.Block_Idx.X + CRA.Thread_IDx.X);
       J : constant Integer := Integer (CRA.Block_Dim.Y * CRA.Block_IDx.Y + CRA.Thread_IDx.Y);
    begin
-      Bilateral (Device_Img.all, 
-                 Device_Filtered_Img.all, 
-                 Width, 
-                 Height, 
+      if I in Device_Filtered_Img.all'Range (1)
+         and then J in Device_Filtered_Img.all'Range (2)
+      then
+         Bilateral (Device_Img.all,
+                 Device_Filtered_Img.all,
+                 Width,
+                 Height,
                  Spatial_Stdev,
-                 Color_Dist_Stdev, 
-                 I, 
+                 Color_Dist_Stdev,
+                 I,
                  J);
+      end if;
    end;
 
 end Bilateral_Kernel;
