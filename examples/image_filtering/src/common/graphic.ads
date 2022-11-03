@@ -41,7 +41,7 @@ package Graphic is
   type Image is array (Natural range <>, Natural range <>) of Rgb;
   type Image_Access is access all Image;
 
-   type Image_Device_Access is access Image
-         with Designated_Storage_Model => CSM.Model;
+  type Image_Device_Access is access Image
+    with Designated_Storage_Model => CSM.Model;
 
 end Graphic;
