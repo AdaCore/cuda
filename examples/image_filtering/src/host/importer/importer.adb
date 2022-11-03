@@ -12,15 +12,7 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 with Qoi;
-=======
-with QOI;
->>>>>>> changes to make it work
-=======
-with Qoi;
->>>>>>> 72c427bbc8c2851273705e6b05744a0c21c762eb
 
 with System;
 
