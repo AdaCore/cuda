@@ -12,8 +12,6 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
---with Ada.Unchecked_Deallocation;
-
 with CUDA.Storage_Models;
 
 package Graphic is

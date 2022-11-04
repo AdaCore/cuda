@@ -120,13 +120,13 @@ package body Bilateral_Kernel is
          and then J in Device_Filtered_Img.all'Range (2)
       then
          Bilateral (Device_Img.all,
-                 Device_Filtered_Img.all,
-                 Width,
-                 Height,
-                 Spatial_Stdev,
-                 Color_Dist_Stdev,
-                 I,
-                 J);
+                    Device_Filtered_Img.all,
+                    Width,
+                    Height,
+                    Spatial_Stdev,
+                    Color_Dist_Stdev,
+                    I,
+                    J);
       end if;
    end;
 

@@ -55,9 +55,9 @@ package body Importer is
             Offset := (J - 1) * W;
             for I in Img'Range (1) loop
                Idx        := Sse.Storage_Count (((Offset + (I - 1)) * 3) + 1);
-               Img (I, J) :=
-                 (Float (Result.Data (Idx + 0)), Float (Result.Data (Idx + 1)),
-                  Float (Result.Data (Idx + 2)));
+               Img (I, J) := (Float (Result.Data (Idx + 0)), 
+                              Float (Result.Data (Idx + 1)),
+                              Float (Result.Data (Idx + 2)));
             end loop;
          end loop;
          return Img;
