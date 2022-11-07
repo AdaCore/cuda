@@ -99,7 +99,7 @@ exception
    when Msg : GLP.Bad_Command =>
       AIO.Put_Line (File => AIO.Standard_Error,
                     Item => "Bad command line: " & E.Exception_Message (Msg));
-      AIO.Put_Line ("Try: ./main in=./data/noisy_lena.qoi kernel=bilateral spatial_stdev=3.4 color_dist_stdev=100.0 device=gpu");
+      AIO.Put_Line ("Try: ./main in=./data/noisy_miners_bathing.qoi kernel=bilateral spatial_stdev=8.0 color_dist_stdev=80.0 device=gpu");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    when I.Bad_filename =>
       AIO.Put_Line ("Input file does not exists.");
