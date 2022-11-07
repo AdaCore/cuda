@@ -8,7 +8,7 @@ Some Expensive Computation
 Remember that before compiling any you will need to have sourced env.sh
 in your environment::
 
-Open the cuda/tutorial directory under your CUDA application. You will see
+Open the ``tutorial`` directory found at the root of this CUDA repository. You will see
 there a typical CUDA project structure. In particular, ``device.gpr`` will build
 the code running on the device, ``host.gpr`` the code on the host. The Makefile
 is responsible to build both project, note that it's using the standard Makefile.build
@@ -17,7 +17,7 @@ structure. If you open cuda/Makefile.build, you'll see both build commands:
 .. code-block:: Makefile
 
     gprbuild -Xcuda_host=$(CUDA_HOST) -P device
-	gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o
+	 gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o
 
 The argument ``-Xcuda_host=$(CUDA_HOST)`` is here to allow to build for cross
 platform such as ARM Linux. In this tutorial, we're only going to build for native
@@ -124,7 +124,7 @@ of the function:
 This kernel will be be called in parallel, once per index in the array to
 compute. Within a kernel, it's possible to index a given call using the
 thread number (``Thread_IDx``) and the block number (``Block_IDx``). You
-can also retreive the number of thread in a block that have been scheduled
+can also retrieve the number of thread in a block that have been scheduled
 (``Block_Dim``) and the number of blocks in the grid (``Grid_Dim``). These
 are 3 dimension values, indexed by x, y and z. In this example, we're only
 going to use the x dimension.
@@ -183,7 +183,7 @@ additional cost of device computation, this allocation will be taken into accoun
 in the total time reported. Indeed, data copy can be a critical limiting factor
 of GPU performance enhancements.
 
-Indentify the portion of the body marked ``-- INSERT HERE DEVICE CALL``. Introduce
+Identify the portion of the body marked ``-- INSERT HERE DEVICE CALL``. Introduce
 here two array allocations and copies for H_A and H_B to D_A and D_B respectively.
 Also allocate one array to D_C to be the size of H_C:
 
