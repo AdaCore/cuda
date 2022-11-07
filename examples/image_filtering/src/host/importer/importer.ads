@@ -18,15 +18,8 @@ package Importer is
 
    package G renames Graphic;
 
-   Bad_filename : exception;
+   Bad_Filename : exception;
 
-   procedure Get_Image_Infos (File_Path : String; 
-                              Width     : out Positive; 
-                              Height    : out Positive);
-
-   procedure Import_Image (File_Path : String; 
-                           Width     : Positive; 
-                           Height    : Positive;
-                           Img       : out G.Image);
+   function Load_Qoi (Abs_Filename : String) return G.Image_Access;
 
 end Importer;

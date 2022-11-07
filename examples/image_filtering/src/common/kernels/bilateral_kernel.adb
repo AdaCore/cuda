@@ -14,54 +14,57 @@
 
 with CUDA.Runtime_Api;
 
-with Graphic;
-
 with Ada.Numerics; use Ada.Numerics;
 with Ada.Numerics.Generic_Elementary_Functions;
 
+with Interfaces.C;
+
 package body Bilateral_Kernel is
 
-   package G renames Graphic;
    package CRA renames CUDA.Runtime_Api;
 
-   procedure Bilateral (Img_Addr          : System.Address; 
-                        Filtered_Img_Addr : System.Address;
-                        Width             : Integer; 
-                        Height            : Integer; 
+   procedure Bilateral (Img               : G.Image;
+                        Filtered_Img      : in out G.Image;
+                        Width             : Integer;
+                        Height            : Integer;
                         Spatial_Stdev     : Float;
-                        Color_Dist_Stdev  : Float; 
-                        I                 : Integer; 
+                        Color_Dist_Stdev  : Float;
+                        I                 : Integer;
                         J                 : Integer) is
       Kernel_Size : constant Integer := Integer (2.0 * Spatial_Stdev * 3.0);
       Half_Size   : constant Natural := (Kernel_Size - 1) / 2;
+
+      Spatial_Variance : constant Float := Spatial_Stdev * Spatial_Stdev;
+      Color_Dist_Variance : constant Float := Color_Dist_Stdev * Color_Dist_Stdev;
 
       Spatial_Gaussian    : Float := 0.0;
       Color_Dist_Gaussian : Float := 0.0;
       Sg_Cdg              : Float := 0.0;
       Sum_Sg_Cdg          : Float := 0.0;
       Rgb_Dist            : Float := 0.0;
+      Spatial_Dist        : Float := 0.0;
       Filtered_Rgb        : G.Rgb := (0.0, 0.0, 0.0);
 
-      Img          : G.Image (1 .. Width, 1 .. Height) with Address => Img_Addr;
-      Filtered_Img : G.Image (1 .. Width, 1 .. Height) with Address => Filtered_Img_Addr;
-
-      package Elementary_Functions is new
+      package Fmath is new
          Ada.Numerics.Generic_Elementary_Functions (Float);
 
-      function Compute_Spatial_Gaussian (M : Float; N : Float) return Float is
-         Spatial_Variance : constant Float := Spatial_Stdev * Spatial_Stdev;
-         Two_Pi_Variance  : constant Float := 2.0 * 3.141_6 * Spatial_Variance;
-         Expo             : constant Float := Elementary_Functions.Exp (-0.5 * ((M * M + N * N) / Spatial_Variance));
+      function Distance_Square (X : Float; Y : Float) return Float is
       begin
-         return (1.0 / (Two_Pi_Variance)) * Expo;
+         return X * X + Y * Y;
+      end;
+
+      function Compute_Spatial_Gaussian (K : Float) return Float is
+      begin
+         return
+           (1.0 / (Fmath.Sqrt (2.0 * Ada.Numerics.Pi) * Spatial_Variance)) *
+           Fmath.Exp (-0.5 * ((K * K) / Spatial_Variance));
       end;
 
       function Compute_Color_Dist_Gaussian (K : Float) return Float is
-         Color_Dist_Variance : constant Float := Color_Dist_Stdev * Color_Dist_Stdev;
       begin
          return
-           (1.0 / (Elementary_Functions.Sqrt (2.0 * 3.141_6) * Color_Dist_Stdev)) *
-           Elementary_Functions.Exp (-0.5 * ((K * K) / Color_Dist_Variance));
+           (1.0 / (Fmath.Sqrt (2.0 * Ada.Numerics.Pi) * Color_Dist_Stdev)) *
+           Fmath.Exp (-0.5 * ((K * K) / Color_Dist_Variance));
       end;
 
       -- Compute Kernel Bounds
@@ -75,11 +78,12 @@ package body Bilateral_Kernel is
       for X in Xb .. Xe loop
          for Y in Yb .. Ye loop
             if X >= 1 and X <= Width and Y >= 1 and Y <= Height then
-               -- Compute Color Distance
-               Rgb_Dist := Elementary_Functions.Sqrt (distance_square (Img (I, J), Img (X, Y)));
+               -- Compute Distances
+               Spatial_Dist := Fmath.Sqrt (Distance_square (Float (X - I), Float(Y - J)));
+               Rgb_Dist := Fmath.Sqrt (G.Distance_square (Img (I, J), Img (X, Y)));
 
                -- Compute Gaussians
-               Spatial_Gaussian    := Compute_Spatial_Gaussian (Float (I - X), Float (J - Y));
+               Spatial_Gaussian    := Compute_Spatial_Gaussian (Spatial_Dist);
                Color_Dist_Gaussian := Compute_Color_Dist_Gaussian (Rgb_Dist);
 
                -- Multiply Gaussians
@@ -102,23 +106,28 @@ package body Bilateral_Kernel is
       end if;
    end;
 
-   procedure Bilateral_CUDA (Device_Img          : System.Address; 
-                             Device_Filtered_Img : System.Address;
-                             Width               : Integer; 
-                             Height              : Integer; 
+   procedure Bilateral_CUDA (Device_Img          : G.Image_Device_Access;
+                             Device_Filtered_Img : G.Image_Device_Access;
+                             Width               : Integer;
+                             Height              : Integer;
                              Spatial_Stdev       : Float;
                              Color_Dist_Stdev    : Float) is
-      I : constant Integer := Integer (CRA.Block_Idx.X);
-      J : constant Integer := Integer (CRA.Block_Idx.Y);
+      use Interfaces.C;
+      I : constant Integer := Integer (CRA.Block_Dim.X * CRA.Block_Idx.X + CRA.Thread_IDx.X);
+      J : constant Integer := Integer (CRA.Block_Dim.Y * CRA.Block_IDx.Y + CRA.Thread_IDx.Y);
    begin
-      Bilateral (Device_Img, 
-                 Device_Filtered_Img, 
-                 Width, 
-                 Height, 
-                 Spatial_Stdev,
-                 Color_Dist_Stdev, 
-                 I, 
-                 J);
+      if I in Device_Filtered_Img.all'Range (1)
+         and then J in Device_Filtered_Img.all'Range (2)
+      then
+         Bilateral (Device_Img.all,
+                    Device_Filtered_Img.all,
+                    Width,
+                    Height,
+                    Spatial_Stdev,
+                    Color_Dist_Stdev,
+                    I,
+                    J);
+      end if;
    end;
 
 end Bilateral_Kernel;

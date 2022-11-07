@@ -12,30 +12,34 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
+with CUDA.Storage_Models;
+
 package Graphic is
-   
+
+   package CSM renames CUDA.Storage_Models;
+
    type Rgb is record
       R, G, B : Float;
    end record;
 
-   subtype Component is Float range 0.0 .. 255.0;
-
-   function "/" (Left : Rgb; Right: Float) return Rgb is
+   function "/" (Left : Rgb; Right : Float) return Rgb is
      (Left.R / Right, Left.G / Right, Left.B / Right);
 
-   function "*" (Left : Rgb; Right: Float) return Rgb is
+   function "*" (Left : Rgb; Right : Float) return Rgb is
      (Left.R * Right, Left.G * Right, Left.B * Right);
 
-   function "+" (Left : Rgb; Right: Rgb) return Rgb is
+   function "+" (Left : Rgb; Right : Rgb) return Rgb is
      (Left.R + Right.R, Left.G + Right.G, Left.B + Right.B);
 
-   function distance_square (Left : Rgb; Right: Rgb) return float is
-      ((Left.R - Right.R) * (Left.R - Right.R) +
-       (Left.G - Right.G) * (Left.G - Right.G) +
-       (Left.B - Right.B) * (Left.B - Right.B));
+   function Distance_Square (Left : Rgb; Right : Rgb) return Float is
+     ((Left.R - Right.R) * (Left.R - Right.R) +
+      (Left.G - Right.G) * (Left.G - Right.G) +
+      (Left.B - Right.B) * (Left.B - Right.B));
 
-   type Image is array (Natural range <>, Natural range <>) of Rgb;
-   type Image_Access is access all Image;
+  type Image is array (Natural range <>, Natural range <>) of Rgb;
+  type Image_Access is access all Image;
 
-   procedure Normalize (Img : Image_Access);
+  type Image_Device_Access is access Image
+    with Designated_Storage_Model => CSM.Model;
+
 end Graphic;
