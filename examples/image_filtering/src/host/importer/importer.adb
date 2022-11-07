@@ -65,7 +65,7 @@ package body Importer is
 
    begin
 
-      Aio.Put_Line ("LOAD_QOI : " & Abs_Filename);
+      Aio.Put_Line ("Loading QOI ... : " & Abs_Filename);
 
       Fd := GNAT.OS_Lib.Open_Read (Abs_Filename, Binary);
 

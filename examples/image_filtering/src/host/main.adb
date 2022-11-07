@@ -60,40 +60,67 @@ procedure Main is
 
    procedure Free is new Ada.Unchecked_Deallocation (G.Image, G.Image_Access);
 
+   procedure Read_Command_Line_Parameters is 
+   begin
+      GLP.Parse_Command_Line (Parameters => Descriptors, Result => Param);
+   end;
+
+   procedure Load_QOI_image is
+   begin
+      Start_Time := Clock;
+      Original_Img := Importer.Load_QOI (+Param.Input_Image);
+      Elapsed_Time := Clock - Start_Time;
+      AIO.Put_Line ("Load QOI image time: " & Duration'Image (To_Duration (Elapsed_Time)) & " seconds");
+      Filtered_Img := new G.Image (1 .. Original_Img'Length (1), 1 .. Original_Img'Length (2));
+   end;
+
+   procedure Filter_Image is
+   begin
+      Start_Time := Clock;
+
+      case Param.Device is
+         when P.Cpu =>
+            BH.Bilateral_Cpu (Host_Img          => Original_Img.all, 
+                              Host_Filtered_Img => Filtered_Img.all,
+                              Width             => Original_Img'Length (1), 
+                              Height            => Original_Img'Length (2),
+                              Spatial_Stdev     => Param.Spatial_Stdev,
+                              Color_Dist_Stdev  => Param.Color_Dist_Stdev);
+         when P.Gpu =>
+            BH.Bilateral_CUDA (Host_Img          => Original_Img.all, 
+                              Host_Filtered_Img => Filtered_Img.all,
+                              Width             => Original_Img'Length (1), 
+                              Height            => Original_Img'Length (2),
+                              Spatial_Stdev     => Param.Spatial_Stdev,
+                              Color_Dist_Stdev  => Param.Color_Dist_Stdev);
+      end case;
+
+      Elapsed_Time := Clock - Start_Time;
+      AIO.Put_Line ("Filtering time (" & Param.Device'Image & "): " & Duration'Image (To_Duration (Elapsed_Time)) & " seconds");
+   end;
+
+   procedure Dump_QOI_image is
+   begin
+      Start_Time := Clock;
+      Exporter.Dump_QOI (+Param.Output_Image, Filtered_Img);
+      Elapsed_Time := Clock - Start_Time;
+      AIO.Put_Line ("Dump QOI image time: " & Duration'Image (To_Duration (Elapsed_Time)) & " seconds");
+   end;
+
+   procedure Free_Resources is
+   begin
+      Free (Original_Img);
+      Free (Filtered_Img);
+   end;
+
 begin
 
-   GLP.Parse_Command_Line (Parameters => Descriptors, Result => Param);
-   Original_Img := Importer.Load_QOI (+Param.Input_Image);
-   Filtered_Img := new G.Image (1 .. Original_Img'Length (1), 1 .. Original_Img'Length (2));
-
-   Start_Time := Clock;
-   
-   case Param.Device is
-      when P.Cpu =>
-         BH.Bilateral_Cpu (Host_Img          => Original_Img.all, 
-                           Host_Filtered_Img => Filtered_Img.all,
-                           Width             => Original_Img'Length (1), 
-                           Height            => Original_Img'Length (2),
-                           Spatial_Stdev     => Param.Spatial_Stdev,
-                           Color_Dist_Stdev  => Param.Color_Dist_Stdev);
-      when P.Gpu =>
-         BH.Bilateral_CUDA (Host_Img          => Original_Img.all, 
-                            Host_Filtered_Img => Filtered_Img.all,
-                            Width             => Original_Img'Length (1), 
-                            Height            => Original_Img'Length (2),
-                            Spatial_Stdev     => Param.Spatial_Stdev,
-                            Color_Dist_Stdev  => Param.Color_Dist_Stdev);
-   end case;
-
-   Elapsed_Time := Clock - Start_Time;
-   AIO.Put_Line ("Filtering time (" & Param.Device'Image & "): " & Duration'Image (To_Duration (Elapsed_Time)) & " seconds");
-
-   Exporter.Dump_QOI (+Param.Output_Image, Filtered_Img);
-
+   Read_Command_Line_Parameters;
+   Load_QOI_image;
+   Filter_Image;
+   Dump_QOI_image;
    AIO.Put_Line ("Result found in " & Param.Output_Image'Image);
-
-   Free (Original_Img);
-   Free (Filtered_Img);
+   Free_Resources;
 
 exception
    when Msg : GLP.Bad_Command =>
