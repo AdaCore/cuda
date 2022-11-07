@@ -17,7 +17,7 @@ structure. If you open cuda/Makefile.build, you'll see both build commands:
 .. code-block:: Makefile
 
     gprbuild -Xcuda_host=$(CUDA_HOST) -P device
-	 gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o
+    gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o
 
 The argument ``-Xcuda_host=$(CUDA_HOST)`` is here to allow to build for cross
 platform such as ARM Linux. In this tutorial, we're only going to build for native
