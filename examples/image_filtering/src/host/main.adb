@@ -60,7 +60,7 @@ procedure Main is
 
    procedure Free is new Ada.Unchecked_Deallocation (G.Image, G.Image_Access);
 
-   procedure Read_Cmd_Parameters is 
+   procedure Read_Command_Line_Parameters is 
    begin
       GLP.Parse_Command_Line (Parameters => Descriptors, Result => Param);
    end;
@@ -107,7 +107,7 @@ procedure Main is
       AIO.Put_Line ("Dump QOI image time: " & Duration'Image (To_Duration (Elapsed_Time)) & " seconds");
    end;
 
-   procedure Free_Ressources is
+   procedure Free_Resources is
    begin
       Free (Original_Img);
       Free (Filtered_Img);
@@ -115,12 +115,12 @@ procedure Main is
 
 begin
 
-   Read_Cmd_Parameters;
+   Read_Command_Line_Parameters;
    Load_QOI_image;
    Filter_Image;
    Dump_QOI_image;
    AIO.Put_Line ("Result found in " & Param.Output_Image'Image);
-   Free_Ressources;
+   Free_Resources;
 
 exception
    when Msg : GLP.Bad_Command =>
