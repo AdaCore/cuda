@@ -83,10 +83,10 @@ package body Exporter is
       QOI.Encode (Data.all, Desc, Output.all, Output_Size);
 
       if Output_Size /= 0 then
-         Put_Line ("DUMP_QOI : " & abs_filename);
+         Put_Line ("Dumping QOI ... : " & abs_filename);
          Write_To_File (abs_filename, Output.all, Output_Size);
       else
-         Put_Line ("DUMP_QOI : Encode failed");
+         Put_Line ("Dumping QOI : Encode failed");
          GNAT.OS_Lib.OS_Exit (1);
       end if;
    end;
