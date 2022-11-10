@@ -3,7 +3,7 @@ with Interfaces.C;     use Interfaces.C;
 
 package body Kernel is
 
-    procedure Native_Complex_Computation
+    procedure Complex_Computation
      (A : Float_Array;
       B : Float_Array;
       C : out Float_Array;
@@ -17,7 +17,7 @@ package body Kernel is
             end loop;
          end loop;
       end if;
-   end Native_Complex_Computation;
+   end Complex_Computation;
 
    procedure Device_Complex_Computation
      (A : Array_Device_Access;
@@ -26,7 +26,7 @@ package body Kernel is
    is
       I : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
    begin
-      Native_Complex_Computation (A.all, B.all, C.all, I);
+      Complex_Computation (A.all, B.all, C.all, I);
    end Device_Complex_Computation;
 
 end Kernel;

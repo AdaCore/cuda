@@ -9,7 +9,7 @@ package Kernel is
    type Array_Device_Access is access Float_Array
      with Designated_Storage_Model => CUDA.Storage_Models.Model;
 
-    procedure Native_Complex_Computation
+    procedure Complex_Computation
      (A : Float_Array;
       B : Float_Array;
       C : out Float_Array;
