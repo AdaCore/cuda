@@ -16,7 +16,7 @@ package body Colors is
 
    -- see https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
 
-   function Hue_To_RGB(P, Q, T: Float) return Float is
+   function Hue_To_RGB (P, Q, T : Float) return Float is
       T_Clamped : Float := T;
    begin
       if T_Clamped < 0.0 then
@@ -51,12 +51,14 @@ package body Colors is
          Res.B := Src.L;
       else
          declare
-            Q : Float := (if Src.L < 0.5 then Src.L * (1.0 + Src.S) else Src.L + src.S - src.L * src.S);
+            Q : Float :=
+              (if Src.L < 0.5 then Src.L * (1.0 + Src.S)
+               else Src.L + Src.S - Src.L * Src.S);
             P : Float := 2.0 * Src.L - Q;
          begin
-            Res.R := Hue_To_RGB (P, Q, Src.h + 1.0 / 3.0);
-            Res.G := Hue_To_RGB (P, Q, Src.h);
-            Res.B := Hue_To_RGB (P, Q, Src.h - 1.0 / 3.0);
+            Res.R := Hue_To_RGB (P, Q, Src.H + 1.0 / 3.0);
+            Res.G := Hue_To_RGB (P, Q, Src.H);
+            Res.B := Hue_To_RGB (P, Q, Src.H - 1.0 / 3.0);
          end;
       end if;
 
@@ -64,8 +66,8 @@ package body Colors is
    end HSL_To_RGB;
 
    function RGB_To_HSL (src : RGB_T) return HSL_T is
-      Max : Float := Float'Max (Src.R, Float'Max (Src.G, Src.B));
-      Min : Float := Float'Min (Src.R, Float'Min (Src.G, Src.B));
+      Max : Float := Float'Max (src.R, Float'Max (src.G, src.B));
+      Min : Float := Float'Min (src.R, Float'Min (src.G, src.B));
       Res : HSL_T;
    begin
       Res.L := (Max + Min) / 2.0;
@@ -77,14 +79,16 @@ package body Colors is
          declare
             D : Float := Max - Min;
          begin
-            Res.S := (if Res.L > 0.5 then D / (2.0 - Max - Min) else D / (Max + Min));
+            Res.S :=
+              (if Res.L > 0.5 then D / (2.0 - Max - Min) else D / (Max + Min));
 
-            if Src.R >= Src.G and Src.R >= Src.B then
-               Res.H := (Src.G - Src.B) / D + (if Src.G < Src.B then 6.0 else 0.0);
-            elsif SRC.G >= SRC.B then
-               Res.H := (Src.B - Src.R) / D + 2.0;
+            if src.R >= src.G and src.R >= src.B then
+               Res.H :=
+                 (src.G - src.B) / D + (if src.G < src.B then 6.0 else 0.0);
+            elsif src.G >= src.B then
+               Res.H := (src.B - src.R) / D + 2.0;
             else
-               Res.H := (Src.R - Src.G) / D + 4.0;
+               Res.H := (src.R - src.G) / D + 4.0;
             end if;
 
             Res.H := @ / 6.0;

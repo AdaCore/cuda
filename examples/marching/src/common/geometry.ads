@@ -12,10 +12,10 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Interfaces;            use Interfaces;
+with Interfaces;                        use Interfaces;
 with Interfaces.C.Pointers;
 with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
-with Colors; use Colors;
+with Colors;                            use Colors;
 
 package Geometry is
 
@@ -25,7 +25,8 @@ package Geometry is
 
    type Point_Real is record
       X, Y, Z : Float;
-   end record with Convention => C;
+   end record with
+     Convention => C;
 
    function "+" (Left, Right : Point_Real) return Point_Real is
      (Left.X + Right.X, Left.Y + Right.Y, Left.Z + Right.Z);
@@ -75,9 +76,9 @@ package Geometry is
    ------------
 
    type Vertex is record
-      Point : Point_Real;
+      Point  : Point_Real;
       Normal : Point_Real;
-      Color : RGB_T;
+      Color  : RGB_T;
    end record;
 
    type Vertex_Array is array (Natural range <>) of aliased Vertex;
