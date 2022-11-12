@@ -22,9 +22,6 @@ with Data;         use Data;
 with CUDA.Storage_Models; use CUDA.Storage_Models;
 
 package Marching_Cubes is
-   type Atomic_Integer is new Integer with
-     Atomic;
-
    type Unsigned32_Array is array (Integer range <>) of aliased Unsigned_32;
 
    type Int_Access is access all Integer;
