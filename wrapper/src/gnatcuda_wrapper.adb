@@ -272,17 +272,17 @@ function GNATCUDA_Wrapper return Integer is
       return To_String (CUDA_Root_Lazy);
    end CUDA_Root;
 
-   -----------------
-   -- Archive_Tgz --
-   -----------------
+   ------------------
+   -- Archive_Name --
+   ------------------
 
-   function Archive_Tgz return String is
+   function Archive_Name return String is
       File_Name : constant String :=
         Base_Name
           (Input_Files (1).all, File_Extension (Input_Files (1).all));
    begin
-      return Dir_Name (Input_Files (1).all) & Directory_Separator & File_Name & ".tgz";
-   end Archive_Tgz;
+      return Dir_Name (Input_Files (1).all) & Directory_Separator & File_Name & ".a";
+   end Archive_Name;
 
 
    -------------------
@@ -413,16 +413,13 @@ function GNATCUDA_Wrapper return Integer is
           (Input_Files (1).all, File_Extension (Input_Files (1).all));
    begin
       Status := Spawn
-        (Locate_And_Check ("tar").all,
-         (new String'("--transform"),
-          new String'("s/.*\///g"),
-          new String'("-cz"))
-         & Input_Files (2 .. Input_File_Number)
-         & new String'("-f")
-         & new String'(Archive_Tgz));
+        (Locate_And_Check ("ar").all,
+         (new String'("r"))
+         & new String'(Archive_Name)
+         & Input_Files (2 .. Input_File_Number));
 
       if Status /= 0 then
-         Put_Line ("tar failure");
+         Put_Line ("ar failure");
          return Status;
       end if;
 
@@ -442,7 +439,7 @@ function GNATCUDA_Wrapper return Integer is
       -- We anticipate a reasonably large upper limit for cubin files in
       -- librairies (2048).
 
-      Tar_Dir : Dir_Type;
+      Ar_Dir : Dir_Type;
       Cubin_Name : String (1 .. 2048);
       Cubin_Name_Len : Integer;
 
@@ -450,16 +447,16 @@ function GNATCUDA_Wrapper return Integer is
 
       function Process_Library (Lib : String) return Integer is
       begin
-         Dir_Name := new String'(Base_Name (Lib, ".tgz"));
+         Dir_Name := new String'(Base_Name (Lib, ".a"));
 
          if not GNAT.IO_Aux.File_Exists (Dir_Name.all) then
             Make_Dir (Dir_Name.all);
          end if;
 
          Status := Spawn
-           (Locate_And_Check ("tar").all,
-            (new String'("-xzf"), new String'(Lib),
-             new String'("-C"), Dir_Name));
+           (Locate_And_Check ("ar").all,
+            (new String'("x"), new String'(Lib),
+             new String'("--output"), Dir_Name));
 
          if Status /= 0 then
             Put_Line ("tar failure on librairy " & Lib);
@@ -467,10 +464,10 @@ function GNATCUDA_Wrapper return Integer is
             return Status;
          end if;
 
-         Open (Tar_Dir, Dir_Name.all);
+         Open (Ar_Dir, Dir_Name.all);
 
          loop
-            Read (Tar_Dir, Cubin_Name, Cubin_Name_Len);
+            Read (Ar_Dir, Cubin_Name, Cubin_Name_Len);
 
             exit when Cubin_Name_Len = 0;
 
@@ -487,7 +484,7 @@ function GNATCUDA_Wrapper return Integer is
             end if;
          end loop;
 
-         Close (Tar_Dir);
+         Close (Ar_Dir);
 
          return 0;
       end Process_Library;
@@ -500,7 +497,7 @@ function GNATCUDA_Wrapper return Integer is
                  Library_Path (D).all &
                  "/lib" &
                  Libraries (L).all &
-                 ".tgz";
+                 ".a";
             begin
                if GNAT.IO_Aux.File_Exists (Tentative) then
                   R_Number := @ + 1;
@@ -524,7 +521,7 @@ function GNATCUDA_Wrapper return Integer is
          if File_Extension (Input_Files (F).all) = ".cubin" then
             Cubin_Number := @ + 1;
             Cubin_Files (Cubin_Number):= new String'(Input_Files (F).all);
-         elsif File_Extension (Input_Files (F).all) = ".tgz" then
+         elsif File_Extension (Input_Files (F).all) = ".a" then
             Status := Process_Library (Input_Files (F).all);
 
             if Status /= 0 then
