@@ -33,5 +33,3 @@ export PATH="$ROOT/llvm-ads/bin:$ROOT/uwrap/bin:$ROOT/uwrap/lang_template/build/
 export C_INCLUDE_PATH="$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$C_INCLUDE_PATH"
 export DYLD_LIBRARY_PATH="$ROOT/uwrap/lang_template/build/lib/relocatable/dev:$ROOT/uwrap/lang_test/build/lib/relocatable/dev:$DYLD_LIBRARY_PATH"
 export MYPYPATH="$ROOT/uwrap/lang_template/build/python:$ROOT/uwrap/lang_test/build/python:$MYPYPATH"
-
-export ADA_INCLUDE_PATH="$ROOT/cuda/api/host/cuda_raw_binding:$ROOT/cuda/api/host/cuda_api:$ROOT/cuda/api/cuda_internal:$ADA_INCLUDE_PATH"
