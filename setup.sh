@@ -43,6 +43,8 @@ echo ""
     echo "
 project Architecture is
 
+  for Languages use ();
+
   type GPU_Arch_Option is
     (\"sm_20\", --  Fermi
      \"sm_30\", --  Kepler
