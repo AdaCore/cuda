@@ -12,20 +12,21 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Data; use Data;
-with Marching_Cubes.Data; use Marching_Cubes.Data;
-with CUDA.Runtime_Api;    use CUDA.Runtime_Api;
-with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
 with System.Atomic_Operations.Exchange;
-with Colors; use Colors;
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 
-package body Marching_Cubes
-is
+with Data;                         use Data;
+with Marching_Cubes.Data;          use Marching_Cubes.Data;
+with CUDA.Runtime_Api;             use CUDA.Runtime_Api;
+with CUDA.Device_Atomic_Functions; use CUDA.Device_Atomic_Functions;
+with Colors;                       use Colors;
+
+package body Marching_Cubes is
 
    --  TODO: the following functions are copies of Colors, because ptxas
    --  needs all symbols to compile. Need to review the behavior of the wrapper.
 
-   function Hue_To_RGB(P, Q, T: Float) return Float is
+   function Hue_To_RGB (P, Q, T : Float) return Float is
       T_Clamped : Float := T;
    begin
       if T_Clamped < 0.0 then
@@ -60,12 +61,14 @@ is
          Res.B := Src.L;
       else
          declare
-            Q : Float := (if Src.L < 0.5 then Src.L * (1.0 + Src.S) else Src.L + src.S - src.L * src.S);
+            Q : Float :=
+              (if Src.L < 0.5 then Src.L * (1.0 + Src.S)
+               else Src.L + Src.S - Src.L * Src.S);
             P : Float := 2.0 * Src.L - Q;
          begin
-            Res.R := Hue_To_RGB (P, Q, Src.h + 1.0 / 3.0);
-            Res.G := Hue_To_RGB (P, Q, Src.h);
-            Res.B := Hue_To_RGB (P, Q, Src.h - 1.0 / 3.0);
+            Res.R := Hue_To_RGB (P, Q, Src.H + 1.0 / 3.0);
+            Res.G := Hue_To_RGB (P, Q, Src.H);
+            Res.B := Hue_To_RGB (P, Q, Src.H - 1.0 / 3.0);
          end;
       end if;
 
@@ -73,8 +76,8 @@ is
    end HSL_To_RGB;
 
    function RGB_To_HSL (src : RGB_T) return HSL_T is
-      Max : Float := Float'Max (Src.R, Float'Max (Src.G, Src.B));
-      Min : Float := Float'Min (Src.R, Float'Min (Src.G, Src.B));
+      Max : Float := Float'Max (src.R, Float'Max (src.G, src.B));
+      Min : Float := Float'Min (src.R, Float'Min (src.G, src.B));
       Res : HSL_T;
    begin
       Res.L := (Max + Min) / 2.0;
@@ -86,14 +89,16 @@ is
          declare
             D : Float := Max - Min;
          begin
-            Res.S := (if Res.L > 0.5 then D / (2.0 - Max - Min) else D / (Max + Min));
+            Res.S :=
+              (if Res.L > 0.5 then D / (2.0 - Max - Min) else D / (Max + Min));
 
-            if Src.R >= Src.G and Src.R >= Src.B then
-               Res.H := (Src.G - Src.B) / D + (if Src.G < Src.B then 6.0 else 0.0);
-            elsif SRC.G >= SRC.B then
-               Res.H := (Src.B - Src.R) / D + 2.0;
+            if src.R >= src.G and src.R >= src.B then
+               Res.H :=
+                 (src.G - src.B) / D + (if src.G < src.B then 6.0 else 0.0);
+            elsif src.G >= src.B then
+               Res.H := (src.B - src.R) / D + 2.0;
             else
-               Res.H := (Src.R - Src.G) / D + 4.0;
+               Res.H := (src.R - src.G) / D + 4.0;
             end if;
 
             Res.H := @ / 6.0;
@@ -105,22 +110,22 @@ is
 
    -- TODO: replace with proper runtime function when available
    function Atomic_Compare_Exchange_4
-     (Ptr           : Address;
-      Expected      : Address;
-      Desired       : Integer;
-      Weak          : Boolean   := False;
-      Success_Model : Integer := 5;
+     (Ptr           : Address; Expected : Address; Desired : Integer;
+      Weak          : Boolean := False; Success_Model : Integer := 5;
       Failure_Model : Integer := 5) return Boolean;
-   pragma Import (Intrinsic,
-                  Atomic_Compare_Exchange_4,
-                  "__atomic_compare_exchange_4");
+   pragma Import
+     (Intrinsic, Atomic_Compare_Exchange_4, "__atomic_compare_exchange_4");
 
    --  function Atomic_Load_4
    --    (Ptr   : Address;
    --     Model : Integer := 5) return Integer;
    --  pragma Import (Intrinsic, Atomic_Load_4, "__atomic_load_4");
 
-   Edge_Lattice : array (0 .. Samples, 0 .. Samples, 0 .. Samples, 0 .. 2) of aliased Integer with Volatile;
+   Edge_Lattice :
+     array
+       (0 .. Samples, 0 .. Samples, 0 .. Samples,
+        0 .. 2) of aliased Integer with
+     Volatile;
 
    procedure Clear_Lattice (XI : Integer) is
    begin
@@ -138,16 +143,11 @@ is
    ----------
 
    procedure Mesh
-     (Balls               : Ball_Array;
-      Triangles           : in out Triangle_Array;
-      Vertices            : in out Vertex_Array;
-      Start               : Point_Real;
-      Stop                : Point_Real;
-      Lattice_Size        : Point_Int;
-      Last_Triangle       : not null access Integer;
-      Last_Vertex         : not null access Integer;
-      Interpolation_Steps : Positive := 4;
-      XI, YI, ZI          : Integer)
+     (Balls               :    Ball_Array; Triangles : in out Triangle_Array;
+      Vertices : in out Vertex_Array; Start : Point_Real; Stop : Point_Real;
+      Lattice_Size        : Point_Int; Last_Triangle : not null access Integer;
+      Last_Vertex         :        not null access Integer;
+      Interpolation_Steps :        Positive := 4; XI, YI, ZI : Integer)
    is
       V0                  : Point_Real;
       E0, E1, E2          : Integer;
@@ -165,21 +165,17 @@ is
       -- Metaballs --
       ---------------
 
-      function Metaballs
-        (Position : Point_Real)
-         return Float
-      is
-         Total : Float := 0.0;
+      function Metaballs (Position : Point_Real) return Float is
+         Total       : Float := 0.0;
          Denominator : Float;
       begin
          for B of Balls loop
             Denominator :=
-              (Position.X - B.Position.X) ** 2 +
-              (Position.Y - B.Position.Y) ** 2 +
-              (Position.Z - B.Position.z) ** 2;
+              (Position.X - B.Position.X)**2 + (Position.Y - B.Position.Y)**2 +
+              (Position.Z - B.Position.Z)**2;
 
-            if Denominator < 0.00001 then
-               Denominator := 0.00001;
+            if Denominator < 0.000_01 then
+               Denominator := 0.000_01;
             end if;
 
             Total := Total + B.Size / Denominator;
@@ -187,57 +183,54 @@ is
          return Total - 1.0;
       end Metaballs;
 
-      function Metaballs_Color
-        (Position : Point_Real)
-         return RGB_T
-      is
-         Total : RGB_T := (others => 0.0);
-         Denominator : Float;
+      function Metaballs_Color (Position : Point_Real) return RGB_T is
+         Total             : RGB_T := (others => 0.0);
+         Denominator       : Float;
          Total_Denominator : Float := 0.0;
-         HSL : HSL_T;
+         HSL               : HSL_T;
       begin
          for B of Balls loop
             Denominator :=
-              (Position.X - B.Position.X) ** 2 +
-              (Position.Y - B.Position.Y) ** 2 +
-              (Position.Z - B.Position.z) ** 2;
+              (Position.X - B.Position.X)**2 + (Position.Y - B.Position.Y)**2 +
+              (Position.Z - B.Position.Z)**2;
 
-            Total := Total + B.Color * 1.0 / Denominator;
+            Total             := Total + B.Color * 1.0 / Denominator;
             Total_Denominator := @ + 1.0 / Denominator;
          end loop;
 
          Total := Total / Total_Denominator;
 
-         HSL := RGB_To_HSL (Total);
+         HSL   := RGB_To_HSL (Total);
          HSL.S := 1.0;
          HSL.L := 0.5;
          return HSL_To_RGB (HSL);
       end Metaballs_Color;
 
-
       -------------
       -- Density --
       -------------
 
-      function Density (P : Point_Real) return Float is
-        (Metaballs (P));
+      function Density (P : Point_Real) return Float is (Metaballs (P));
 
-         -------------------
+      -------------------
       -- Density_Index --
       -------------------
 
       function Density_Index (XI, YI, ZI : Integer) return Integer is
-        (if Metaballs ((Start.X + Float (XI) * Step.X,
-                      Start.Y + Float (YI) * Step.Y,
-                        Start.Z + Float (ZI) * Step.Z)) > 0.0 then 1 else 0);
+        (if
+           Metaballs
+             ((Start.X + Float (XI) * Step.X, Start.Y + Float (YI) * Step.Y,
+               Start.Z + Float (ZI) * Step.Z)) >
+           0.0
+         then 1
+         else 0);
 
       --------------------
       -- Get_Edge_Index --
       --------------------
 
       function Get_Edge_Index
-        (XI, YI, ZI : Integer;
-         V1, V2     : Point_Int_01) return Unsigned_32
+        (XI, YI, ZI : Integer; V1, V2 : Point_Int_01) return Unsigned_32
       is
          X1 : Integer := XI + V1.X;
          Y1 : Integer := YI + V1.Y;
@@ -247,7 +240,7 @@ is
          Z2 : Integer := ZI + V2.Z;
 
          Temp       : Integer;
-         Edge_Index : Integer := -1;
+         Edge_Index : Integer          := -1;
          Y_Size     : constant Integer := Lattice_Size.Y + 1;
          Z_Size     : constant Integer := Lattice_Size.Z + 1;
       begin
@@ -288,30 +281,29 @@ is
 
          --  Values go from 0 to size + 1 (boundary condition)
 
-         return Unsigned_32 (X1 * (Y_Size * Z_Size * 3) +
-                             Y1 * (Z_Size * 3) +
-                             Z1 * 3 + Edge_Index);
+         return
+           Unsigned_32
+             (X1 * (Y_Size * Z_Size * 3) + Y1 * (Z_Size * 3) + Z1 * 3 +
+              Edge_Index);
       end Get_Edge_Index;
 
       -----------------
       -- Record_Edge --
       -----------------
 
-      procedure Compute_Edge
-        (Vertex_Index : Integer; E : Integer)
-      is
-         Factor      : Float      := 0.5;
+      procedure Compute_Edge (Vertex_Index : Integer; E : Integer) is
+         Factor      : Float := 0.5;
          Intr_Step   : Float;
          Dir, P1, P2 : Point_Real;
-         Point : Point_Real;
+         Point       : Point_Real;
       begin
-         P1 := (Float (V1 (E).X) * Step.X,
-                Float (V1 (E).Y) * Step.Y,
-                Float (V1 (E).Z) * Step.Z);
+         P1 :=
+           (Float (V1 (E).X) * Step.X, Float (V1 (E).Y) * Step.Y,
+            Float (V1 (E).Z) * Step.Z);
 
-         P2 := (Float (V2 (E).X) * Step.X,
-                Float (V2 (E).Y) * Step.Y,
-                Float (V2 (E).Z) * Step.Z);
+         P2 :=
+           (Float (V2 (E).X) * Step.X, Float (V2 (E).Y) * Step.Y,
+            Float (V2 (E).Z) * Step.Z);
 
          P1 := @ + V0;
          P2 := @ + V0;
@@ -319,7 +311,7 @@ is
          --  Interpolate
 
          Intr_Step := (if Metaballs (P1) > 0.0 then -0.25 else 0.25);
-         Dir  := P2 - P1;
+         Dir       := P2 - P1;
 
          for I in 1 .. Interpolation_Steps loop
             if Metaballs (P1 + Dir * Factor) > 0.0 then
@@ -334,43 +326,46 @@ is
          Point := P1 + Dir * Factor;
 
          declare
-            D : Float := 1.0 / 10.0;
+            D    : Float := 1.0 / 10.0;
             Grad : Point_Real;
+            Norm : Float;
          begin
-            Grad.X := Density (Point + (D, 0.0, 0.0))
-              -Density (Point + (-D, 0.0, 0.0));
-            Grad.Y := Density (Point + (0.0, D, 0.0))
-              -Density (Point + (0.0, -D, 0.0));
-            Grad.Z := Density (Point + (0.0, D, 0.0))
-              -Density (Point + (0.0, -D, 0.0));
+            Grad.X :=
+              Density (Point + (D, 0.0, 0.0)) -
+              Density (Point + (-D, 0.0, 0.0));
+            Grad.Y :=
+              Density (Point + (0.0, D, 0.0)) -
+              Density (Point + (0.0, -D, 0.0));
+            Grad.Z :=
+              Density (Point + (0.0, D, 0.0)) -
+              Density (Point + (0.0, -D, 0.0));
 
-            Vertices (Vertex_Index) := (Point => Point,
-                                        Normal => -Grad,
-                                        Color => Metaballs_Color (Point));
-            --  TODO: Normalize Grad once we have a math run-time
+            Norm := Sqrt (Grad.X**2 + Grad.Y**2 + Grad.Z**2);
+
+            Vertices (Vertex_Index) :=
+              (Point => Point, Normal => -Grad / Norm,
+               Color => Metaballs_Color (Point));
          end;
       end Compute_Edge;
 
-      function Record_Edge
-        (E : Integer;
-         XI, YI, ZI : Integer) return Integer
+      function Record_Edge (E : Integer; XI, YI, ZI : Integer) return Integer
       is
          P1 : Point_Int_01 := V1 (E);
          P2 : Point_Int_01 := V2 (E);
-         X1 : Integer := XI + P1.X;
-         Y1 : Integer := YI + P1.Y;
-         Z1 : Integer := ZI + P1.Z;
-         X2 : Integer := XI + P2.X;
-         Y2 : Integer := YI + P2.Y;
-         Z2 : Integer := ZI + P2.Z;
+         X1 : Integer      := XI + P1.X;
+         Y1 : Integer      := YI + P1.Y;
+         Z1 : Integer      := ZI + P1.Z;
+         X2 : Integer      := XI + P2.X;
+         Y2 : Integer      := YI + P2.Y;
+         Z2 : Integer      := ZI + P2.Z;
 
          Temp       : Integer;
-         Edge_Index : Integer := -1;
+         Edge_Index : Integer          := -1;
          Y_Size     : constant Integer := Lattice_Size.Y + 1;
          Z_Size     : constant Integer := Lattice_Size.Z + 1;
 
          Lattice_Value : aliased Integer := -1;
-         Vertex_Index : aliased Integer;
+         Vertex_Index  : aliased Integer;
       begin
          if X2 > X1 then
             Temp := X1;
@@ -423,9 +418,8 @@ is
          --  it by putting -2
 
          if Atomic_Compare_Exchange_4
-           (Ptr      => Edge_Lattice (X1, Y1, Z1, Edge_Index)'Address,
-            Expected => Lattice_Value'Address,
-            Desired  => -2)
+             (Ptr      => Edge_Lattice (X1, Y1, Z1, Edge_Index)'Address,
+              Expected => Lattice_Value'Address, Desired => -2)
          then
             Vertex_Index := Integer (Atomic_Add (Last_Vertex, 1)) + 1;
 
@@ -445,27 +439,26 @@ is
          end if;
       end Record_Edge;
 
-
       --  Start of processing for Mesh
 
    begin
-      Index := ((Density_Index (XI,     YI,     ZI    )      ) +
-                (Density_Index (XI,     YI + 1, ZI    ) *   2) +
-                (Density_Index (XI + 1, YI + 1, ZI    ) *   4) +
-                (Density_Index (XI + 1, YI,     ZI    ) *   8) +
-                (Density_Index (XI,     YI,     ZI + 1) *  16) +
-                (Density_Index (XI,     YI + 1, ZI + 1) *  32) +
-                (Density_Index (XI + 1, YI + 1, ZI + 1) *  64) +
-                (Density_Index (XI + 1, YI,     ZI + 1) * 128));
+      Index :=
+        ((Density_Index (XI, YI, ZI)) + (Density_Index (XI, YI + 1, ZI) * 2) +
+         (Density_Index (XI + 1, YI + 1, ZI) * 4) +
+         (Density_Index (XI + 1, YI, ZI) * 8) +
+         (Density_Index (XI, YI, ZI + 1) * 16) +
+         (Density_Index (XI, YI + 1, ZI + 1) * 32) +
+         (Density_Index (XI + 1, YI + 1, ZI + 1) * 64) +
+         (Density_Index (XI + 1, YI, ZI + 1) * 128));
 
       --  Set the inital vertex for the benefit of Record_Edges
 
-      V0 := (Start.X + Float (XI) * Step.X,
-             Start.Y + Float (YI) * Step.Y,
-             Start.Z + Float (ZI) * Step.Z);
+      V0 :=
+        (Start.X + Float (XI) * Step.X, Start.Y + Float (YI) * Step.Y,
+         Start.Z + Float (ZI) * Step.Z);
 
-      Record_All_Vertices := XI = Lattice_Size.X - 1
-        or else YI = Lattice_Size.Y - 1
+      Record_All_Vertices :=
+        XI = Lattice_Size.X - 1 or else YI = Lattice_Size.Y - 1
         or else ZI = Lattice_Size.Z - 1;
 
       for I in 0 .. Case_To_Numpolys (Index) - 1 loop
@@ -487,33 +480,21 @@ is
    procedure Mesh_CUDA
      (D_Balls             : Device_Ball_Array_Access;
       D_Triangles         : Device_Triangle_Array_Access;
-      D_Vertices          : Device_Vertex_Array_Access;
-      Start               : Point_Real;
-      Stop                : Point_Real;
-      Lattice_Size        : Point_Int;
-      Last_Triangle       : Device_Int_Access;
-      Last_Vertex         : Device_Int_Access;
-      Interpolation_Steps : Positive := 4;
-      Debug_Value         : Device_Int_Access)
+      D_Vertices          : Device_Vertex_Array_Access; Start : Point_Real;
+      Stop                : Point_Real; Lattice_Size : Point_Int;
+      Last_Triangle       : Device_Int_Access; Last_Vertex : Device_Int_Access;
+      Interpolation_Steps : Positive := 4; Debug_Value : Device_Int_Access)
    is
    begin
       Mesh
-        (D_Balls.all,
-         D_Triangles.all,
-         D_Vertices.all,
-         Start,
-         Stop,
-         Lattice_Size,
-         Last_Triangle,
-         Last_Vertex,
-         Interpolation_Steps,
+        (D_Balls.all, D_Triangles.all, D_Vertices.all, Start, Stop,
+         Lattice_Size, Last_Triangle, Last_Vertex, Interpolation_Steps,
          Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X),
          Integer (Block_Idx.Y * Block_Dim.Y + Thread_Idx.Y),
          Integer (Block_Idx.Z * Block_Dim.Z + Thread_Idx.Z));
    end Mesh_CUDA;
 
-   procedure Clear_Lattice_CUDA
-   is
+   procedure Clear_Lattice_CUDA is
    begin
       Clear_Lattice (Integer (Block_Idx.X * Block_Dim.X + Thread_Idx.X));
    end Clear_Lattice_CUDA;

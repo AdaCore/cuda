@@ -12,29 +12,28 @@
 -- of the license.                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Command_Line;         use Ada.Command_Line;
-with Ada.Text_IO;              use Ada.Text_IO;
-with Ada.Calendar;             use Ada.Calendar;
-with Ada.Directories;          use Ada.Directories;
-with Ada.Numerics.Elementary_Functions;
-use Ada.Numerics.Elementary_Functions;
-with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
-with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Command_Line;                  use Ada.Command_Line;
+with Ada.Text_IO;                       use Ada.Text_IO;
+with Ada.Calendar;                      use Ada.Calendar;
+with Ada.Directories;                   use Ada.Directories;
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Float_Random;         use Ada.Numerics.Float_Random;
+with Ada.Exceptions;                    use Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
-with Interfaces.C;             use Interfaces.C;
-with Interfaces;               use Interfaces;
+with Interfaces.C;                      use Interfaces.C;
+with Interfaces;                        use Interfaces;
 
 with CUDA.Runtime_Api; use CUDA.Runtime_Api;
 with Interfaces.C.Pointers;
 
-with Maths;                    use Maths.Single_Math_Functions;
-with Program_Loader;           use Program_Loader;
-with Utilities;                use Utilities;
+with Maths;          use Maths.Single_Math_Functions;
+with Program_Loader; use Program_Loader;
+with Utilities;      use Utilities;
 
-with Geometry;                 use Geometry;
-with Marching_Cubes;           use Marching_Cubes;
-with Data;                     use Data;
-with System; use System;
+with Geometry;          use Geometry;
+with Marching_Cubes;    use Marching_Cubes;
+with Data;              use Data;
+with System;            use System;
 with CUDA.Driver_Types; use CUDA.Driver_Types;
 with CUDA.Vector_Types; use CUDA.Vector_Types;
 
@@ -50,21 +49,21 @@ procedure Main is
 
    Interpolation_Steps : constant Positive := 16;
 
-   Last_Triangle     : aliased Integer;
-   Last_Vertex       : aliased Integer;
+   Last_Triangle : aliased Integer;
+   Last_Vertex   : aliased Integer;
 
-   Last_Time         : Ada.Calendar.Time;
+   Last_Time : Ada.Calendar.Time;
 
-   FPS               : Integer := 0;
+   FPS : Integer := 0;
 
-   Running           : Boolean := True;
+   Running : Boolean := True;
 
-   D_Balls             : Device_Ball_Array_Access;
-   D_Triangles         : Device_Triangle_Array_Access;
-   D_Vertices          : Device_Vertex_Array_Access;
+   D_Balls     : Device_Ball_Array_Access;
+   D_Triangles : Device_Triangle_Array_Access;
+   D_Vertices  : Device_Vertex_Array_Access;
 
    Threads_Per_Block : constant Dim3 := (8, 4, 4);
-   Blocks_Per_Grid : constant Dim3 :=
+   Blocks_Per_Grid   : constant Dim3 :=
      (unsigned (Samples) / Threads_Per_Block.X,
       unsigned (Samples) / Threads_Per_Block.Y,
       unsigned (Samples) / Threads_Per_Block.Z);
@@ -84,17 +83,17 @@ procedure Main is
 
    task body Compute is
       X1r, X2r, Y1r, Y2r, Z1r, Z2r : Integer;
-      Do_Exit : Boolean := False;
+      Do_Exit                      : Boolean := False;
    begin
       loop
          select
             accept Clear (XI : Integer) do
                X1r := XI;
-            end;
+            end Clear;
          or
             accept Exit_Loop do
                Do_Exit := True;
-            end;
+            end Exit_Loop;
          end select;
 
          exit when Do_Exit;
@@ -109,11 +108,11 @@ procedure Main is
                Y2r := Y2;
                Z1r := Z1;
                Z2r := Z2;
-            end;
+            end Set_And_Go;
          or
             accept Exit_Loop do
                Do_Exit := True;
-            end;
+            end Exit_Loop;
          end select;
 
          exit when Do_Exit;
@@ -123,18 +122,13 @@ procedure Main is
                for YI in Y1r .. Y2r loop
                   for ZI in Z1r .. Z2r loop
                      Mesh
-                       (Balls               => Balls,
-                        Triangles           => Tris,
-                        Vertices            => Verts,
-                        Start               => Start,
-                        Stop                => Stop,
+                       (Balls => Balls, Triangles => Tris, Vertices => Verts,
+                        Start               => Start, Stop => Stop,
                         Lattice_Size        => (Samples, Samples, Samples),
                         Last_Triangle       => Last_Triangle'Access,
                         Last_Vertex         => Last_Vertex'Access,
-                        Interpolation_Steps => Interpolation_Steps,
-                        XI                  => XI,
-                        YI                  => YI,
-                        ZI                  => ZI);
+                        Interpolation_Steps => Interpolation_Steps, XI => XI,
+                        YI                  => YI, ZI => ZI);
                   end loop;
                end loop;
             end loop;
@@ -186,8 +180,8 @@ begin
 
    if Mode = Mode_CUDA then
       D_Triangles := new Triangle_Array (Tris'Range);
-      D_Vertices := new Vertex_Array (Verts'Range);
-      D_Balls := new Ball_Array (Balls'Range);
+      D_Vertices  := new Vertex_Array (Verts'Range);
+      D_Balls     := new Ball_Array (Balls'Range);
    end if;
 
    Initialize;
@@ -196,44 +190,38 @@ begin
 
    while Running loop
       Last_Triangle := Tris'First - 1;
-      Last_Vertex := Verts'First - 1;
+      Last_Vertex   := Verts'First - 1;
 
       if Mode = Mode_CUDA then
          if Compute_Started then
             --  Copy back data if computation has been done
 
-            Debug_Value := D_Debug_Value.all;
+            Debug_Value   := D_Debug_Value.all;
             Last_Triangle := D_Last_Triangle.all;
-            Last_Vertex := D_Last_Vertex.all;
+            Last_Vertex   := D_Last_Vertex.all;
 
             Tris (0 .. Last_Triangle) := D_Triangles (0 .. Last_Triangle);
-            Verts (0 .. Last_Vertex) := D_Vertices (0 .. Last_Vertex);
+            Verts (0 .. Last_Vertex)  := D_Vertices (0 .. Last_Vertex);
          end if;
 
-         D_Balls.all := Balls;
+         D_Balls.all         := Balls;
          D_Last_Triangle.all := 0;
-         D_Last_Vertex.all := 0;
-         D_Debug_Value.all := 0;
+         D_Last_Vertex.all   := 0;
+         D_Debug_Value.all   := 0;
 
-         pragma CUDA_Execute
-           (Clear_Lattice_CUDA,
-            (Blocks_Per_Grid.X, 1, 1),
+         pragma Cuda_Execute
+           (Clear_Lattice_CUDA, (Blocks_Per_Grid.X, 1, 1),
             (Threads_Per_Block.X, 1, 1));
 
-         pragma CUDA_Execute
+         pragma Cuda_Execute
            (Mesh_CUDA
-              (D_Balls             => D_Balls,
-               D_Triangles         => D_Triangles,
-               D_Vertices          => D_Vertices,
-               Start               => Start,
-               Stop                => Stop,
+              (D_Balls             => D_Balls, D_Triangles => D_Triangles,
+               D_Vertices          => D_Vertices, Start => Start, Stop => Stop,
                Lattice_Size        => (Samples, Samples, Samples),
-               Last_Triangle       => D_Last_Triangle,
-               Last_Vertex         => D_Last_Vertex,
+               Last_Triangle => D_Last_Triangle, Last_Vertex => D_Last_Vertex,
                Interpolation_Steps => Interpolation_Steps,
                Debug_Value         => D_Debug_Value),
-            Blocks_Per_Grid,
-            Threads_Per_Block);
+            Blocks_Per_Grid, Threads_Per_Block);
 
          Compute_Started := True;
       elsif Mode = Mode_Sequential then
@@ -245,18 +233,13 @@ begin
             for YI in 0 .. Samples - 1 loop
                for ZI in 0 .. Samples - 1 loop
                   Mesh
-                    (Balls               => Balls,
-                     Triangles           => Tris,
-                     Vertices            => Verts,
-                     Start               => Start,
-                     Stop                => Stop,
+                    (Balls => Balls, Triangles => Tris, Vertices => Verts,
+                     Start               => Start, Stop => Stop,
                      Lattice_Size        => (Samples, Samples, Samples),
                      Last_Triangle       => Last_Triangle'Access,
                      Last_Vertex         => Last_Vertex'Access,
-                     Interpolation_Steps => Interpolation_Steps,
-                     XI                  => XI,
-                     YI                  => YI,
-                     ZI                  => ZI);
+                     Interpolation_Steps => Interpolation_Steps, XI => XI,
+                     YI                  => YI, ZI => ZI);
                end loop;
             end loop;
          end loop;
@@ -267,9 +250,7 @@ begin
 
          for XI in 0 .. Samples - 1 loop
             Compute_Tasks (XI).Set_And_Go
-              (XI, XI,
-               0, Samples - 1,
-               0, Samples - 1);
+              (XI, XI, 0, Samples - 1, 0, Samples - 1);
          end loop;
 
          for XI in 0 .. Samples - 1 loop
@@ -281,24 +262,26 @@ begin
 
       Draw
         (Verts (0 .. Integer (Last_Vertex)),
-         Tris (0 .. Integer (Last_Triangle)),
-         Running);
+         Tris (0 .. Integer (Last_Triangle)), Running);
 
       --  Move the balls
 
       for I in Balls'Range loop
          declare
             New_Position : Point_Real := Balls (I).Position;
-            Speed : constant := 0.01;
+            Speed        : constant   := 0.01;
          begin
             New_Position.X := Balls (I).Position.X + Speeds (I).X;
             New_Position.Y := Balls (I).Position.Y + Speeds (I).Y;
             New_Position.Z := Balls (I).Position.Z + Speeds (I).Z;
 
             if Length (New_Position) > 1.0 then
-               Speeds (I).X := -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
-               Speeds (I).Y := -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
-               Speeds (I).Z := -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
+               Speeds (I).X :=
+                 -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
+               Speeds (I).Y :=
+                 -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
+               Speeds (I).Z :=
+                 -@ + (Random (Seed) - 0.5) * Balls (I).Speed * 0.2;
 
                Speeds (I) := Normalize (Speeds (I)) * Balls (I).Speed;
             end if;
@@ -312,7 +295,9 @@ begin
       FPS := @ + 1;
       if Clock - Last_Time >= 1.0 then
          Put (FPS'Image & " FPS,");
-         Put_Line (Integer (Float (Clock - Last_Time) / Float (FPS) * 1000.0)'Img & " ms");
+         Put_Line
+           (Integer (Float (Clock - Last_Time) / Float (FPS) * 1_000.0)'Img &
+            " ms");
          FPS       := 0;
          Last_Time := Clock;
       end if;
@@ -344,5 +329,3 @@ exception
 
       raise;
 end Main;
-
-

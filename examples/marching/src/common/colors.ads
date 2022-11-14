@@ -31,7 +31,7 @@ package Colors is
      (Left.R / Right, Left.G / Right, Left.B / Right);
 
    type HSL_T is record
-      H, S, L: Float;
+      H, S, L : Float;
    end record;
 
    function HSL_To_RGB (Src : HSL_T) return RGB_T;
