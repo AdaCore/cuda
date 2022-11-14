@@ -48,7 +48,7 @@ begin
    T0 := Clock;
 
    for I in 0 .. Num_Elements - 1 loop
-      Native_Complex_Computation (H_A.all, H_B.all, H_C.all, I);
+      Complex_Computation (H_A.all, H_B.all, H_C.all, I);
    end loop;
 
    Lapsed := Clock - T0;

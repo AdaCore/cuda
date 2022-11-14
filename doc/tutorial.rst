@@ -58,11 +58,11 @@ second to make the next steps meaningful.
 This code is currently fully native and single treaded. We're going to offload
 the computation to the GPU.
 
-Open ``src/common/kernel.ads``. You'll see the specification of ``Native_Complex_Computation``:
+Open ``src/common/kernel.ads``. You'll see the specification of ``Complex_Computation``:
 
 .. code-block:: ada
 
-  procedure Native_Complex_Computation
+  procedure Complex_Computation
      (A : Float_Array;
       B : Float_Array;
       C : out Float_Array;
@@ -86,8 +86,8 @@ Introduce a new pointer type in the ``Kernel`` package:
     type Array_Device_Access is access Float_Array
        with Designated_Storage_Model => CUDA.Storage_Models.Model;
 
-Note that this pointer has to be pool specific - e.g. it can't have the ``all``
-Ada reservered word. That means that it conceptually points to a specific
+Note that this pointer has to be pool specific - e.g. it can't be an ``access all``. 
+That means that it conceptually points to a specific
 pool of data - the device memory - and that conversions with other
 pointers types are not allowed.
 
@@ -139,7 +139,7 @@ and thread index:
 Note that these are expressed in terms of Interfaces.C.int, so the result
 needs to be converted explicly to Integer.
 
-From there, the call to ``Native_Complex_Computation`` is trivial. The whole
+From there, the call to ``Complex_Computation`` is trivial. The whole
 kernel should now look like:
 
 .. code-block:: ada
@@ -151,7 +151,7 @@ kernel should now look like:
    is
       I : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
    begin
-      Native_Complex_Computation (A.all, B.all, C.all, I);
+      Complex_Computation (A.all, B.all, C.all, I);
    end Device_Complex_Computation;
 
 We're done with the kernel - let's move to the host code. Open ``src/host/main.adb``.

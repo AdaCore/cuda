@@ -3,11 +3,8 @@ with Interfaces.C;     use Interfaces.C;
 
 package body Kernel is
 
-    procedure Native_Complex_Computation
-     (A : Float_Array;
-      B : Float_Array;
-      C : out Float_Array;
-      I : Integer)
+   procedure Complex_Computation
+     (A : Float_Array; B : Float_Array; C : out Float_Array; I : Integer)
    is
    begin
       if I < A'Length then
@@ -17,6 +14,6 @@ package body Kernel is
             end loop;
          end loop;
       end if;
-   end Native_Complex_Computation;
+   end Complex_Computation;
 
 end Kernel;
