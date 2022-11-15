@@ -1,7 +1,6 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 SELF_DIR := $(dir $(mkfile_path))
 
-#SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include  $(SELF_DIR)Makefile.env
 
 CUDA_HOST=x86_64-linux
