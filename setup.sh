@@ -27,7 +27,7 @@ if [ -z $GPU_ARCH ]; then
         echo "FAIL"
 
         fatal $(cat <<EOF
-Target CPU not specified\n
+Target GPU not specified\n
 Syntax:\n
 $> sh setup.sh -mcpu <gpu architecture>\n
 For example:\n
