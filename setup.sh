@@ -1,6 +1,14 @@
 #! /bin/sh
 set -e
 
+fatal() {
+    echo $@ >&2
+    return 1
+}
+
+if [ ! -f ./env.sh ]; then
+    fatal "$(basename $0) must be run from the CUDA directory"
+fi
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -10,12 +18,26 @@ while [ $# -gt 0 ] ; do
 done
 
 if [ -z $GPU_ARCH ]; then
-    echo "Target CPU not specified"
-    echo "Syntax:"
-    echo "$> sh setup.sh -mcpu <gpu architecture>"
-    echo "For example:"
-    echo "$> sh setup.sh -mcpu sm_75"
-    return 1
+    echo -n "autodetect compute capability: "
+    GPU_ARCH=$(\
+        sh ./compute_capability.sh --expect-single --sm-prefix \
+        || true \
+    )
+    if [ -z "$GPU_ARCH" ]; then
+        echo "FAIL"
+
+        fatal $(cat <<EOF
+Target CPU not specified\n
+Syntax:\n
+$> sh setup.sh -mcpu <gpu architecture>\n
+For example:\n
+$> sh setup.sh -mcpu sm_75
+EOF
+        )
+        return 1
+    fi
+
+    echo "OK: $GPU_ARCH"
 fi
 
 ROOT=$(dirname $(readlink -f "$0"))
