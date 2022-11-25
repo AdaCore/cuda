@@ -34,8 +34,13 @@ while [ ! -z $1 ]; do
     shift
 done
 
-cap=$(nvidia-smi --query-gpu=compute_cap --format=csv | tail -n +2 | tr -d .)
-number=$(echo "$cap" | wc -l)
+csv=$(nvidia-smi --query-gpu=compute_cap --format=csv)
+cap=$(echo "$csv" | tail -n +2 | tr -d '. \t')
+if [ -z "$cap" ]; then
+    number=0
+else
+    number=$(echo "$cap" | wc -l)
+fi
 
 # number of GPU
 if [ $expect_single -eq 0 ]; then
@@ -46,11 +51,13 @@ elif [ $number -ne 1 ]; then
 fi
 
 # capacity
-echo "$cap" | while read c; do
-    if [ $compute_prefix -eq 0 ]; then
-        prefix="sm_"
-    else
-        prefix="compute_"
-    fi
-    echo "$prefix$c"
-done
+if [ $number -ne 0 ]; then
+    echo "$cap" | while read c; do
+        if [ $compute_prefix -eq 0 ]; then
+            prefix="sm_"
+        else
+            prefix="compute_"
+        fi
+        echo "$prefix$c"
+    done
+fi
