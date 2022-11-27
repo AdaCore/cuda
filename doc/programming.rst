@@ -1,87 +1,90 @@
-**************************************
+n**************************************
 Programming with GNAT for CUDA®
 **************************************
 
 CUDA API
 ========
 
-The CUDA API available from GNAT for CUDA® is a binding to the CUDA API 
-provided by NVIDIA, installed with the CUDA driver. Is is accessed by the host
-by adding a reference to ``cuda_host.gpr`` (on the host) and ``cuda_device.gpr``
-(on the target).
+The CUDA API available from GNAT for CUDA® is a binding to the CUDA API
+provided by NVIDIA. The NVIDIA API is installed with the CUDA driver. You
+access the Ada API by adding a reference to :file:`cuda_host.gpr` (on the
+host) and :file:`cuda_device.gpr` (on the target). The initial
+installation script generates the Ada version of the API from the CUDA
+version that's installed on your system.
 
-The Ada version of the API is generated automatically when running the initial
-installation script, and thus corresponds specifically to the CUDA version that
-is installed on the system.
+Two versions of the Ada API are available:
 
-Two versions of the API are available:
+- a "thick" binding version. These are child units of the :code:`CUDA`
+  package, the main one being :code:`CUDA.Runtime_API`. This is the API you
+  will most likely use. However, this API is still in the process of being
+  completed and a number of types and subprogram specs have not been mapped
+  to higher-level Ada constructs. For example, you will still see a lot of
+  references to :code:`System.Address` where you would normally expect
+  specific access types in Ada.
+- a "thin" binding version. These are typically identified by having a
+  suffix of :code:`_h`.  They are direct bindings to the underlying C
+  APIs. These bindings are functional and complete. They can be used as a
+  low-level alternative to the thick binding, but they don't expose an
+  interface consistent with the Ada programming style and may require more
+  work to use.
 
-- a "thick" binding version. These units are child units of the CUDA package,
-  the main one being ``CUDA.Runtime_API``. This is the intended API to use.
-  Note that at this stage, this API is still in the process of being completed.
-  A number of types and subprogram profiles have not been mapped to higher-level
-  Ada constructions. For example, you will still see a lot of references
-  to ``System.Address`` where Ada would call for specific types.
-- a "thin" binding version. These units are typically identified by their 
-  suffix "_h" and are direct bindings to the underlying C APIs. These bindings
-  are functional and complete, they can be used as a low-level alternative
-  to the thick binding. However, they do not expose an interface consistent 
-  with the Ada programming patterns and may require more work at the user-level.
-
-At any time, these bindings can be regenerated. That can be useful for example
-if a new version of CUDA is installed. To generate these bindings, you can 
-execute the "bind.sh" script locaed under 
-<your GNAT for CUDA installation>/cuda/api/.
+You can regenerate these bindings at any time. You may want to do this, for
+example, if you install a new version of CUDA. To regenerate these
+bindings, execute the :file:`bind.sh` script located in :file:`<your GNAT
+for CUDA installation>/cuda/api/`.
 
 Defining and calling Kernels
 ============================
 
-Just as a typical CUDA program, programming in GNAT for CUDA requires the
-developer to identify the application entry point to the GPU code, called
-kernels. In Ada, this is done by associating a procedure with the
-``CUDA_Global`` aspect, which serves the same role as the CUDA ``__global__``
-modifier. For example:
+Just as in a typical CUDA program, programming in GNAT for CUDA requires
+you to identify application entry points to the GPU code, called
+"kernels". In Ada, you do this by annotating a procedure with the
+:code:`CUDA_Global` aspect, which serves the same role as the CUDA
+:code:`__global__` modifier. For example:
 
 .. code-block:: ada
 
     procedure My_Kernel (X : Some_Array_Access)
     with CUDA_Global;
 
-Kernels are compiled both for host and device. They can be called as regular
-procedures, e.g:
+Kernels are compiled both for the host and the device. They can be called
+as regular procedures, e.g:
 
 .. code-block:: ada
 
     My_Kernel (An_Array_Instance);
 
-Will do a regular single thread call to the kernel, and execute it on the host.
-In some situations, this can help debug on the host.
+The above makes a regular single-threaded call to the kernel and executes
+it on the host.  You may want to do this because of a better debugging
+environment on the host.
 
-Calling a kernel on the device is done through the CUDA_Execute pragma:
+To call a kernel on the device (which means copying it to the device and
+executing it there), you use the :code:`CUDA_Execute` pragma:
 
 .. code-block:: ada
 
     pragma CUDA_Execute (My_Kernel (An_Array_Instance), 10, 1);
 
-Note that the procedure call looks the same as in the case of a regular call.
-However, this call is done surrounded by the pragma CUDA_Execute, which has two
-extra parameters, defining respectively the number of threads per block and number
-of blocks per grid. This is equivalent to a familiar CUDA call:
+The procedure call looks the same as a regular call, but this call is
+surrounded by the pragma :code:`CUDA_Execute`, which has two extra
+parameters defining, respectively, the number of threads per block and the
+number of blocks per grid. This is equivalent to the CUDA call:
 
 .. code-block:: c
 
     <<<10, 1>>> myKernel (someArray);
 
-The above calls are launching ten instances of the kernel to the device.
+In each case, these calls launch ten instances of the kernel to the device.
 
-Thread per block and blocks per grid can be expressed as a 1 dimensional scalar
-or a ``Dim3`` value which will give a dimensionality in x, y and z. For example::
+The numbers of threads per block and blocks per grid can be expressed as a
+one-dimensional scalar or a :code:`Dim3` value that specifies all three
+dimensions (:code:`x`, :code:`y`, and :code:`z`). For example::
 
 .. code-block:: ada
 
    pragma CUDA_Execute (My_Kernel (An_Array_Instance), (3, 3, 3), (3, 3, 3));
 
-The above call will launch (3 * 3 * 3) * (3 * 3 * 3) = 729 instances of the 
+The above call launches (3 * 3 * 3) * (3 * 3 * 3) = 729 instances of the
 kernel on the device.
 
 Passing Data between Device and Host
@@ -90,19 +93,18 @@ Passing Data between Device and Host
 Using Storage Model Aspect
 --------------------------
 
-Storage Model is an extension to the Ada language that is currently under 
-implementation. Discussion around the generic capability 
-can be found `here <https://github.com/AdaCore/ada-spark-rfcs/pull/76>`_.
+"Storage Model" is an extension to the Ada language that is currently under
+development. General description of this capability can be found `here
+<https://github.com/AdaCore/ada-spark-rfcs/blob/master/considered/storage_model_2.rst>`_.
 
-GNAT for CUDA provides a storage model that maps to CUDA primitives for allocation,
-deallocation and copy. It is declared in the package ``CUDA.Storage_Models``.
-Users may used directly ``CUDA.Storage_Models.Model`` or create their own
-instances.
+GNAT for CUDA provides a storage model that maps to CUDA primitives for
+allocation, deallocation, and copying. The model is declared in the package
+:code:`CUDA.Storage_Models`.  You may either use
+:code:`CUDA.Storage_Models.Model` itself or you may create your own.
 
-When a pointer type is associated with a CUDA storage model, memory allocation
-will happen on the device. This allocation can be a single operation, or multiple
-allocations and copies as it is the case in GNAT for unconstrained arrays. For 
-example:
+When a pointer type is associated with a CUDA storage model, memory
+allocation through that pointer occurs on the device in the same manner as
+it would in the host if a storage model wasn't specified. For example:
 
 .. code-block:: ada
 
@@ -111,10 +113,11 @@ example:
     type Int_Array_Device_Access is access Int_Array
        with Designated_Storage_Model => CUDA.Storage_Model.Model;
 
-    Device_Array : Int_Array_Device_Access := new Int_Array (1 .. 100);    
+    Device_Array : Int_Array_Device_Access := new Int_Array (1 .. 100);
 
-Moreover, copies between host and device will be instrumented to call proper
-CUDA memory copy operations. The code can now be written:
+In addition to allocation being done on the device, copies between the host
+and device are converted to call the CUDA memory copy operations. So you
+can write:
 
 .. code-block:: ada
 
@@ -132,9 +135,9 @@ CUDA memory copy operations. The code can now be written:
        Host_Array.all := Device_Array.all;
     end Main;
 
-On the kernel side, CUDA.Storage_Model.Model is implemented as being the native
-storage model (as opposed to the foreign device one from the host). 
-``Int_Array_Device_Access`` can be used directly:
+On the kernel side, :code:`CUDA.Storage_Model.Model` is the native storage
+model (as opposed to the foreign device one when on the host side). You
+can use :code:`Int_Array_Device_Access` directly:
 
 .. code-block:: ada
 
@@ -143,19 +146,19 @@ storage model (as opposed to the foreign device one from the host).
        Device_Array (Thread_IDx.X) := Device_Array (Thread_IDx.X) + 10;
     end Kernel;
 
-This is the intended way of sharing memory between device and host. Note that
-the storage model can be extended to support capabilities such as streaming or 
-unified memory.
+This is the recommended way of sharing memory between device and host.
+However, the storage model can be extended to support capabilities such as
+streaming or unified memory.
 
 Using Unified Storage Model
 ---------------------------
 
-An alternative to using the default CUDA Storage model is to use so-called 
-unified memory. When using such memory model, the device memory is mapped 
-directly on to host memory, and therefore no specific copy operation is 
-necessary. The factors that may lead to one model or the other are outside of 
-the scope of this manual. A specific model called ``Unified_Model`` can be used
-in replacement of the default one:
+An alternative to using the default CUDA Storage model is to use so-called
+"unified memory". In that model, the device memory is mapped directly onto
+host memory, so no special copy operation is necessary. The factors that
+may lead you to choose to one model over the other are outside of the scope
+of this manual. To use unified memory, you use the package
+:code:`Unified_Model` instead of the default one:
 
 .. code-block:: ada
 
@@ -167,11 +170,11 @@ in replacement of the default one:
 Using Storage Model with Streams
 --------------------------------
 
-CUDA streams allows to launch several operations in parallel. This allows to
-specify which execution write and read operation have to wait for. The Ada CUDA
-API doesn't provide a pre-allocated stream memory model. Instead, it provides
-a type that can be instantiated, and for which the specific stream can be 
-specified, e.g.:
+CUDA streams allows you to launch several computations in parallel. This
+model allows you to specify which computation write and read operation must
+wait for. The Ada CUDA API doesn't provide a pre-allocated stream memory
+model. Instead, it provides a type, :code:`CUDA_Async_Storage_Model`, that
+you can instantiate and specify the specific stream::
 
 .. code-block:: ada
 
@@ -183,9 +186,9 @@ specified, e.g.:
     type Int_Array_Device_Access is access Int_Array
        with Designated_Storage_Model => My_Stream_Model;
 
-Note that the value of the stream associated to a specific model can vary over
-time, allowing different parts of a given object to be used by different 
-streams, e.g.:
+The data stream associated with a specific model can vary over time,
+allowing different parts of a given object to be used by different streams,
+e.g.:
 
 .. code-block:: ada
 
@@ -201,24 +204,26 @@ streams, e.g.:
 Low-Level Data Transfer
 -----------------------
 
-At the lowest level, it is possible to allocate memory to the device using the
-standard CUDA function malloc bound from CUDA.Runtime_API.Malloc. E.g.:
+At the lowest level, you can allocate memory to the device using the
+standard CUDA function :code:`malloc` that's bound from
+:code:`CUDA.Runtime_API.Malloc`. E.g.:
 
 .. code-block:: ada
 
  Device_Array : System.Address := CUDA.Runtime_API.Malloc (Integer'Size * 100);
 
-This is equivalent to the following code in CUDA:
+This is equivalent to the following CUDA code:
 
 .. code-block:: c
 
- int * deviceArray = cudaMalloc (sizeof (int) * 100);
+ int *deviceArray = cudaMalloc (sizeof (int) * 100);
 
-Note that the objects on the Ada side aren't typed. Creating typed objects
-requires more advanced Ada constructions that are described later.
+In this example, objects on the Ada side aren't typed. Creating typed
+objects requires more advanced Ada constructions that are described later.
 
-The above example creates a space in the device memory of 100 integers. It can
-now be used to perform copies back and forth from host memory. For example:
+The above statement created space in the device memory of 100 integers.
+That space can now be used to perform copies back and forth from host
+memory. For example:
 
 .. code-block:: ada
 
@@ -249,10 +254,11 @@ now be used to perform copies back and forth from host memory. For example:
             Kind  => Memcpy_Device_To_Host);
     end Main;
 
-The above will copy the contents of Host_Array to Device_Array, perform some
-computations on the device, and then copy the memory back. Note that at this
-level of data passing, we're not passing a typed array but a raw address. On the
-kernel side, we need to reconstruct the array with an overlay:
+This code copies the contents of :code:`Host_Array` to
+:code:`Device_Array`, performs some computations on that data on the
+device, and then copies the data back. At this level of coding, we're not
+passing a typed array but instead a raw address. On the kernel side, we
+need to reconstruct the array with an overlay:
 
 .. code-block:: ada
 
@@ -263,38 +269,39 @@ kernel side, we need to reconstruct the array with an overlay:
        Device_Array (Thread_IDx.X) := Device_Array (Thread_IDx.X) + 10;
     end Kernel;
 
-While effective, this method of passing data back and forth is not very
-satisfactory and should be reserved for cases where an alternative does not 
-exist (yet). In particular, typing is lost at the interface, and the developer
-is left with manual means of verification.
+While it works, this method of passing data back and forth is not very
+satisfactory and you should reserve it for cases where an alternative
+doesn't exist or doesn't exist yet. In particular, typing is lost at the
+interface, and you need to carefully check manually for type correctness.
 
+Specifying Where Code is For
+============================
 
-Specifying Compilation Side
-===========================
-
-As for CUDA, a GNAT for CUDA application contains code that may be compiled
-exclusively for the host, the device or both. By default, all code is 
-compiled for both the host and the device. Code can be identified as only being
-compilable for the device with the ``CUDA_Device`` aspect:
+Like in CUDA, a GNAT for CUDA application contains code that may be
+compiled exclusively for the host, the device, or both. By default, all
+code is compiled for both the host and the device. You can identify code as
+only being compilable for the device by using the :code:`CUDA_Device`
+aspect:
 
 .. code-block:: ada
 
    procedure Some_Device_Procedure
       with CUDA_Device;
 
-The above procedure will not exist on the host. Calling it will result in a
-compilation error.
+:code:`Some_Device_Procedure` will not exist on the host. Calling it will
+result in a compilation error.
 
-The corresponding ``CUDA_Host`` aspect is currently not implemented.
+The corresponding :code:`CUDA_Host` aspect is currently not implemented.
 
-Accessing Blocks and Threads Indexes and Dimensions
-===================================================
+Accessing Block and Thread Indexes and Dimensions
+=================================================
 
-GNAT for CUDA® allows to access block and thread indexes and dimensions in a way
-that is similar to CUDA. Notably, the package ``CUDA.Runtime_API`` declares
-``Block_Dim``, ``Grid_Dim``, ``Block_IDx`` and ``Thread_IDx`` which map 
-directly to the corresponding PTX registers. For example:
+GNAT for CUDA® allows you to access block and thread indexes and
+dimensions in a way that's similar to CUDA. The package
+:code:`CUDA.Runtime_API` declares :code:`Block_Dim`, :code:`Grid_Dim`,
+:code:`Block_IDx` and :code:`Thread_IDx` which map directly to the
+corresponding PTX registers. For example:
 
 .. code-block:: ada
 
-    I : Integer := Integer (Block_Dim.X * Block_IDx.Y + Thread_IDx.X);
+    J : Integer := Integer (Block_Dim.X * Block_IDx.Y + Thread_IDx.X);

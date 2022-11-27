@@ -2,40 +2,46 @@
 Installation
 **************************************
 
-Before installing, make sure that you have the following prerequisites:
+Before installing this software, make sure you have the following
+prerequisites installed:
 
- - An x86_64 Linux environment, with CUDA drivers installed.
- - A GNAT Pro version that is of the same date or more recent than your gnat
-   cuda delivery
+ - An x86_64 Linux environment with CUDA drivers
+ - A GNAT Pro version of the same or more recent date than this GNAT
+   CUDA version
 
-The following steps are specific for x86 Linux native host. Please refer
-to the cross ARM installation if you need to target cross ARM Linux instead.
-
-Then follow these steps
+Use the following steps for an x86 Linux native host. Please refer to
+the cross ARM installation if you need to target cross ARM Linux
+instead::
 
 Untar the package::
 
- tar -xzf tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
+.. code-block:: shell
 
-At this stage, you need to know which GPU architecture you're targeting. This
-will typically be a sm\_ prefix followed by a number, for example sm_89 is the
-Ada Lovelace architecture. You can find details
-`on this GPU architecture mapping <https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/>`_.
-This parameter is to be passed to the next script.
+ tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
 
-In the extracted directory, generate the toolsuite setup for your current
-installation::
+Now you need to know which GPU architecture you're targeting. This is
+typically an ``sm``\_ prefix followed by a number. For example
+``sm_89`` is the Ada Lovelace architecture. You can find details `on
+the GPU architecture mapping here
+<https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/>`_.
+You pass this parameter to the next script.
+
+In the extracted directory, generate the tool suite setup for your
+current installation::
+
+.. code-block:: shell
 
   cd cuda_env-[version]-x86_64-linux-bin/cuda
   sh setup.sh -mcpu <your GPU architecture>
 
 In the same directory, execute::
 
+.. code-block:: shell
+
   source ./env.sh
 
-Note that this is needed every time you will need to compile a CUDA application.
-
-This step is only needed once at installation.
+You need to perform the above step every time you want to compile a
+CUDA application.
 
 To check if everything is correctly installed, you can try an example:
 
@@ -43,7 +49,9 @@ To check if everything is correctly installed, you can try an example:
   make
   ./main
 
-You should see::
+You need only perform this step at installation. You should see::
+
+.. code-block:: text
 
   CUDA kernel launch with  16 blocks of  256  threads
   Copy output data from the CUDA device to the host memory
