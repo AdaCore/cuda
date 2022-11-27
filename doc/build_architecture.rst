@@ -123,6 +123,18 @@ Some things to note here:
   :switch:`-gnatd_c` and the binder needs :code:`-d_c` to enable
   CUDA-specific capabilities.
 
+A current issue in GPRbuild requires ``ADA_INCLUDE_PATH`` to include the CUDA
+API path prior to calling the host builder. Note that this same variables
+should not be set in the previous step otherwise the driver binding.
+Setting up of ``ADA_INCLUDE_PATH`` can be done in the following way, assuming that
+``PREFIX`` points to the root directory of your GNAT for CUDA installation::
+
+.. code-block:: shell
+
+  export ADA_INCLUDE_PATH="$PREFIX/api/host/cuda_raw_binding:$PREFIX/api/host/cuda_api:$PREFIX/api/cuda_internal"
+
+This constraint is to be lifted in a future version of the technology.
+
 You can build this project by::
 
 .. code-block:: shell
@@ -141,7 +153,7 @@ GNAT for CUDA installation, e.g:
 
 .. code-block:: makefile
 
-   include $GNAT_FOR_CUDA_PREFIX/Makefile.build
+   include $PREFIX/Makefile.build
 
    build: gnatcuda_build
 
@@ -170,7 +182,7 @@ you need:
   values matching the TEGRA configuration for both the :code:`device`
   and :code:`host` build project. You can find the definition of
   possible values for both scenario variables in
-  :file:`cuda_api_device.gpr`.
+  :file:`architecture.gpr`.
 - Finally deploy the built executable to the CUDA host and execute it.
 
 For a detailed set of instructions, please consult the git repository

@@ -45,7 +45,7 @@ if you do only a single array operation, the computation of the starting
 position is significant.
 
 To improve this performance, an Ada extension is available when compiling
-with :switch:`-gnatX`.  This extension indicates that the lower bound of
+with :switch:`-gnatX0`. This extension indicates that the lower bound of
 the array is known at compile-time. If this lower bound is a constant, it
 will remove both the need for loading that lower bound and doing a
 subtraction when computing the offset. E.g.:

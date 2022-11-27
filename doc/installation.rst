@@ -17,7 +17,7 @@ Untar the package::
 
 .. code-block:: shell
 
- tar -xzf tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
+ tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
 
 Now you need to know which GPU architecture you're targeting. This is
 typically an ``sm``\_ prefix followed by a number. For example
@@ -49,7 +49,7 @@ To check if everything is correctly installed, you can try an example:
   make
   ./main
 
-You need only perform this step at installation.  You should see::
+You need only perform this step at installation. You should see::
 
 .. code-block:: text
 

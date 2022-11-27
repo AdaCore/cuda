@@ -6,11 +6,12 @@ Current Limitations
   program. However, that device library can itself include multiple
   static libraries.
 - Exception propagation is not supported on the device.
+- Ada and GNAT checks are currently not supported on the device.
 - The binding to the CUDA API is incomplete, both on the host and the device.
 - Elaboration is not supported on the device.
 - Tagged types cannot be passed between the host and the device.
 - Parameters that can be passed to a :code:`CUDA_Execute` call are
-  limited to scalars in input mode and accesses to scalars.
+  limited input mode.
 - The toolchain is only hosted on Linux; support for Windows hosts is
   not yet available.
 - Debugging is currently not supported on the device. The :switch:`-g`

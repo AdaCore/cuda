@@ -2,7 +2,7 @@
 Welcome to GNAT for CUDA®
 **************************************
 
-GNAT for CUDA®is a toolsuite that compilies Ada and SPARK code directly to
+GNAT for CUDA® is a toolsuite that compiles Ada and SPARK code directly to
 NVIDIA GPUs. We leverage the CUDA toolsuite provided by NVIDIA in order to
 create a toolsuite that follows the same programming principles that CUDA
 developers are familiar with while providing access to these mechanisms

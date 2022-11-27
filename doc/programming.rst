@@ -6,9 +6,9 @@ CUDA API
 ========
 
 The CUDA API available from GNAT for CUDA® is a binding to the CUDA API
-provided by NVIDIA.  The NVIDIA API is installed with the CUDA driver.  You
+provided by NVIDIA. The NVIDIA API is installed with the CUDA driver. You
 access the Ada API by adding a reference to :file:`cuda_host.gpr` (on the
-host) and :file:`cuda_device.gpr` (on the target).  The initial
+host) and :file:`cuda_device.gpr` (on the target). The initial
 installation script generates the Ada version of the API from the CUDA
 version that's installed on your system.
 
@@ -23,7 +23,7 @@ Two versions of the Ada API are available:
   specific access types in Ada.
 - a "thin" binding version. These are typically identified by having a
   suffix of :code:`_h`.  They are direct bindings to the underlying C
-  APIs. These bindings are functional and complete.  They can be used as a
+  APIs. These bindings are functional and complete. They can be used as a
   low-level alternative to the thick binding, but they don't expose an
   interface consistent with the Ada programming style and may require more
   work to use.
@@ -94,8 +94,8 @@ Using Storage Model Aspect
 --------------------------
 
 "Storage Model" is an extension to the Ada language that is currently under
-development. General discussions about the capability can be found `here
-<https://github.com/AdaCore/ada-spark-rfcs/pull/76>`_.
+development. General description of this capability can be found `here
+<https://github.com/AdaCore/ada-spark-rfcs/blob/master/considered/storage_model_2.rst>`_.
 
 GNAT for CUDA provides a storage model that maps to CUDA primitives for
 allocation, deallocation, and copying. The model is declared in the package
@@ -104,7 +104,7 @@ allocation, deallocation, and copying. The model is declared in the package
 
 When a pointer type is associated with a CUDA storage model, memory
 allocation through that pointer occurs on the device in the same manner as
-it would in the host if a storage model wasn't specified.  For example:
+it would in the host if a storage model wasn't specified. For example:
 
 .. code-block:: ada
 
@@ -113,10 +113,10 @@ it would in the host if a storage model wasn't specified.  For example:
     type Int_Array_Device_Access is access Int_Array
        with Designated_Storage_Model => CUDA.Storage_Model.Model;
 
-    Device_Array : Int_Array_Device_Access := new Int_Array (1 .. 100);    
+    Device_Array : Int_Array_Device_Access := new Int_Array (1 .. 100);
 
 In addition to allocation being done on the device, copies between the host
-and device are convverted to call the CUDA memory copy operations. So you
+and device are converted to call the CUDA memory copy operations. So you
 can write:
 
 .. code-block:: ada
@@ -136,7 +136,7 @@ can write:
     end Main;
 
 On the kernel side, :code:`CUDA.Storage_Model.Model` is the native storage
-model (as opposed to the foreign device one when on the host side).  You
+model (as opposed to the foreign device one when on the host side). You
 can use :code:`Int_Array_Device_Access` directly:
 
 .. code-block:: ada

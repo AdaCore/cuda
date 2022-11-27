@@ -142,7 +142,7 @@ kernel based on the block and thread index:
 
    J : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
 
-These are expressed in terms of :code:`Interfaces.C.int`, so we need to 
+These are expressed in terms of :code:`Interfaces.C.int`, so we need to
 explicly convert the result to :code:`Integer`.
 
 At this point the call to :code:`Complex_Computation` is trivial. Our whole
@@ -192,8 +192,8 @@ additional cost of device computation, this allocation is taken into
 account in the total time reported because data copy can be a critically
 limiting factor of GPU performance enhancements.
 
-Find the portion of the body marked :code:`-- INSERT HERE DEVICE
-CALL`. After that, add the two array allocations and copies for :code:`H_A`
+Find the portion of the body marked :code:`-- INSERT HERE DEVICE CALL`.
+After that, add the two array allocations and copies for :code:`H_A`
 and :code:`H_B` to :code:`D_A` and :code:`D_B` respectively.  Also allocate
 an array for :code:`D_C` which is the size of :code:`H_C`:
 
@@ -222,10 +222,10 @@ The CUDA call is as follows:
       Blocks_Per_Grid);
 
 When executing that pragma, the CUDA API schedules
-:code:`Device_Complex_Computation` to be executed :code:`Blocks_Per_Grid *
-Threads_Per_Block` times on the kernel. This call itself is non-blocking,
-but subsequent dependent operations (such as copies from the device) will
-block host execution until the kernel completes.
+:code:`Device_Complex_Computation` to be executed
+:code:`Blocks_Per_Grid * Threads_Per_Block` times on the kernel. This call
+itself is non-blocking, but subsequent dependent operations (such as copies
+from the device) will block host execution until the kernel completes.
 
 Let's introduce this copy now. Results are going to be stored in
 :code:`D_C`, so let's copy it to :code:`H_C`:
