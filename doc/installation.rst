@@ -13,7 +13,21 @@ Use the following steps for an x86 Linux native host. Please refer to
 the cross ARM installation if you need to target cross ARM Linux
 instead::
 
-Untar the package::
+Prior to running GNAT for CUDA, you need to have the NVIDIA environment
+in your PATH, and in particular ptxas. You can check that by running:
+
+.. code-block:: shell
+
+  which ptxas
+
+If it doesn't return anything, CUDA may not be installed, or need to be
+put in your PATH, e.g.:
+
+.. code-block:: shell
+
+   export PATH=/usr/local/cuda-<your CUDA version>/bin/:$PATH
+
+From there, you can untar the package::
 
 .. code-block:: shell
 
@@ -44,6 +58,8 @@ You need to perform the above step every time you want to compile a
 CUDA application.
 
 To check if everything is correctly installed, you can try an example:
+
+.. code-block:: shell
 
   cd cuda/examples/0_Simple/vectorAdd
   make
