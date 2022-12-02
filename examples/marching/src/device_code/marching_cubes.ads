@@ -62,7 +62,4 @@ package Marching_Cubes is
       Debug_Value         : Device_Int_Access) with
      Cuda_Global;
 
-   procedure Last_Chance_Handler is null;
-   pragma Export (C, Last_Chance_Handler, "__gnat_last_chance_handler");
-
 end Marching_Cubes;
