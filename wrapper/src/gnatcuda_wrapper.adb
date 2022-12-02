@@ -687,6 +687,10 @@ begin
          elsif Arg (Arg'First .. Arg'First + 1) = "-l" then
             Libraries_Number := @ + 1;
             Libraries (Libraries_Number) := new String'(Arg (Arg'First + 2 .. Arg'Last));
+         elsif Argument (J) = "-g" then
+            --  -g is currently not supported and will lead to compilation
+            --  failures, we want to ignore that switch.
+           Put_Line ("warning: -g is currently not supported, ignored");
          else
             LLVM_Arg_Number := @ + 1;
             LLVM_Args (LLVM_Arg_Number) := new String'(Argument (J));
