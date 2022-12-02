@@ -15,7 +15,4 @@ package Kernel is
       C : Array_Device_Access)
      with CUDA_Global;
 
-  procedure Last_Chance_Handler is null;
-  pragma Export (C, Last_Chance_Handler, "__gnat_last_chance_handler");
-
 end Kernel;

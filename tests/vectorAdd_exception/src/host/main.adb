@@ -30,7 +30,7 @@ procedure Main is
    D_A, D_B, D_C : Array_Device_Access;
    Array_Size : CUDA.Stddef.Size_T := CUDA.Stddef.Size_T(Interfaces.C.c_float'size * Num_Elements / 8);
 
-   Threads_Per_Block : Integer := 256;
+   Threads_Per_Block : Integer := 256 + 1;
    Blocks_Per_Grid : Integer :=
      (Num_Elements + Threads_Per_Block - 1) / Threads_Per_Block;
 
@@ -56,7 +56,6 @@ begin
    D_A := new Float_Array'(H_A.all);
    D_B := new Float_Array'(H_B.all);
    D_C := new Float_Array (H_C.all'Range);
-   D_C.all := (others => 99.0);
 
    Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
                " blocks of " & Threads_Per_Block'Img & "  threads");
@@ -66,43 +65,7 @@ begin
       Threads_Per_Block,
       Blocks_Per_Grid);
 
-   Err := Get_Last_Error;
-
-   -- TODO: Need to wrapp correctly Get_Error_String and return a String instead of a C string
-   --      if Err /= Success then
-   --        Put_Line  ("Failed to launch vectorAdd kernel (error code " & Get_Error_String (Err) & " )");
-   --        return;
-   --      end if;
-
    Put_Line ("Copy output data from the CUDA device to the host memory");
 
    H_C.all := D_C.all;
-
-   for I in 1..Num_Elements loop
-      if I mod 2 = 0 then
-         if abs (H_A (I) + H_B (I) - H_C (I)) > 1.0E-5 then
-            Put_Line ("[1] Result verification failed at element "& I'Img & "!");
-
-            return;
-         end if;
-      else
-         if H_C (I) /= 99.0 then
-            Put_Line ("[2] Result verification failed at element "& I'Img & "! (Value = " & H_C (I)'Img & ")");
-
-            return;
-         end if;
-      end if;
-   end loop;
-
-   Put_Line ("Test PASSED");
-
-   Free (D_A);
-   Free (D_B);
-   Free (D_C);
-
-   Free (H_A);
-   Free (H_B);
-   Free (H_C);
-
-   Put_Line ("Done");
 end Main;

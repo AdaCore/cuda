@@ -14,13 +14,13 @@ library project Device is
    for Library_Standalone use "encapsulated";
 
    package Compiler is
-      for Switches ("ada") use CUDA_API_Device.Compiler_Options & ("-gnat-p");
+      for Switches ("ada") use CUDA_API_Device.Compiler_Options;
    end Compiler;
 
    package Binder is
       for Default_Switches ("ada") use CUDA_API_Device.Binder_Options;
    end Binder;
 
-   for Library_Options use CUDA_API_Device.Library_Options & ("-L/usr/local/cuda/nvvm/lib64", "-lnvvm");
+   for Library_Options use CUDA_API_Device.Library_Options;
 
 end Device;

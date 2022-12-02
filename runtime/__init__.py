@@ -31,7 +31,7 @@ class CUDADevice(DFBBTarget):
     @property
     def compiler_switches(self):
         # The required compiler switches
-        return ('-gnatp',f'-mcpu={self.gpu_arch}',)
+        return (f'-mcpu={self.gpu_arch}',)
 
     def base_profile(self, profile):
         # No base profile as the CUDA runtime uses it's own sources.
