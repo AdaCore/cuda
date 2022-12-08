@@ -27,11 +27,11 @@ put in your PATH, e.g.:
 
    export PATH=/usr/local/cuda-<your CUDA version>/bin/:$PATH
 
-From there, you can untar the package::
+From there, you can untar the package:
 
 .. code-block:: shell
 
- tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
+   tar -xzf cuda_env-[version]-x86_64-linux-bin.tar.gz
 
 Now you need to know which GPU architecture you're targeting. This is
 typically an ``sm``\_ prefix followed by a number. For example
@@ -41,16 +41,16 @@ the GPU architecture mapping here
 You pass this parameter to the next script.
 
 In the extracted directory, generate the tool suite setup for your
-current installation::
+current installation:
 
 .. code-block:: shell
 
   cd cuda_env-[version]-x86_64-linux-bin/cuda
   sh setup.sh -mcpu <your GPU architecture>
 
-In the same directory, execute::
+In the same directory, execute:
 
-.. code-block:: shell
+.. code-block:: sh
 
   source ./env.sh
 
@@ -65,9 +65,9 @@ To check if everything is correctly installed, you can try an example:
   make
   ./main
 
-You need only perform this step at installation. You should see::
+You need only perform this step at installation. You should see:
 
-.. code-block:: text
+.. code-block:: shell
 
   CUDA kernel launch with  16 blocks of  256  threads
   Copy output data from the CUDA device to the host memory
