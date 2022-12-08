@@ -50,7 +50,7 @@ current installation:
 
 In the same directory, execute:
 
-.. code-block:: sh
+.. code-block:: shell
 
   source ./env.sh
 
