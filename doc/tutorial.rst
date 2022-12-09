@@ -292,7 +292,7 @@ speed of the rendering is dependent on the GPU power available on your
 system.  You can adjust the speed by changing the sampling of the grid that
 computes the marching cubes: the smaller the sampling, the faster the
 computation.  You do this by changing the value in
-:file:`src/common/data.ads`::
+:file:`src/common/data.ads`:
 
 .. code-block:: ada
 

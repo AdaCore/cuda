@@ -72,7 +72,7 @@ A few things to note:
   :switch:`-d_d=driver` to enable CUDA-specific capbilities and generate a
   driver library that can be elaborated by the host.
 
-You can easily build this project with the :file:`gprbuild` command::
+You can easily build this project with the :file:`gprbuild` command:
 
 .. code-block:: shell
 
@@ -127,7 +127,7 @@ A current issue in GPRbuild requires ``ADA_INCLUDE_PATH`` to include the CUDA
 API path prior to calling the host builder. Note that this same variables
 should not be set in the previous step otherwise the driver binding.
 Setting up of ``ADA_INCLUDE_PATH`` can be done in the following way, assuming that
-``PREFIX`` points to the root directory of your GNAT for CUDA installation::
+``PREFIX`` points to the root directory of your GNAT for CUDA installation:
 
 .. code-block:: shell
 
@@ -135,7 +135,7 @@ Setting up of ``ADA_INCLUDE_PATH`` can be done in the following way, assuming th
 
 This constraint is to be lifted in a future version of the technology.
 
-You can build this project by::
+You can build this project by:
 
 .. code-block:: shell
 
@@ -203,7 +203,7 @@ are all structured similarly and have:
   process (automatically generated during the first :file:`make`)
 - a :file:`src/` directory that contains the sources of the example
 
-In an example directory, you can make a project with::
+In an example directory, you can make a project with:
 
 .. code-block:: shell
 
@@ -211,7 +211,7 @@ In an example directory, you can make a project with::
 
 By default, examples are built for the native environment. If you want
 to target a cross ARM Linux, you can change the ``CUDA_HOST`` value,
-e.g.::
+e.g.:
 
 .. code-block:: shell
 

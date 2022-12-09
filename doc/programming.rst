@@ -1,4 +1,4 @@
-n**************************************
+**************************************
 Programming with GNAT for CUDA®
 **************************************
 
@@ -78,7 +78,7 @@ In each case, these calls launch ten instances of the kernel to the device.
 
 The numbers of threads per block and blocks per grid can be expressed as a
 one-dimensional scalar or a :code:`Dim3` value that specifies all three
-dimensions (:code:`x`, :code:`y`, and :code:`z`). For example::
+dimensions (:code:`x`, :code:`y`, and :code:`z`). For example:
 
 .. code-block:: ada
 
@@ -174,7 +174,7 @@ CUDA streams allows you to launch several computations in parallel. This
 model allows you to specify which computation write and read operation must
 wait for. The Ada CUDA API doesn't provide a pre-allocated stream memory
 model. Instead, it provides a type, :code:`CUDA_Async_Storage_Model`, that
-you can instantiate and specify the specific stream::
+you can instantiate and specify the specific stream:
 
 .. code-block:: ada
 
