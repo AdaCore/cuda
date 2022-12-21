@@ -1,0 +1,199 @@
+import ada.wrappers;
+import ada.transformations;
+
+wrap wrap_ada_specs ();
+
+match DefiningName ()
+wrap w_DefiningName (normalize_ada_name (it));
+
+match DefiningName (x"cuda(?<n>.*)")
+wrap w_DefiningName (normalize_ada_name (n));
+
+match DefiningName (x"u?(?<n>.*)_h")
+wrap w_DefiningName ("CUDA." & normalize_ada_name (n));
+
+match DefiningName (x"cuda_(?<n>.*)_h")
+wrap w_DefiningName ("CUDA." & normalize_ada_name (n));
+
+match DefiningName (x"^cudaArray(.*)")
+wrap w_DefiningName ("CUDA_Array\1");
+
+match DefiningName ("cudaExtent") and parent (TypeDecl ())
+wrap w_DefiningName ("Extent_T");
+
+match DefiningName (x"^cudaMemoryType$") and parent (TypeDecl ())
+wrap w_DefiningName ("Memory_Type_T");
+
+match DefiningName ("cudaAccessPolicyWindow") and parent (TypeDecl ())
+wrap w_DefiningName ("Access_Policy_Window_T");
+
+match DefiningName (x"^cuda(.*[a-zA-Z])([1-3]D)(.*)$")
+wrap w_DefiningName (normalize_ada_name ("\1") & "_\2_" & normalize_ada_name ("\3"));
+
+match DefiningName (x"^cuda(.*[a-zA-Z])([1-3]D)$")
+wrap w_DefiningName (normalize_ada_name ("\1") & "_\2");
+
+#TODO I should be able to write match DefiningName (x"^p([A-Z].*)$" and not x"pType")
+match DefiningName (x"^p([A-Z].*)$") and not DefiningName (x"pType")
+wrap w_DefiningName (normalize_ada_name ("\1"));
+
+match ParamSpec()
+   and f_type_expr ("Interfaces.C.Strings.chars_ptr")
+wrap chars_into_string ();
+
+match s: SubpDecl()
+    and child (f_subp_kind ("function"))
+    and p_subp_decl_spec ().p_returns ().filter (x"Interfaces.C.Strings.chars_ptr")
+wrap chars_into_string ();
+
+match ObjectDecl(child (DefiningName (x"^cuda(Error.*)$")))
+wrap error_code_into_exception ("CUDA.Exceptions", "Exception_Registry", "\1");
+
+match NumberDecl (child (d: DefiningName ("^cudaSurfaceType.*$"))) do
+    match d ("^cuda(SurfaceType.*)(1D|2D|3D)(.+)$") do
+        wrap constant_into_enumeration (
+            "Surface_Type",
+            normalize_ada_name ("\1") & "_\2_" & normalize_ada_name ("\3"));
+    elsmatch d ("^cuda(SurfaceType.*)(1D|2D|3D)$") do
+        wrap constant_into_enumeration (
+            "Surface_Type",
+            normalize_ada_name ("\1") & "_\2");
+    elsmatch d ("^cuda(SurfaceType.*)$") do
+        wrap constant_into_enumeration (
+            "Surface_Type",
+            normalize_ada_name ("\1"));
+    end;
+end;
+
+match sb: SubpDecl(child (DefiningName (x"cudaDeviceGetStreamPriorityRange"))) do
+    match p: child (ParamSpec(x"greatestPriority"))
+    pick p
+    wrap w: w_ParamSpecCall (
+      generate_formal => "NO",
+      pre_call_decl => defer ("""\e<sb.tmp ("greatest")> : aliased int;\n"""),
+      actual_value => defer ("""\e<sb.tmp ("greatest")>'Access""")
+   );
+
+    match p: child (ParamSpec(x"leastPriority"))
+    pick p
+    wrap w: w_ParamSpecCall (
+      generate_formal => "NO",
+      pre_call_decl => defer ("""\e<sb.tmp ("least")> : aliased int;\n"""),
+      actual_value => defer ("""\e<sb.tmp ("least")>'Access""")
+   );
+
+   weave w: w_SubpDeclCall (
+    subp_kind => "function",
+    result_type_expr => "Stream_Priority_Range_T",
+    post_call_decl => @ & defer (i"""
+        \e<sb.tmp ("result")> : Stream_Priority_Range_T :=
+          (Least => Integer (\e<sb.tmp ("least")>),
+           Greatest => Integer (\e<sb.tmp ("greatest")>));\n"""),
+        return_stmt => defer ("""return \e<sb.tmp ("result")>;""")
+   );
+end;
+
+match SubpDecl ()
+   and child (f_subp_kind ("function"))
+   and p_subp_decl_spec ().p_returns ().filter (x"driver_types_h.cudaError_t")
+   and not p_defining_name ().filter (x"cudaPeekAtLastError|cudaGetLastError")
+wrap return_into_exception ("CUDA.Exceptions", "Exception_Registry");
+
+match ParamSpec (x"access .*")
+   and not parent (SubpDecl (p_defining_name ().filter (x"atomic")))
+wrap access_into_out ();
+
+match ParamSpec (x"access constant.*")
+   and not parent (SubpDecl (p_defining_name ().filter (x"atomic")))
+wrap access_into_in ();
+
+match ParamSpec (not prev (ParamSpec ()) and x"access .*")
+   and parent (SubpDecl (p_defining_name ().filter (x".*Get.*")))
+wrap access_into_return ();
+
+match ParamSpec(x"(device|Device).*:.*int.*") do
+    match ParamSpec (x"access .*") do
+        match ParamSpec (not prev (ParamSpec ())) do
+            wrap access_into_return ("Device_T");
+        else
+            wrap access_into_out ("Device_T");
+        end;
+    else
+        wrap into_explicit_conversion ("Device_T");
+    end;
+end;
+
+match ParamSpec (x"event.*:.*System.Address")
+wrap address_into_return ("CUDA.Driver_Types.Event_T");
+
+match ParamSpec(x"pStream.*:.*System.Address")
+wrap address_into_return ("CUDA.Driver_Types.Stream_T");
+
+match ParamSpec (x"pGraphNode.*:.*System.Address") and not prev (ParamSpec ())
+wrap address_into_return ("CUDA.Driver_Types.Graph_Node_T");
+
+match ParamSpec (x"pDependencies.*:.*System.Address") and n: next (ParamSpec (x"numDependencies"))
+wrap address_into_in_array ("Graph_Node_Array_T", n);
+
+match ParamSpec (x"devPtr") and parent (SubpDecl (x"cudaMalloc"))
+wrap address_into_return ("System.Address");
+
+match ParamSpec (x"ptr") and parent (SubpDecl (x"cudaMallocHost"))
+wrap address_into_return ("System.Address");
+
+match ParamSpec (not prev (ParamSpec ())) and parent (SubpDecl (x"cudaEventElapsedTime"))
+wrap access_into_return ();
+
+match u: w_PackageDecl (origin (PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))))
+pick  u.child (new (w_WithClause (ref => "CUDA.Exceptions")));
+
+match PackageDecl (p_defining_name ().filter (x"cuda_runtime_api_h"))
+weave w_PackageDecl (
+    spec_content => @ & i"""
+        type Device_T is new Integer;
+
+        type Stream_Priority_Range_T is record
+           Least : Integer;
+           Greatest : Integer;
+        end record;
+
+        type Graph_Node_Array_T is array (Integer range <>) of CUDA.Driver_Types.Graph_Node_T;
+
+        Stubbed_Grid_Dim   : CUDA.Vector_Types.Dim3 := (0, 0, 0);
+        Stubbed_Block_Idx  : CUDA.Vector_Types.Uint3 := (0, 0, 0);
+        Stubbed_Block_Dim  : CUDA.Vector_Types.Dim3 := (0, 0, 0);
+        Stubbed_Thread_Idx : CUDA.Vector_Types.Uint3 := (0, 0, 0);
+        Stubbed_Wrap_Size  : Interfaces.C.Int := 0;
+
+        function Grid_Dim return CUDA.Vector_Types.Dim3 with Inline;
+        function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
+        function Block_Dim return CUDA.Vector_Types.Dim3  with Inline;
+        function Thread_Idx return CUDA.Vector_Types.Uint3 with Inline;
+        function Warp_Size return Interfaces.C.Int with Inline;""",
+
+    body_content => @ & i"""
+        function Grid_Dim return CUDA.Vector_Types.Dim3 is
+        begin
+            return Stubbed_Grid_Dim;
+        end Grid_Dim;
+
+        function Block_Idx return CUDA.Vector_Types.Uint3 is
+        begin
+            return Stubbed_Block_Idx;
+        end Block_Idx;
+
+        function Block_Dim return CUDA.Vector_Types.Dim3 is
+        begin
+            return Stubbed_Block_Dim;
+        end Block_Dim;
+
+        function Thread_Idx return CUDA.Vector_Types.Uint3 is
+        begin
+            return Stubbed_Thread_Idx;
+        end Thread_Idx;
+
+        function Warp_Size return Interfaces.C.Int is
+        begin
+            return Stubbed_Wrap_Size;
+        end Warp_Size;"""
+);
