@@ -50,7 +50,8 @@ runtime: libdevice.ads
 	mv install/device-cuda install/lib/rts-device-cuda
 	cp -R runtime/device_gnat/* install/lib/rts-device-cuda/gnat/
 	rm -rf $(llvm_dir)/lib/rts-device-cuda
-	cp -R install/lib/rts-device-cuda $(llvm_dir)/lib/rts-device-cuda
+	cp -p install/include/rts-sources/device_gnat/* install/lib/rts-device-cuda/gnat/
+	cp -pR install/lib/rts-device-cuda $(llvm_dir)/lib/rts-device-cuda
 
 
 libdevice.ads:
