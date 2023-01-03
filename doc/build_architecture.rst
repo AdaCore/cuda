@@ -2,6 +2,8 @@
 Build Architecture
 **************************************
 
+.. role:: switch(samp)
+
 Overall Model
 =============
 

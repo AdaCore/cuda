@@ -2,6 +2,8 @@
 Tutorial
 **************************************
 
+.. role:: switch(samp)
+
 Some Expensive Computation
 ==========================
 
