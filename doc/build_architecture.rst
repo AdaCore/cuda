@@ -71,7 +71,7 @@ A few things to note:
 - The compiler, binder and library switches are coming from the package
   :code:`CUDA_API_Device` and include the specialized switches necessary
   for CUDA.  You can add to these switches, but the the binder needs
-  :switch:`-d_d=driver` to enable CUDA-specific capbilities and generate a
+  :switch:`-d_d=driver` to enable CUDA-specific capabilities and generate a
   driver library that can be elaborated by the host.
 
 You can easily build this project with the :file:`gprbuild` command:

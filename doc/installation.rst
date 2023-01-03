@@ -11,7 +11,7 @@ prerequisites installed:
 
 Use the following steps for an x86 Linux native host. Please refer to
 the cross ARM installation if you need to target cross ARM Linux
-instead::
+instead.
 
 Prior to running GNAT for CUDA, you need to have the NVIDIA environment
 in your PATH, and in particular ptxas. You can check that by running:

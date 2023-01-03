@@ -8,7 +8,7 @@ Some Expensive Computation
 ==========================
 
 Before compiling any CUDA code, you will need to source :file:`env.sh` into
-your environment::
+your environment.
 
 Open the :file:`tutorial` directory found at the top directory of this CUDA
 repository. There you'll see a typical CUDA project structure. In
