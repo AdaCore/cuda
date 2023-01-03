@@ -18,7 +18,7 @@ responsible for building both projects.  Note that it's using the standard
 :file:`Makefile.build` structure. If you look at
 :file:`cuda/Makefile.build`, you'll see both build commands:
 
-.. code-block:: Makefile
+.. code-block:: shell
 
     gprbuild -Xcuda_host=$(CUDA_HOST) -P device
     gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o
