@@ -2,6 +2,8 @@
 Current Limitations
 **************************************
 
+.. role:: switch(samp)
+
 - You can only link one standalone device library to a host
   program. However, that device library can itself include multiple
   static libraries.

@@ -2,11 +2,13 @@
 Tutorial
 **************************************
 
+.. role:: switch(samp)
+
 Some Expensive Computation
 ==========================
 
 Before compiling any CUDA code, you will need to source :file:`env.sh` into
-your environment::
+your environment.
 
 Open the :file:`tutorial` directory found at the top directory of this CUDA
 repository. There you'll see a typical CUDA project structure. In
@@ -16,7 +18,7 @@ responsible for building both projects.  Note that it's using the standard
 :file:`Makefile.build` structure. If you look at
 :file:`cuda/Makefile.build`, you'll see both build commands:
 
-.. code-block:: Makefile
+.. code-block:: shell
 
     gprbuild -Xcuda_host=$(CUDA_HOST) -P device
     gprbuild -Xcuda_host=$(CUDA_HOST) -P host -largs $(CURDIR)/lib/*.fatbin.o

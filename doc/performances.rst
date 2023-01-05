@@ -2,6 +2,8 @@
 Performance Considerations
 **************************************
 
+.. role:: switch(samp)
+
 GNAT for CUDA relies on the CUDA toolchain backend technology and provides
 a very similar compilation model. There's no fundamental reason why the
 performance and resource consumption of a program in Ada would be
