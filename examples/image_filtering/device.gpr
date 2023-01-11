@@ -11,11 +11,11 @@
 --    for Library_Dir use "lib";
 
 --    package Compiler is
---       for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");      
+--       for Switches ("ada") use CUDA_API_Device.Compiler'Switches ("ada");
 --    end Compiler;
 
 --    for Archive_Builder use CUDA_API_Device'Archive_Builder;
-   
+
 -- end Device;
 
 -- with "cuda_api_device.gpr";
@@ -45,7 +45,7 @@
 
 -- end Device;
 
-with "cuda_api_device";
+with "cuda_api_device.gpr";
 
 library project Device is
 

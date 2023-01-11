@@ -1,4 +1,4 @@
-with "cuda_api_host";
+with "cuda_api_host.gpr";
 with "openglada/opengl-glfw.gpr";
 
 project Host is
