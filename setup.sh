@@ -10,6 +10,17 @@ if [ ! -f ./env.sh ]; then
     fatal "$(basename $0) must be run from the CUDA directory"
 fi
 
+if ! command -v gprbuild 1>/dev/null; then
+    fatal "gprbuild is required"
+fi
+
+gprbuild_version=$(gprbuild --version | head -n 1 | cut -d ' ' -f 3)
+gprbuild_major_version=$(echo ${gprbuild_version} | cut -d '.' -f 1)
+
+if [ $gprbuild_major_version -lt 23 ]; then
+    fatal "gprbuild 23.0 or later is required, only ${gprbuild_version} was found"
+fi
+
 while [ $# -gt 0 ] ; do
   case $1 in
     -mcpu) GPU_ARCH="$2" ;;
