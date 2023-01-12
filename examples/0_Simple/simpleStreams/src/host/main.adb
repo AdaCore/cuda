@@ -74,7 +74,14 @@ begin
    Set_Device_Flags (Device_Sync_Method or (if B_Pin_Generic_Memory then cudaDeviceMapHost else 0));
 
    Host_A := new Integer_Array'(0 .. N - 1 => 0);
-   Device_A := new Integer_Array'(0 .. N - 1 => 0);
+
+   --  There is currently an issue with aggregates initialization in this
+   --  specific case. The code commented should eventually work, replaced
+   --  by a separate allocation and copy for now.
+   --  Device_A := new Integer_Array'(0 .. N - 1 => 0);
+   Device_A := new Integer_Array(0 .. N - 1);
+   Device_A.all := Host_A.all;
+
    Device_C := new Integer_Array (0 .. N - 1);
    Device_C (0) := C;
 
@@ -131,8 +138,8 @@ begin
    Threads := (512, 1, 1);
    Blocks := (unsigned (N) / (unsigned (Streams'Length) * Threads.X), 1, 1);
 
-   Host_Memset (Host_A.all'Address, 255, Host_A.all'Size);
-   CUDA.Runtime_Api.Memset (Device_A.all'Address, 0, Host_A.all'Size);
+   Host_Memset (Host_A.all'Address, 255, Host_A.all'Size / 8);
+   CUDA.Runtime_Api.Memset (System.Address (Device_A.all'Address), 0, Host_A.all'Size / 8);
 
    Event_Record (Start_Event, null);
 

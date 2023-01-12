@@ -10,7 +10,7 @@ library project Device is
    for Library_Name use "device";
    for Library_Dir use "lib";
    for Library_Kind use "dynamic";
-   for Library_Interface use ("kernels");
+   for Library_Interface use ("kernels", "support");
    for Library_Standalone use "encapsulated";
 
    package Compiler is
