@@ -1,6 +1,6 @@
 export PATH := install/bin:$(PATH)
 
-# path to BB runtime's source repo
+# Path to BB runtime's source repo
 BB_SRC   := ../bb-runtimes
 # Path to GNAT's source repo
 GNAT_SRC := ../gnat
