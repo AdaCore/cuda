@@ -61,7 +61,7 @@ To check if everything is correctly installed, you can try an example:
 
 .. code-block:: shell
 
-  cd cuda/examples/0_Simple/vectorAdd
+  cd cuda/examples/0_Introduction/vectorAdd
   make
   ./main
 

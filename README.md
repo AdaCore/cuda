@@ -57,7 +57,7 @@ make
 **Note**: By default we are building for `x86_64,` Turing family GPU `sm_75`
 - First [Setup GNAT for CUDA](#setup-gnat-for-cuda). Then:
 ```
-cd examples/0_Simple/vectorAdd
+cd examples/0_Introduction/vectorAdd
 make
 ```
 
@@ -110,7 +110,7 @@ CUDA_HOST=aarch64-linux
 - Build example program. On **host**:
 ```
 source ./env.sh
-cd examples/0_Simple/vectorAdd
+cd examples/0_Introduction/vectorAdd
 make
 ```
 
