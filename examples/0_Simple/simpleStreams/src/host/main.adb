@@ -204,6 +204,9 @@ begin
    Event_Destroy (Stop_Event);
 
    Free (Host_A);
-   Free (Device_A);
-   Free (Device_C);
+
+   -- The two statements below currently fail with an exception.
+   -- TODO: fix that.
+   -- Free (Device_A);
+   -- Free (Device_C);
 end Main;
