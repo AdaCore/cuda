@@ -5,9 +5,9 @@ include  $(SELF_DIR)Makefile.env
 
 CUDA_HOST=x86_64-linux
 
-gnatcuda: device host
+gnatcuda: host
 
-host:
+host: device
 	# gprbuild currently doesn't pass ADA_INCLUDE_PATH to gnatbind. We need to
 	# set that manually so that cuda.ads can be found
 	export ADA_INCLUDE_PATH="$(SELF_DIR)api/host/cuda_raw_binding:$(SELF_DIR)/api/host/cuda_api:$(SELF_DIR)api/cuda_internal" ; \
