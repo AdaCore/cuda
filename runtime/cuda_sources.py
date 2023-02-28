@@ -84,7 +84,7 @@ rts_sources = {
             'device_gnat/s-atopex.ads',
             'device_gnat/s-atopex.adb',
             'device_gnat/s-atopri.ads',
-            'libgnat/s-stoele.ads',
+            'device_gnat/s-stoele.ads',
             'device_gnat/s-stoele.adb',
             'libgnat/s-unstyp.ads',
             'libgnat/unchconv.ads'],
