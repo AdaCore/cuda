@@ -31,17 +31,9 @@ $(info "libdevice.bc  : $(libdevice.bc)")
 
 export PATH := $(cuda_dir)/bin:$(PATH)
 
-.PHONY: main clean wrapper runtime
+.PHONY: main clean runtime
 
-
-main: install/bin wrapper runtime
-
-wrapper:
-	@echo "======================= WRAPPER BUILDING"
-	gprbuild -p -P wrapper/wrapper.gpr
-	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
-	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
-	cp $(llvm_dir)/bin/llvm-gnatbind $(llvm_dir)/bin/cuda-gnatbind
+main: install/bin runtime
 
 runtime: libdevice.ads
 	@echo "======================= RUNTIME BUILDING"
@@ -70,4 +62,3 @@ uninstall:
 
 clean:
 	rm -rf install
-	gprclean -P wrapper/wrapper.gpr

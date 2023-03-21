@@ -1,0 +1,22 @@
+local_llvm := $(shell which llvm-gcc)
+ifeq (, $(local_llvm))
+ $(error "No llvm-gcc in PATH")
+endif
+$(info "LLVM's GCC    : $(local_llvm)")
+
+llvm_dir   := $(shell dirname $(dir $(local_llvm)))
+ifeq (, $(llvm_dir))
+ $(error "Could not locate LLVM's directory")
+endif
+$(info "LLVM directory: $(llvm_dir)")
+
+.PHONY: wrapper
+
+wrapper:
+	@echo "======================= INSTALL SETUP"
+	mkdir -p install/bin
+	@echo "======================= WRAPPER BUILDING"
+	gprbuild -p -P wrapper/wrapper.gpr
+	cp wrapper/obj/gnatcuda_wrapper install/bin/cuda-gcc
+	cp install/bin/cuda-gcc $(llvm_dir)/bin/cuda-gcc
+	cp $(llvm_dir)/bin/llvm-gnatbind $(llvm_dir)/bin/cuda-gnatbind
