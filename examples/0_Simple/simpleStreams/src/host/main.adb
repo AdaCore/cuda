@@ -191,17 +191,15 @@ begin
       end loop;
    end;
 
-   for I in Streams'Range loop
-      Stream_Destroy (Streams (I));
-   end loop;
-
    Event_Destroy (Start_Event);
    Event_Destroy (Stop_Event);
 
    Free (Host_A);
 
-   -- The two statements below currently fail with an exception.
-   -- TODO: fix that.
-   -- Free (Device_A);
-   -- Free (Device_C);
+   Free (Device_A);
+   Free (Device_C);
+
+   for I in Streams'Range loop
+      Stream_Destroy (Streams (I));
+   end loop;
 end Main;
