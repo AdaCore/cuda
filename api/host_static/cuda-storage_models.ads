@@ -38,6 +38,13 @@ package CUDA.Storage_Models is
        (Allocate   => CUDA_Unified_Allocate,
         Deallocate => CUDA_Unified_Deallocate);
 
+   type CUDA_Pagelocked_Storage_Model is limited record
+      null;
+   end record
+     with Storage_Model_Type =>
+       (Allocate   => CUDA_Pagelocked_Allocate,
+        Deallocate => CUDA_Pagelocked_Deallocate);
+
    CUDA_Null_Address : constant CUDA_Address :=
      CUDA_Address (System.Null_Address);
 
@@ -109,8 +116,22 @@ package CUDA.Storage_Models is
       Size            : Storage_Count;
       Alignment       : Storage_Count);
 
+   procedure CUDA_Pagelocked_Allocate
+     (Model           : in out CUDA_Async_Storage_Model;
+      Storage_Address : out System.Address;
+      Size            : Storage_Count;
+      Alignment       : Storage_Count);
+
+   procedure CUDA_Pagelocked_Deallocate
+     (Model           : in out CUDA_Async_Storage_Model;
+      Storage_Address : System.Address;
+      Size            : Storage_Count;
+      Alignment       : Storage_Count);
+
    Model : CUDA_Storage_Model;
 
    Unified_Model : CUDA_Unified_Storage_Model;
+
+   Pagelocked_Model : CUDA_Pagelocked_Storage_Model;
 
 end CUDA.Storage_Models;
