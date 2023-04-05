@@ -157,9 +157,9 @@ package body CUDA.Storage_Models is
       return 0;
    end CUDA_Async_Storage_Size;
 
-   ----------------------------
-   -- CUDA_Unfified_Allocate --
-   ----------------------------
+   ---------------------------
+   -- CUDA_Unified_Allocate --
+   ---------------------------
 
    procedure CUDA_Unified_Allocate
      (Model           : in out CUDA_Async_Storage_Model;
