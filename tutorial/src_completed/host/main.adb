@@ -72,8 +72,8 @@ begin
 
    pragma CUDA_Execute
      (Device_Complex_Computation (D_A, D_B, D_C),
-      Threads_Per_Block,
-      Blocks_Per_Grid);
+      Blocks_Per_Grid,
+      Threads_Per_Block);
 
    Err := Get_Last_Error;
 

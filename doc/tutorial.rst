@@ -220,8 +220,8 @@ The CUDA call is as follows:
 
    pragma CUDA_Execute
      (Device_Complex_Computation (D_A, D_B, D_C),
-      Threads_Per_Block,
-      Blocks_Per_Grid);
+      Blocks_Per_Grid,
+      Threads_Per_Block);
 
 When executing that pragma, the CUDA API schedules
 :code:`Device_Complex_Computation` to be executed
@@ -249,8 +249,8 @@ The whole sequence should look like:
 
    pragma CUDA_Execute
      (Device_Complex_Computation (D_A, D_B, D_C),
-      Threads_Per_Block,
-      Blocks_Per_Grid);
+      Blocks_Per_Grid,
+      Threads_Per_Block);
 
    H_C.all := D_C.all;
 
