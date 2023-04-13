@@ -62,8 +62,8 @@ begin
 
    pragma CUDA_Execute
      (Vector_Add (D_A, D_B, D_C),
-      Threads_Per_Block,
-      Blocks_Per_Grid);
+      Blocks_Per_Grid,
+      Threads_Per_Block);
 
    Err := Get_Last_Error;
 
