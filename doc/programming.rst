@@ -67,8 +67,8 @@ executing it there), you use the :code:`CUDA_Execute` pragma:
 
 The procedure call looks the same as a regular call, but this call is
 surrounded by the pragma :code:`CUDA_Execute`, which has two extra
-parameters defining, respectively, the number of threads per block and the
-number of blocks per grid. This is equivalent to the CUDA call:
+parameters defining, respectively, the number of blocks per grid and the
+number of threads per block. This is equivalent to the CUDA call:
 
 .. code-block:: c
 
