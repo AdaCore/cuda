@@ -6,7 +6,7 @@ Before installing this software, make sure you have the following
 prerequisites installed:
 
  - An x86_64 Linux environment with CUDA drivers
- - An installation of GNAT Pro, version 24.0w (20230124) or later.
+ - An installation of GNAT Pro, version 24.0w (20230413) or later.
 
 Use the following steps for an x86 Linux native host. Please refer to
 the cross ARM installation if you need to target cross ARM Linux
