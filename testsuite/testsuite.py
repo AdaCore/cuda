@@ -50,9 +50,40 @@ class CUDAExamplesDriver(DiffTestDriver):
             raise TestAbortWithFailure(e) from e
 
 
+class CUDATextOracleDriver(DiffTestDriver):
+    def check_file(self, path):
+        assert Path(path).is_file, f"Missing file: {path}"
+
+    def do_run(self):
+        expect_failure = self.test_env.get("expect_failure", False)
+
+        self.check_file(Path(self.working_dir()) / "Makefile")
+        self.shell(["make", "-I", str(self.test_env["test_dir"]), "-j12"], timeout=10,
+                   analyze_output=False)
+        result = self.shell(["./main"], catch_error=not expect_failure, analyze_output=not expect_failure)
+        if expect_failure:
+            assert result.status != 0, f"Expected failure {result.out}"
+
+    def run(self):
+        try:
+            self.do_run()
+        except AssertionError as ae:
+            raise TestAbortWithError(ae) from ae
+        except TestAbortWithFailure as e:
+            logging.error(f"test caused failure: {e}")
+            logging.error(self.output)
+            raise
+        except Exception as e:
+            # those are test failures
+            logging.error(f"test raised an exception {e.__class__}: {e}")
+            logging.error(self.output)
+            raise TestAbortWithFailure(e) from e
+
+
 class CUDATestsuite(Testsuite):
     tests_subdir = "tests"
-    test_driver_map = {"examples": CUDAExamplesDriver}
+    test_driver_map = {"examples": CUDAExamplesDriver,
+                       "text_oracle" : CUDATextOracleDriver}
 
 
 if __name__ == "__main__":

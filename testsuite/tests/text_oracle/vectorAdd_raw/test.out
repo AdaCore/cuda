@@ -1,0 +1,5 @@
+[Vector addition of 4096 elements]
+CUDA kernel launch with 16 blocks of 256 threads
+Copy output data from the CUDA device to the host memory
+Test PASSED
+Done

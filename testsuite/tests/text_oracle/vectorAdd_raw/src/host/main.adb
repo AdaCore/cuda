@@ -31,7 +31,7 @@ procedure Main is
      Ada.Unchecked_Deallocation (Float_Array, Access_Host_Float_Array);
 
 begin
-   Put_Line ("[Vector addition of " & Num_Elements'Img & " elements]");
+   Put_Line ("[Vector addition of" & Num_Elements'Img & " elements]");
 
    H_A := new Float_Array (1 .. Num_Elements);
    H_B := new Float_Array (1 .. Num_Elements);
@@ -62,8 +62,8 @@ begin
       Count => Array_Size,
       Kind  => Memcpy_Host_To_Device);
 
-   Put_Line ("CUDA kernel launch with " & blocks_Per_Grid'Img &
-               " blocks of " & Threads_Per_Block'Img & "  threads");
+   Put_Line ("CUDA kernel launch with" & blocks_Per_Grid'Img &
+               " blocks of" & Threads_Per_Block'Img & " threads");
 
    pragma CUDA_Execute (Vector_Add (D_A, D_B, D_C, Num_Elements), Blocks_Per_Grid, Threads_Per_Block);
 
