@@ -8,3 +8,6 @@ __pycache__/
 .clang-format
 doc/_build/
 main
+Makefile.env
+out/
+testsuite/out/
