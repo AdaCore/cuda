@@ -17,7 +17,7 @@ main components:
   called from the host application.
 
 You compile the host application as a regular host executable, with special
-switches that specifify that it needs to include specific CUDA operations.
+switches that specify that it needs to include specific CUDA operations.
 
 You compile the device library as a standalone library project. This
 library project has run-time restrictions similar to those of "bare metal"
@@ -70,7 +70,7 @@ A few things to note:
   needs in order to know which compiler to use.
 - The compiler, binder and library switches are coming from the package
   :code:`CUDA_API_Device` and include the specialized switches necessary
-  for CUDA.  You can add to these switches, but the the binder needs
+  for CUDA.  You can add to these switches, but the binder needs
   :switch:`-d_d=driver` to enable CUDA-specific capabilities and generate a
   driver library that can be elaborated by the host.
 
@@ -87,8 +87,8 @@ in the format needed for it to be loaded to the GPU.
 An important limitation of the current implementation is that a GNAT CUDA
 application can only link against at most one fat binary. However, this fat
 binary (which is standalone library) can itself depend on arbitrary number
-of static libraries. Note that, in particularly, it depends on
-:code:`cuda_runtime_api` as well as the run-time).
+of static libraries. Note that, in particular, it depends on
+:code:`cuda_runtime_api` as well as the run-time.
 
 A typical host project file looks like this:
 
