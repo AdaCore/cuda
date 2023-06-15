@@ -61,7 +61,7 @@ The timing depends on your platform. You should chose a parameter that
 causes the processing to take around 1 second to make the next steps
 meaningful.
 
-As we said, this code is currently fully native and single treaded. We're
+As we said, this code is currently fully native and single-threaded. We're
 now going to offload the computation to the GPU.
 
 Open :file:`src/common/kernel.ads`. You'll see the specification of
@@ -145,7 +145,7 @@ kernel based on the block and thread index:
    J : Integer := Integer (Block_Dim.X * Block_IDx.X + Thread_IDx.X);
 
 These are expressed in terms of :code:`Interfaces.C.int`, so we need to
-explicly convert the result to :code:`Integer`.
+explicitly convert the result to :code:`Integer`.
 
 At this point the call to :code:`Complex_Computation` is trivial. Our whole
 kernel should now look like:
@@ -212,7 +212,7 @@ host to the device are also done through the CUDA API.
 Now we can finally call our kernel code! We do this using a special pragma,
 :code:`CUDA_Execute`, which takes at least three parameters: a procedure
 call to a kernel, the dimension of the blocks (how many threads they
-contain) and the dimension for the grid (how many block it contains).
+contain) and the dimension for the grid (how many blocks it contains).
 
 The CUDA call is as follows:
 
