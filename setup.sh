@@ -3,7 +3,7 @@ set -e
 
 fatal() {
     echo $@ >&2
-    return 1
+    exit 1
 }
 
 if [ ! -f ./env.sh ]; then
