@@ -47,7 +47,6 @@ For example:\n
 $> sh setup.sh -mcpu sm_75
 EOF
         )
-        return 1
     fi
 
     echo "OK: $GPU_ARCH"
