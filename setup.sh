@@ -3,7 +3,7 @@ set -e
 
 fatal() {
     echo $@ >&2
-    return 1
+    exit 1
 }
 
 if [ ! -f ./env.sh ]; then
@@ -38,14 +38,15 @@ if [ -z $GPU_ARCH ]; then
         echo "FAIL"
 
         fatal $(cat <<EOF
-Target GPU not specified\n
+Target GPU detection failed, and no GPU was specified\n
+Please manually specify a target GPU with -mcpu\n
+\n
 Syntax:\n
 $> sh setup.sh -mcpu <gpu architecture>\n
 For example:\n
 $> sh setup.sh -mcpu sm_75
 EOF
         )
-        return 1
     fi
 
     echo "OK: $GPU_ARCH"
