@@ -86,7 +86,7 @@ in the format needed for it to be loaded to the GPU.
 
 An important limitation of the current implementation is that a GNAT CUDA
 application can only link against at most one fat binary. However, this fat
-binary (which is standalone library) can itself depend on arbitrary number
+binary (which is a standalone library) can itself depend on arbitrary number
 of static libraries. Note that, in particular, it depends on
 :code:`cuda_runtime_api` as well as the run-time.
 
@@ -126,8 +126,8 @@ Some things to note here:
   CUDA-specific capabilities.
 
 A current issue in GPRbuild requires ``ADA_INCLUDE_PATH`` to include the CUDA
-API path prior to calling the host builder. Note that this same variables
-should not be set in the previous step otherwise the driver binding.
+API path prior to calling the host builder. Note that this same variable
+should not be set in the previous step otherwise the driver binding will fail.
 Setting up of ``ADA_INCLUDE_PATH`` can be done in the following way, assuming that
 ``PREFIX`` points to the root directory of your GNAT for CUDA installation:
 

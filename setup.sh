@@ -67,7 +67,7 @@ echo "Generating Ada runtime for your CUDA installation"
 echo "================================================="
 echo ""
 make runtime GPU_ARCH=$GPU_ARCH
-echo "GPU_ARCH=$GPU_ARCH" >> Makefile.env
+echo "GPU_ARCH=$GPU_ARCH" > Makefile.env
 echo ""
 echo "Generating Ada bindings for your CUDA installation"
 echo "=================================================="

@@ -25,7 +25,7 @@ Beta
 - CUDA libraries - eg. apt-get
 - GNAT aarch64-linux cross compiler toolchain - AdaCore client portal (optional)
 
-### Developper - git repository clone
+### Developer - git repository clone
 **Note**: During beta phase this repo can only be built by AdaCore engineers with `anod` acces.
 
 #### Prerequisites
@@ -37,6 +37,15 @@ Beta
 - bb-runtimes - anod (set root Makefile $BB_SRC to it)
 - CUDA_env - anod (set to system environment variables)
 
+With anod, all prerequisites can be installed by
+
+'''
+anod init wave cuda-sandbox
+cd cuda-sandbox
+anod install cuda_env
+cd x86_64-linux/cuda_env/install/cuda/
+'''
+
 ### Setup GNAT for CUDA
 ```
 chmod +x setup.sh
@@ -44,13 +53,7 @@ chmod +x setup.sh
 ```
 - **End user only**:
 ```
-source ./env.sh 
-```
-
-### Build cuda-gcc (optional)
-- First [Setup GNAT for CUDA](#setup-gnat-for-cuda). Then:
-```
-make
+source ./env.sh
 ```
 
 ### Compilation of vectorAdd example program
@@ -65,7 +68,7 @@ make
 
 **Note**: To illustrate concrete cross-compilation steps, the following instructions are contextualized for cross-compiling from a `x86_64-linux` desktop (**host**) to a `aarch64-linux` Jetson Nano (**cuda_host**) Maxwell family GPU `sm_53` running an `Ubuntu 18.04` derivative as officialy published by NVIDIA. The **cuda_host** is located at LAN IP address **192.168.x.y** running as user **alice**:
 
-- First [Setup GNAT for CUDA](#setup-gnat-for-cuda). 
+- First [Setup GNAT for CUDA](#setup-gnat-for-cuda).
 
 - Make sure your cross toolchain is properly installed.
 ```
@@ -81,10 +84,10 @@ $ echo $ENV_PREFIX
 sudo apt install sshfs
 ```
 
-- Create folders. On **host**:   
-		 `/usr/lib/aarch64-linux-gnu/`        
-       `/usr/local/cuda/targets/aarch64-linux/lib`       
-		 `/usr/local/cuda/targets/aarch64-linux/lib/stubs`    
+- Create folders. On **host**:
+		 `/usr/lib/aarch64-linux-gnu/`
+       `/usr/local/cuda/targets/aarch64-linux/lib`
+		 `/usr/local/cuda/targets/aarch64-linux/lib/stubs`
 
 ```
 sudo mkdir -p /usr/lib/aarch64-linux-gnu/
