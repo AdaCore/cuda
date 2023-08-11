@@ -1,0 +1,10 @@
+[Matrix Multiply Using CUDA] - Starting...
+MatrixA (320, 320), MatrixB (640, 320)
+Computing result using CUDA Kernel...
+done
+Computing result using Iteration...
+done
+Checking computed result for correctness: 
+Correct cuda: 204800, errors: 0
+Correct iter: 204800, errors: 0
+Result = PASS
