@@ -24,7 +24,7 @@ You should consider using the following switches:
 Unconstrained Arrays
 ====================
 
-In Ada, unconstrained arrays are associated with two bounds per dimenson,
+In Ada, unconstrained arrays are associated with two bounds per dimension,
 which are not known statically. This differs from their C equivalent where
 the index always starts at zero and which have known bounds.  The
 consequence is that computing the offset of an Ada array normally requires
