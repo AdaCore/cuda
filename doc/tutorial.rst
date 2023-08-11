@@ -83,7 +83,7 @@ host to device: they need to be passed through specific access types marked
 as addressing device memory space. You do this by using a specific aspect
 on the type :code:`Designated_Storage_Model => CUDA.Storage_Models.Model`.
 When you do this, allocation and deallocation are done through the CUDA
-API.  Copies betwen these pointers and native pointers are also modified to
+API.  Copies between these pointers and native pointers are also modified to
 move data from the device to the host and back.
 
 We next introduce a new pointer type in the :code:`Kernel` package:
