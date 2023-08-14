@@ -9,7 +9,7 @@ export CUDA_PATH=$CUDA_ROOT/include/
 test -d "$CUDA_PATH"
 
 assert_has_files() {
-    if [ -z $(ls $1 2>/dev/null) ]; then
+    if [ -z "$(ls $1 2>/dev/null)" ]; then
         echo "uwrap failed: no file in $1" >&2
         return 1
     fi
