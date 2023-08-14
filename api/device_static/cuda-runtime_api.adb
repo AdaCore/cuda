@@ -89,4 +89,17 @@ package body CUDA.Runtime_Api is
       return warpsize;
    end Warp_Size;
 
+   ---
+   -- Sync_Threads --
+   ---
+
+   procedure Sync_Threads is
+      procedure barrier0 with
+         Inline,
+         Import,
+         Convention    => C,
+         External_Name => "*llvm.nvvm.barrier0";
+   begin
+      barrier0;
+   end Sync_Threads;
 end CUDA.Runtime_Api;
