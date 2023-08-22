@@ -40,10 +40,6 @@ cd cuda_raw_binding
 #g++ -c -fdump-ada-spec -D __CUDACC__ -D __CUDA_ARCH__ "$CUDA_PATH/device_functions.h"
 g++ -c -fdump-ada-spec -D __CUDACC__ -D __CUDA_ARCH__ "$CUDA_PATH/cuda_runtime_api.h" -w
 echo "project CUDA_Raw is end CUDA_Raw;" > cuda_raw.gpr
-cd ../cuda_api
-uwrap -l ada -w ../../cuda-device.wrp ../cuda_raw_binding/*_h.ads -P../cuda_raw_binding/cuda_raw
-assert_has_files $PWD
-gnatpp *
 cd ..
 mkdir libdevice
 cd libdevice
