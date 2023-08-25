@@ -163,7 +163,13 @@ weave w_PackageDecl (
         function Block_Idx return CUDA.Vector_Types.Uint3 with Inline;
         function Block_Dim return CUDA.Vector_Types.Dim3  with Inline;
         function Thread_Idx return CUDA.Vector_Types.Uint3 with Inline;
-        function Warp_Size return Interfaces.C.Int with Inline;""",
+        function Warp_Size return Interfaces.C.Int with Inline;
+        procedure Sync_Threads with Inline;
+        --  bind CUDA procedure __syncthreads()
+        --  which is a shorthand for LLVM intrinsic
+        --    declare void @llvm.nvvm.barrier0()
+        --  https://www.llvm.org/docs/NVPTXUsage.html#llvm-nvvm-barrier0
+        """,
 
     body_content => @ & i"""
         function Grid_Dim return CUDA.Vector_Types.Dim3 is
@@ -215,5 +221,19 @@ weave w_PackageDecl (
                 with Inline, Import, Convention => C, External_Name => "*llvm.nvvm.read.ptx.sreg.warpsize";
         begin
             return warpsize;
-        end Warp_Size;"""
+        end Warp_Size;
+
+        ---
+        -- Sync_Threads --
+        ---
+
+        procedure Sync_Threads is
+            procedure barrier0 with
+                Inline,
+                Import,
+                Convention    => C,
+                External_Name => "*llvm.nvvm.barrier0";
+        begin
+            barrier0;
+        end Sync_Threads;"""
 );

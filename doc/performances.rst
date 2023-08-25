@@ -7,7 +7,7 @@ Performance Considerations
 GNAT for CUDA relies on the CUDA toolchain backend technology and provides
 a very similar compilation model. There's no fundamental reason why the
 performance and resource consumption of a program in Ada would be
-significantly different than that of the same program in C. However, you
+essentially different than that of the same program in C. However, you
 may need to specify some non-default switches to get the best performance
 and your usage of some Ada features may negatively affect performance.
 
@@ -59,6 +59,10 @@ subtraction when computing the offset. E.g.:
        V : Arr_Access := new Arr (0 .. 5);
        begin
           V (1) := 0;
+
+
+.. only:: COMMENT
+  Such a file doesn't exist in ada-spark-rfcs repository
 
 The feature is fully described `here
 <https://github.com/AdaCore/ada-spark-rfcs/blob/master/considered/rfc-lower-bound.rst>`_.

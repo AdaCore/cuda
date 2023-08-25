@@ -95,7 +95,7 @@ Using Storage Model Aspect
 
 "Storage Model" is an extension to the Ada language that is currently under
 development. General description of this capability can be found `here
-<https://github.com/AdaCore/ada-spark-rfcs/blob/master/considered/storage_model_2.rst>`_.
+<https://github.com/AdaCore/ada-spark-rfcs/blob/master/prototyped/storage_model_2.rst>`_.
 
 GNAT for CUDA provides a storage model that maps to CUDA primitives for
 allocation, deallocation, and copying. The model is declared in the package
@@ -127,7 +127,7 @@ can write:
        Host_Array : Int_Array_Host_Access := new Int_Array (1 .. 100);
        Device_Array : Int_Array_Device_Access := new Int_Array'(Host_Array.all);
     begin
-       pragma Kernel_Execute (
+       pragma CUDA_Execute (
            Some_Kernel (Device_Array),
            Host_Array.all'Length,
            1);
@@ -201,6 +201,10 @@ e.g.:
        My_Stream_Model.Stream := Stream_2;
        X (5_001 .. 10_000) := 0;
 
+.. only:: COMMENT
+    The example above would need additional explanations.
+    It is not clear (if at all) X and the streams are related
+
 Low-Level Data Transfer
 -----------------------
 
@@ -242,7 +246,7 @@ memory. For example:
             Count => Host_Array.all'Size,
             Kind  => Memcpy_Host_To_Device);
 
-        pragma Kernel_Execute (
+        pragma CUDA_Execute (
             Some_Kernel (Device_Array, Host_Array.all'Length),
             Host_Array.all'Length,
             1);
