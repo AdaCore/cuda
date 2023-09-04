@@ -35,7 +35,7 @@ export PATH := $(cuda_dir)/bin:$(PATH)
 
 main: install/bin runtime
 
-runtime: libdevice.ads
+runtime:
 	@echo "======================= RUNTIME BUILDING"
 	rm -rf install/include/rts-sources/device_gnat
 	./gen-rts-sources.py --bb-dir $(BB_SRC) --gnat $(GNAT_SRC)/src/ada --rts-profile=light
@@ -46,10 +46,6 @@ runtime: libdevice.ads
 	rm -rf $(llvm_dir)/lib/rts-device-cuda
 	cp -p install/include/rts-sources/device_gnat/* install/lib/rts-device-cuda/gnat/
 	cp -pR install/lib/rts-device-cuda $(llvm_dir)/lib/rts-device-cuda
-
-
-libdevice.ads:
-	llvm-ads $(libdevice.bc) ./runtime/device_gnat/libdevice.ads
 
 install/bin:
 	@echo "======================= INSTALL SETUP"
