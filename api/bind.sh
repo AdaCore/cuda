@@ -16,7 +16,7 @@ assert_has_files() {
 }
 
 assert_in_path() {
-    if ! which "$1">/dev/null; then
+    if ! command -v "$1">/dev/null; then
         echo "Exec not found: $1" >&2
         return 1
     fi
