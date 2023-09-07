@@ -106,6 +106,20 @@ end Architecture;" > architecture.gpr
     sh bind.sh
 )
 echo ""
+echo "Installing the CUDA API"
+(
+    NO_SOURCED_CHECK=1 . ./env.sh
+    cd api
+    rm -rf install
+    for gpr in cuda_api_device.gpr cuda_api_host.gpr; do
+        gprbuild -P $gpr
+        gprinstall -P $gpr \
+            --prefix=install \
+            --create-missing-dirs
+    done
+    cp architecture.gpr install/share/gpr
+)
+echo ""
 echo "Post setup notes"
 echo "================"
 echo "Please source env.sh to get environment setup"

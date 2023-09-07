@@ -26,7 +26,7 @@ ROOT="$CURRENT/.."
 CUDA_ROOT=$($SHELL $CURRENT/locate_cuda_root.sh) || return 2
 export CUDA_ROOT # direct export would gobble up eventual error
 
-export GPR_PROJECT_PATH="$ROOT/cuda/api/:$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$GPR_PROJECT_PATH:$ROOT/gnat-llvm/share/gpr"
+export GPR_PROJECT_PATH="$ROOT/cuda/api/install/share/gpr:$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$GPR_PROJECT_PATH:$ROOT/gnat-llvm/share/gpr"
 export PYTHONPATH="$ROOT/uwrap/lang_template/build/python:$ROOT/uwrap/lang_test/build/python:$PYTHONPATH"
 export LD_LIBRARY_PATH="$ROOT/uwrap/lang_template/build/lib/relocatable/dev:$ROOT/uwrap/lang_test/build/lib/relocatable/dev:$LD_LIBRARY_PATH:$ROOT/gnat-llvm/lib"
 export PATH="$ROOT/llvm-ads/bin:$ROOT/uwrap/bin:$ROOT/uwrap/lang_template/build/lib/relocatable/dev:$ROOT/uwrap/lang_template/build/obj-mains:$ROOT/uwrap/lang_template/build/scripts:$ROOT/uwrap/lang_test/build/lib/relocatable/dev:$ROOT/uwrap/lang_test/build/obj-mains:$ROOT/uwrap/lang_test/build/scripts:$PATH:$ROOT/gnat-llvm/bin"
