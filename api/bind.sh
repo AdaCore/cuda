@@ -15,6 +15,16 @@ assert_has_files() {
     fi
 }
 
+assert_in_path() {
+    if ! command -v "$1">/dev/null; then
+        echo "Exec not found: $1" >&2
+        return 1
+    fi
+}
+
+# Pre for uwrap invocations
+assert_in_path gnatls
+
 rm -rf host device
 
 echo "Generating host binding for $CUDA_PATH/cuda_runtime_api.h"
@@ -37,7 +47,6 @@ cd device
 rm -rf cuda_api cuda_raw_binding
 mkdir cuda_api cuda_raw_binding
 cd cuda_raw_binding
-#g++ -c -fdump-ada-spec -D __CUDACC__ -D __CUDA_ARCH__ "$CUDA_PATH/device_functions.h"
 g++ -c -fdump-ada-spec -D __CUDACC__ -D __CUDA_ARCH__ "$CUDA_PATH/cuda_runtime_api.h" -w
 echo "project CUDA_Raw is end CUDA_Raw;" > cuda_raw.gpr
 cd ..

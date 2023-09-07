@@ -1,9 +1,15 @@
 export PATH := install/bin:$(PATH)
 
 # Path to BB runtime's source repo
-BB_SRC   := ../bb-runtimes
+BB_SRC   := $(realpath ../bb-runtimes)
+ifeq (, $(BB_SRC))
+ $(error "Could not locate BB-Runtimes' directory")
+endif
 # Path to GNAT's source repo
-GNAT_SRC := ../gnat
+GNAT_SRC := $(realpath ../gnat)
+ifeq (, $(GNAT_SRC))
+ $(error "Could not locate GNAT source's directory")
+endif
 
 local_llvm := $(shell which llvm-gcc)
 ifeq (, $(local_llvm))
