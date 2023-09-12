@@ -17,4 +17,4 @@ build-doc:
     - image:ada-trainings
   stage: build
   script:
-      - make -C doc html
+      - make -C doc html SPHINXOPTS="-W --keep-going -n"
