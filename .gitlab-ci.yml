@@ -1,0 +1,6 @@
+check-lint:
+  services:
+    - image:e3
+  stage: build
+  script:
+      - shellcheck **/*.sh
