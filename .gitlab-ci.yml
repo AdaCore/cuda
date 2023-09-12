@@ -10,4 +10,4 @@ check-python-lint:
     - image:e3
   stage: build
   script:
-      - black **/*.py
+      - black .
