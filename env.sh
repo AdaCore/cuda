@@ -1,4 +1,6 @@
-# no set -e because this is supposed to be sourced!
+# shellcheck shell=sh
+# this file is SUPPOSED TO BE SOURCED
+# so, no shebang, no set -e
 
 # https://stackoverflow.com/a/28776166
 # Cannot detect if the script is being sourced from within a script

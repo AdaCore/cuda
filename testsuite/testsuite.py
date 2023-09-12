@@ -30,8 +30,11 @@ class CUDAExamplesDriver(DiffTestDriver):
         sync_tree(str(TESTED_SOURCE_DIR), self.working_dir())
 
         self.check_file(Path(self.working_dir()) / "Makefile")
-        self.shell(["make", "-I", str(TESTED_SOURCE_DIR), "-j12"], timeout=10,
-                   analyze_output=False)
+        self.shell(
+            ["make", "-I", str(TESTED_SOURCE_DIR), "-j12"],
+            timeout=10,
+            analyze_output=False,
+        )
         self.shell(["./main"])
 
     def run(self):
@@ -58,9 +61,16 @@ class CUDATextOracleDriver(DiffTestDriver):
         expect_failure = self.test_env.get("expect_failure", False)
 
         self.check_file(Path(self.working_dir()) / "Makefile")
-        self.shell(["make", "-I", str(self.test_env["test_dir"]), "-j12"], timeout=10,
-                   analyze_output=False)
-        result = self.shell(["./main"], catch_error=not expect_failure, analyze_output=not expect_failure)
+        self.shell(
+            ["make", "-I", str(self.test_env["test_dir"]), "-j12"],
+            timeout=10,
+            analyze_output=False,
+        )
+        result = self.shell(
+            ["./main"],
+            catch_error=not expect_failure,
+            analyze_output=not expect_failure,
+        )
         if expect_failure:
             assert result.status != 0, f"Expected failure {result.out}"
 
@@ -82,8 +92,10 @@ class CUDATextOracleDriver(DiffTestDriver):
 
 class CUDATestsuite(Testsuite):
     tests_subdir = "tests"
-    test_driver_map = {"examples": CUDAExamplesDriver,
-                       "text_oracle" : CUDATextOracleDriver}
+    test_driver_map = {
+        "examples": CUDAExamplesDriver,
+        "text_oracle": CUDATextOracleDriver,
+    }
 
 
 if __name__ == "__main__":

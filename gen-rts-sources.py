@@ -16,11 +16,11 @@ take_next = False
 index = 0
 while index < len(sys.argv):
     arg = sys.argv[index]
-    if arg.startswith('--bb-dir='):
-        _, path = arg.split('=')
+    if arg.startswith("--bb-dir="):
+        _, path = arg.split("=")
         sys.argv.remove(arg)
         break
-    elif arg == '--bb-dir':
+    elif arg == "--bb-dir":
         take_next = True
         sys.argv.remove(arg)
     elif take_next:
@@ -34,7 +34,7 @@ assert path is not None, "missing --bb-dir switch"
 sys.path.append(os.path.abspath(path))
 
 # also add ./runtime
-sys.path.append(os.path.join(os.path.dirname(__file__), 'runtime'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "runtime"))
 
 # import our cuda gnat rts sources
 import cuda_sources
@@ -42,6 +42,7 @@ import cuda_sources
 # and replace in the original module before it is used by the
 # build_rts script and its dependencies
 import support.rts_sources.sources
+
 support.rts_sources.sources.all_scenarios = cuda_sources.rts_scenarios
 support.rts_sources.sources.sources = cuda_sources.rts_sources
 
@@ -51,7 +52,7 @@ from support import add_source_search_path
 
 def instrument_bb_runtimes():
     # Add the runtime directory in the BSP sources search path
-    PWD = os.path.join(os.path.dirname(__file__), 'runtime')
+    PWD = os.path.join(os.path.dirname(__file__), "runtime")
     add_source_search_path(PWD)
 
 
@@ -60,5 +61,5 @@ def main():
     gen_rts_sources.main()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

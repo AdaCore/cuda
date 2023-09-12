@@ -24,7 +24,7 @@
 # first option to disable the feature by default.
 
 rts_scenarios = {
-    'Cuda_Target': ['device', 'host'],
+    "Cuda_Target": ["device", "host"],
 }
 
 # Sources
@@ -54,39 +54,39 @@ rts_scenarios = {
 # If no condition is defined, then the folder is always used.
 rts_sources = {
     # LIBGNAT
-
-    'device_gnat': {
-        'conditions': ['Cuda_Target:device'],
-        'srcs': [
-            'device_gnat/a-numeri.ads',
-            'device_gnat/a-nagefl.ads',
-            'device_gnat/a-ngelfu.ads',
-            'device_gnat/a-nuaufl.ads',
-            'device_gnat/a-nuelfu.ads',
-            'libgnat/a-unccon.ads',
-            'libgnat/ada.ads',
-            'hie/i-c__hie.ads',
-            'libgnat/i-cexten.ads',
-            'device_gnat/i-cpoint.ads',
-            'device_gnat/i-cpoint.adb',
-            'device_gnat/i-cstrin.ads',
-            'libgnat/interfac.ads',
-            'libgnat/interfac.ads',
-            'libgnat/machcode.ads',
-            'libgnat/s-atacco.ads',
-            'device_gnat/s-atoope.ads',
-            'libgnat/s-maccod.ads',
-            'device_gnat/s-memory.ads',
-            'device_gnat/s-memory.adb',
-            'device_gnat/s-parame.ads',
-            'device_gnat/s-assert.ads',
-            'device_gnat/s-assert.adb',
-            'device_gnat/s-atopex.ads',
-            'device_gnat/s-atopex.adb',
-            'device_gnat/s-atopri.ads',
-            'device_gnat/s-stoele.ads',
-            'device_gnat/s-stoele.adb',
-            'libgnat/s-unstyp.ads',
-            'libgnat/unchconv.ads'],
+    "device_gnat": {
+        "conditions": ["Cuda_Target:device"],
+        "srcs": [
+            "device_gnat/a-numeri.ads",
+            "device_gnat/a-nagefl.ads",
+            "device_gnat/a-ngelfu.ads",
+            "device_gnat/a-nuaufl.ads",
+            "device_gnat/a-nuelfu.ads",
+            "libgnat/a-unccon.ads",
+            "libgnat/ada.ads",
+            "hie/i-c__hie.ads",
+            "libgnat/i-cexten.ads",
+            "device_gnat/i-cpoint.ads",
+            "device_gnat/i-cpoint.adb",
+            "device_gnat/i-cstrin.ads",
+            "libgnat/interfac.ads",
+            "libgnat/interfac.ads",
+            "libgnat/machcode.ads",
+            "libgnat/s-atacco.ads",
+            "device_gnat/s-atoope.ads",
+            "libgnat/s-maccod.ads",
+            "device_gnat/s-memory.ads",
+            "device_gnat/s-memory.adb",
+            "device_gnat/s-parame.ads",
+            "device_gnat/s-assert.ads",
+            "device_gnat/s-assert.adb",
+            "device_gnat/s-atopex.ads",
+            "device_gnat/s-atopex.adb",
+            "device_gnat/s-atopri.ads",
+            "device_gnat/s-stoele.ads",
+            "device_gnat/s-stoele.adb",
+            "libgnat/s-unstyp.ads",
+            "libgnat/unchconv.ads",
+        ],
     },
 }
