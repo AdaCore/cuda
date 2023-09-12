@@ -1,7 +1,13 @@
-check-lint:
+check-shell-lint:
   services:
     - image:e3
   stage: build
   script:
       - shellcheck -S warning **/*.sh
+
+check-python-lint:
+  services:
+    - image:e3
+  stage: build
+  script:
       - black **/*.py
