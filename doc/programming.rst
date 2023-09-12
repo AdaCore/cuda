@@ -202,6 +202,7 @@ e.g.:
        X (5_001 .. 10_000) := 0;
 
 .. only:: COMMENT
+
     The example above would need additional explanations.
     It is not clear (if at all) X and the streams are related
 
