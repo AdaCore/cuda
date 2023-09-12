@@ -51,7 +51,7 @@ processing to be done on the device, which explains why there was no time
 spent on the device. You can change the size of the array by adding a
 parameter on the :file:`main` invocation, e.g.:
 
-.. code-block::
+.. code-block:: text
 
     ./main 9
     Host processing took  1.303823000 seconds
@@ -259,7 +259,7 @@ That's it! As an extra exercise, you might want to instantiate and call
 strictly necessary. Now compile and run the code. You can try different
 values for the array size to observe different timings. For example:
 
-.. code-block::
+.. code-block:: text
 
     ./main 10
     Host processing took  1.227895000 seconds
@@ -283,7 +283,7 @@ In this example, we'll define a density function through `Metaballs
 To build and run the example, ensure you have SDL and OpenGL installed.
 You can build and run the code like the other examples:
 
-.. code-block::
+.. code-block:: shell
 
     cd cuda/examples/marching
     make
