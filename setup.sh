@@ -28,7 +28,9 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
+
 if [ -z $GPU_ARCH ]; then
+    # shellcheck disable=SC2039 # no POSIX `-n` switch, at worst it's echoed
     echo -n "autodetect compute capability: "
     GPU_ARCH=$(\
         sh ./compute_capability.sh --expect-single --sm-prefix \
@@ -37,7 +39,7 @@ if [ -z $GPU_ARCH ]; then
     if [ -z "$GPU_ARCH" ]; then
         echo "FAIL"
 
-        fatal $(cat <<EOF
+        fatal "$(cat <<EOF
 Target GPU detection failed, and no GPU was specified\n
 Please manually specify a target GPU with -mcpu\n
 \n
@@ -46,13 +48,13 @@ $> sh setup.sh -mcpu <gpu architecture>\n
 For example:\n
 $> sh setup.sh -mcpu sm_75
 EOF
-        )
+        )"
     fi
 
     echo "OK: $GPU_ARCH"
 fi
 
-ROOT=$(dirname $(readlink -f "$0"))
+ROOT=$(dirname "$(readlink -f "$0")")
 
 (
 echo ""

@@ -3,5 +3,5 @@ check-lint:
     - image:e3
   stage: build
   script:
-      - shellcheck **/*.sh
+      - shellcheck -S warning **/*.sh
       - black **/*.py

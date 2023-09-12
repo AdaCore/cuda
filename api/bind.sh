@@ -5,6 +5,7 @@ CURRENT_FILE=$(realpath "$0")
 CURRENT_DIR=$(dirname $CURRENT_FILE)
 ROOT=$(dirname $CURRENT_DIR)
 
+# shellcheck source=./locate_cuda_root.sh
 . "$ROOT/locate_cuda_root.sh"
 
 export CUDA_PATH=$CUDA_ROOT/include/

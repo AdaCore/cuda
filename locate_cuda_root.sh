@@ -50,16 +50,16 @@ elif [ ! -z "$CUDA_ROOT" ]; then
     true # no-op
 elif command -v nvcc >/dev/null; then
     ## Heuristic: $CUDA_ROOT/bin/nvcc
-    nvcc=$(readlink -f $(command -v nvcc))
+    nvcc=$(readlink -f "$(command -v nvcc)")
     assert test -f "$nvcc"
-    CUDA_ROOT="$(dirname $(dirname $nvcc))"
+    CUDA_ROOT=$(dirname "$(dirname $nvcc)")
 else
     ## Try a "standard" directory
     CUDA_ROOT="/usr/local/cuda"
 fi
 
 # Check root seems correct
-assert test -d $(realpath "$CUDA_ROOT")
+assert test -d "$(realpath "$CUDA_ROOT")"
 assert test -d "$CUDA_ROOT/include"
 assert test -f "$CUDA_ROOT/bin/ptxas"
 assert test -f "$CUDA_ROOT/bin/nvcc"
