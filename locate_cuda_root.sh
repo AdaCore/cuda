@@ -23,7 +23,7 @@ assert() {
     fail=$?
     set -e
     if [ $fail -eq 1 ]; then
-        echo "assert failed: $@" >&2
+        echo "assert failed: $*" >&2
         exit 2
     fi
 }

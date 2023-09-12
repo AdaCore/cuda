@@ -1,3 +1,4 @@
+#!/usr/bin/sh
 # no set -e because this is supposed to be sourced!
 
 # https://stackoverflow.com/a/28776166

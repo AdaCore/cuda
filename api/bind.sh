@@ -1,6 +1,8 @@
+#!/bin/sh
 set -ex
 
-CURRENT_DIR=$(dirname $(realpath $0))
+CURRENT_FILE=$(realpath "$0")
+CURRENT_DIR=$(dirname $CURRENT_FILE)
 ROOT=$(dirname $CURRENT_DIR)
 
 . "$ROOT/locate_cuda_root.sh"
