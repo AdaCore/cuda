@@ -1,4 +1,4 @@
-check-shell-lint:
+check-lint:
   services:
     - image:e3
   stage: build

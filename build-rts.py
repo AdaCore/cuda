@@ -18,15 +18,15 @@ index = 0
 
 while index < len(sys.argv):
     arg = sys.argv[index]
-    if arg.startswith('--bb-dir='):
-        _, path = arg.split('=')
+    if arg.startswith("--bb-dir="):
+        _, path = arg.split("=")
         sys.argv.remove(arg)
         break
-    elif arg == '--bb-dir':
+    elif arg == "--bb-dir":
         path = sys.argv[index + 1]
         sys.argv.remove(sys.argv[index + 1])
         sys.argv.remove(arg)
-    elif arg == '--mcpu':
+    elif arg == "--mcpu":
         gpu_arch = sys.argv[index + 1]
         sys.argv.remove(sys.argv[index + 1])
         sys.argv.remove(arg)
@@ -46,7 +46,7 @@ from runtime import CUDADevice
 
 def build_configs(target):
     "Customized targets to build specific runtimes"
-    if target == 'cuda-device':
+    if target == "cuda-device":
         t = CUDADevice()
         t.gpu_arch = gpu_arch
     else:
@@ -54,19 +54,20 @@ def build_configs(target):
 
     return t
 
+
 def instrument_bb_runtimes():
     # Add this directory in the BSP sources search path
     PWD = os.path.dirname(__file__)
     add_source_search_path(PWD)
-    add_source_search_path(os.path.join(PWD, '..'))
+    add_source_search_path(os.path.join(PWD, ".."))
 
     # Patch build_rts.build_configs to return the customized targets
     build_rts.build_configs = build_configs
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # patch bb-runtimes to use our sources
     instrument_bb_runtimes()
     # and build the runtime tree
     build_rts.main()
     # build_cuda()
-
