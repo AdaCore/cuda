@@ -10,7 +10,7 @@ check-python-lint:
     - image:e3
   stage: build
   script:
-      - black .
+      - black --check .
 
 build-doc:
   services:
