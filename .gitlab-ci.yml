@@ -11,3 +11,10 @@ check-python-lint:
   stage: build
   script:
       - black --check .
+
+build-doc:
+  services:
+    - image:ada-trainings
+  stage: build
+  script:
+      - make -C doc html SPHINXOPTS="-W --keep-going -n"

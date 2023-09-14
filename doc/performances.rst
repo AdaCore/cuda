@@ -62,6 +62,7 @@ subtraction when computing the offset. E.g.:
 
 
 .. only:: COMMENT
+
   Such a file doesn't exist in ada-spark-rfcs repository
 
 The feature is fully described `here
