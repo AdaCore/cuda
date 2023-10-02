@@ -61,16 +61,21 @@ echo ""
 echo "Starting setup GNAT for CUDA"
 echo "============================"
 echo ""
+
 cd $ROOT
 NO_SOURCED_CHECK=1 . ./env.sh
+
 echo "CUDA installation detected on $CUDA_ROOT"
 echo ""
+
 echo "Generating Ada runtime for your CUDA installation"
 echo "================================================="
 echo ""
 make runtime GPU_ARCH=$GPU_ARCH
-echo "GPU_ARCH=$GPU_ARCH" > Makefile.env
 echo ""
+
+echo "GPU_ARCH=$GPU_ARCH" > Makefile.env
+
 echo "Generating Ada bindings for your CUDA installation"
 echo "=================================================="
 echo ""
@@ -108,7 +113,10 @@ end Architecture;" > architecture.gpr
     sh bind.sh
 )
 echo ""
+
 echo "Installing the CUDA API"
+echo "======================="
+echo ""
 (
     NO_SOURCED_CHECK=1 . ./env.sh
     cd api
@@ -122,8 +130,10 @@ echo "Installing the CUDA API"
     cp architecture.gpr install/share/gpr
 )
 echo ""
+
 echo "Post setup notes"
 echo "================"
+echo ""
 echo "Please source env.sh to get environment setup"
 echo "Please re-run this script after CUDA installation updates"
 echo ""
