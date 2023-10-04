@@ -14,7 +14,7 @@ library project CUDA_API_Device is
 
    Compiler_Options := ("-gnatX0", "-O2", "-gnatn", "-mcpu=" & Architecture.GPU_Arch);
    Binder_Options := ("-d_d");
-   Library_Options := ("-mcpu=" & Architecture.GPU_Arch);
+   Library_Options := ("-mcpu=" & Architecture.GPU_Arch, "-cuda-host=" & CUDA_Host);
 
    package Compiler is
       for Switches ("ada") use Compiler_Options;
