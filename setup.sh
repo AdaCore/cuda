@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 set -e
 
 fatal() {
@@ -7,7 +7,7 @@ fatal() {
 }
 
 if [ ! -f ./env.sh ]; then
-    fatal "$(basename $0) must be run from the CUDA directory"
+    fatal "$(basename "$0") must be run from the CUDA directory"
 fi
 
 if ! command -v gprbuild 1>/dev/null; then
@@ -15,9 +15,9 @@ if ! command -v gprbuild 1>/dev/null; then
 fi
 
 gprbuild_version=$(gprbuild --version | head -n 1 | cut -d ' ' -f 3)
-gprbuild_major_version=$(echo ${gprbuild_version} | cut -d '.' -f 1)
+gprbuild_major_version=$(echo "${gprbuild_version}" | cut -d '.' -f 1)
 
-if [ $gprbuild_major_version -lt 23 ]; then
+if [ "$gprbuild_major_version" -lt 23 ]; then
     fatal "gprbuild 23.0 or later is required, only ${gprbuild_version} was found"
 fi
 
@@ -29,7 +29,7 @@ while [ $# -gt 0 ] ; do
 done
 
 
-if [ -z $GPU_ARCH ]; then
+if [ -z "$GPU_ARCH" ]; then
     # shellcheck disable=SC2039 # no POSIX `-n` switch, at worst it's echoed
     echo -n "autodetect compute capability: "
     GPU_ARCH=$(\
@@ -62,7 +62,7 @@ echo "Starting setup GNAT for CUDA"
 echo "============================"
 echo ""
 
-cd $ROOT
+cd "$ROOT"
 NO_SOURCED_CHECK=1 . ./env.sh
 
 echo "CUDA installation detected on $CUDA_ROOT"
@@ -71,7 +71,7 @@ echo ""
 echo "Generating Ada runtime for your CUDA installation"
 echo "================================================="
 echo ""
-make runtime GPU_ARCH=$GPU_ARCH
+make runtime GPU_ARCH="$GPU_ARCH"
 echo ""
 
 echo "GPU_ARCH=$GPU_ARCH" > Makefile.env

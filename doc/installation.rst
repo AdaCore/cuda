@@ -12,7 +12,7 @@ Use the following steps for an x86 Linux native host. Please refer to
 the cross ARM installation if you need to target cross ARM Linux
 instead.
 
-Prior to running GNAT for CUDA, you need to have the NVIDIA environment
+Prior to running GNAT for CUDA, you need to have the CUDA Toolkit
 in your PATH, and in particular ptxas. You can check that by running:
 
 .. code-block:: shell
@@ -45,7 +45,7 @@ current installation:
 .. code-block:: shell
 
   cd gnat-cuda-[version]-x86_64-linux-bin/cuda
-  sh setup.sh -mcpu <your GPU architecture>
+  ./setup.sh -mcpu <your GPU architecture>
 
 In the same directory, execute:
 
@@ -64,7 +64,7 @@ To check if everything is correctly installed, you can try an example:
   make
   ./main
 
-You need only perform this step at installation. You should see:
+You need only perform this check at installation. You should see:
 
 .. code-block:: shell
 
@@ -86,9 +86,9 @@ prerequisites installed:
 
 Download CUDA Toolkit for your development host from 
 https://developer.nvidia.com/cuda-downloads. This is required for building
-the cuda bindings.
+the CUDA bindings.
 
-Prior to running GNAT for CUDA, you need to have the NVIDIA environment
+Prior to running GNAT for CUDA, you need to have the CUDA Toolkit
 in your PATH, and in particular ptxas. You can check that by running:
 
 .. code-block:: shell
@@ -117,15 +117,15 @@ As an example, the files can be copied form the target board as follows:
   $ scp -rp <my-aarch64-linux-target>:/lib ./sysroot/
   $ scp -rp <my-aarch64-linux-target>:/lib64 ./sysroot/
 
-Obtain a copy of the cuda libraries from the target board and place it 
-in the targets folder of your cuda setup:
+Obtain a copy of the CUDA libraries from the target board and place it 
+in the targets folder of your CUDA setup:
 
 .. code-block:: shell
 
   $ scp -rp jetty:/usr/local/cuda/targets/aarch64-linux ./
   $ sudo mv aarch64-linux /usr/local/cuda/targets
 
-Make the sysroot location visible to gnat via the `ENV_PREFIX` variable
+Make the sysroot location visible to GNAT via the `ENV_PREFIX` variable
 
 .. code-block:: shell
 
@@ -156,7 +156,7 @@ current installation:
 .. code-block:: shell
 
   cd gnat-cuda-[version]-x86_64-linux-bin/cuda
-  sh setup.sh -mcpu <your GPU architecture>
+  ./setup.sh -mcpu <your GPU architecture>
 
 In the same directory, execute:
 
@@ -175,7 +175,7 @@ To check if everything is correctly installed, you can try an example:
   make
   ./main
 
-You need only perform this step at installation. You should see:
+You need only perform this check at installation. You should see:
 
 .. code-block:: shell
 
