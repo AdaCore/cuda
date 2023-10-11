@@ -1,6 +1,6 @@
-**************************************
+***********************************
 Prerequisites and environment setup
-**************************************
+***********************************
 
 Before installing this software, make sure you have the pre-requisites
 corresponding to your build environment installed.
@@ -24,7 +24,7 @@ put in your PATH, e.g.:
    export PATH=/usr/local/cuda-<your CUDA version>/bin:$PATH
 
 Native compiler on x86_64 Linux
-**************************************
+*******************************
 
 In case both the development host and the target are running x86_64 Linux
 then the following tools are required:
@@ -33,7 +33,7 @@ then the following tools are required:
  - An installation of GNAT Pro, version 24.0w (20230413) or later.
 
 Cross compilation for aarch64 Linux
-**************************************
+***********************************
 
 If the development host is running x86_64 Linux and the target
 aarch64 Linux then the following tools are required:
@@ -43,7 +43,7 @@ aarch64 Linux then the following tools are required:
    version 24.0w (20230413) or later, on the development host.
 
 Obtain a copy of the system libraries according to the instructions 
-in the cross toolchain documentation and place them in a on your choice.
+in the cross toolchain documentation and place them in a directory of your choice.
 
 As an example, the files can be copied form the target board as follows:
 
@@ -71,15 +71,15 @@ Make the sysroot location visible to GNAT via the `ENV_PREFIX` variable
 
   $ export ENV_PREFIX=`pwd`/sysroot
 
-Let the toolchain know, that the intended compilation target is aarch64-linux
+Let the toolchain know that the intended compilation target is aarch64-linux
 
 .. code-block:: shell
 
   $ export cuda_host=aarch64-linux
 
-**************************************
+***************
 GNAT-CUDA setup
-**************************************
+***************
 
 After setting up the environment, you can extract the gnat-cuda package:
 
@@ -119,7 +119,8 @@ To check if everything is correctly installed, you can try an example:
   make
   ./main
 
-.. note:: 
+.. note::
+
   In cross compilation workflow you have to copy `main` to target
   before executing it
 
