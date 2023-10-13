@@ -281,6 +281,7 @@ In this example, we'll define a density function through `Metaballs
 .. image:: marching.png
 
 To build and run the example, ensure you have SDL and OpenGL installed.
+
 You can build and run the code like the other examples:
 
 .. code-block:: shell
