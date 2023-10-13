@@ -9,6 +9,11 @@ Before going to platform-specific prerequisites, download CUDA Toolkit for
 your development host from https://developer.nvidia.com/cuda-downloads.
 This is required for building the CUDA bindings.
 
+.. note:: 
+  
+  In cross compilation workflow the version of CUDA Toolkit on the development
+  host must be the same as that on the target.
+
 You need to have the CUDA Toolkit in your PATH, and in particular ptxas.
 You can check that by running:
 
@@ -38,12 +43,17 @@ Cross compilation for aarch64 Linux
 If the development host is running x86_64 Linux and the target
 aarch64 Linux then the following tools are required:
 
- - An aarch64 Linux environment with CUDA drivers on the target
+ - An aarch64 Linux environment with CUDA drivers on the target.
+ - An installation of GNAT Pro, version 24.0w (20230413) or later
+   for building the gnat-cuda bindings on the development host.
  - An installation of GNAT Pro cross toolchain for aarch64-linux, 
    version 24.0w (20230413) or later, on the development host.
 
 Obtain a copy of the system libraries according to the instructions 
-in the cross toolchain documentation and place them in a directory of your choice.
+in the cross toolchain documentation and place them in a directory of
+your choice. **NB!** if you are going to copy the folders from target
+to the development host then make sure that all of the required
+libraries are installed on target before.
 
 As an example, the files can be copied form the target board as follows:
 
@@ -62,7 +72,7 @@ in the targets folder of your CUDA setup:
 
 .. code-block:: shell
 
-  $ scp -rp jetty:/usr/local/cuda/targets/aarch64-linux ./
+  $ scp -rp <my-aarch64-linux-target>:/usr/local/cuda/targets/aarch64-linux ./
   $ sudo mv aarch64-linux /usr/local/cuda/targets
 
 Make the sysroot location visible to GNAT via the `ENV_PREFIX` variable
