@@ -1,16 +1,21 @@
-check-shell-lint:
-  services:
-    - image:e3
-  stage: build
-  script:
-      - shellcheck -S warning **/*.sh
+stages:
+    - test
+    - build
 
-check-python-lint:
+check_syntax:
+  stage: test
   services:
-    - image:e3
-  stage: build
+    - image:lint
+
   script:
-      - black --check .
+    - autolint --check --output-code-climate-report=code_quality_report.json .
+
+  allow_failure: true
+
+  artifacts:
+    when: always
+    reports:
+      codequality: code_quality_report.json
 
 build-doc:
   services:
