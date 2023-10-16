@@ -15,7 +15,7 @@ is_sourced() {
 }
 
 if [ -z "$NO_SOURCED_CHECK" ]; then
-    if ! is_sourced || ! [ -f $PWD/env.sh ] ; then
+    if ! is_sourced || ! [ -f "$PWD/env.sh" ] ; then
         echo "This script is meant to be sourced from its own directory"
         exit 2
     fi
@@ -25,7 +25,7 @@ CURRENT=$(pwd)
 ROOT="$CURRENT/.."
 
 # being sourced, must be super careful with error return value
-CUDA_ROOT=$($SHELL $CURRENT/locate_cuda_root.sh) || return 2
+CUDA_ROOT=$("$SHELL" "$CURRENT/locate_cuda_root.sh") || return 2
 export CUDA_ROOT # direct export would gobble up eventual error
 
 export GPR_PROJECT_PATH="$ROOT/cuda/api/install/share/gpr:$ROOT/uwrap/lang_template/build:$ROOT/uwrap/lang_test/build:$GPR_PROJECT_PATH:$ROOT/gnat-llvm/share/gpr"
