@@ -63,6 +63,8 @@ echo "============================"
 echo ""
 
 cd "$ROOT"
+# shellcheck disable=SC1091 # FIXME shellcheck -P SCRIPTDIR
+# https://github.com/koalaman/shellcheck/issues/769#issuecomment-486492469
 NO_SOURCED_CHECK=1 . ./env.sh
 
 echo "CUDA installation detected on $CUDA_ROOT"
@@ -118,6 +120,8 @@ echo "Installing the CUDA API"
 echo "======================="
 echo ""
 (
+    # shellcheck disable=SC1091 # FIXME shellcheck -P SCRIPTDIR
+    # https://github.com/koalaman/shellcheck/issues/769#issuecomment-486492469
     NO_SOURCED_CHECK=1 . ./env.sh
     cd api
     rm -rf install

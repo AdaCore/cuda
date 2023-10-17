@@ -10,8 +10,6 @@ check_syntax:
   script:
     - autolint --check --output-code-climate-report=code_quality_report.json .
 
-  allow_failure: true
-
   artifacts:
     when: always
     reports:

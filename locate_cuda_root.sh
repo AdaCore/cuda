@@ -2,7 +2,7 @@
 set -e
 
 usage() {
-    echo "usage: $(basename $0) [-h] [cuda_root_directory]"
+    echo "usage: $(basename "$0") [-h] [cuda_root_directory]"
     echo "Tests and returns the path to the CUDA root, from either the "
     echo "environment, the argument given, or a very smart (not) heuristic"
     echo ""
@@ -42,17 +42,17 @@ if [ "$1" = "-h" ]; then
 fi
 
 # Locate root
-if [ ! -z "$1" ]; then
+if [ -n "$1" ]; then
     ## Use argument
     CUDA_ROOT="$1"
-elif [ ! -z "$CUDA_ROOT" ]; then
+elif [ -n "$CUDA_ROOT" ]; then
     ## Use already set value
     true # no-op
 elif command -v nvcc >/dev/null; then
     ## Heuristic: $CUDA_ROOT/bin/nvcc
     nvcc=$(readlink -f "$(command -v nvcc)")
     assert test -f "$nvcc"
-    CUDA_ROOT=$(dirname "$(dirname $nvcc)")
+    CUDA_ROOT=$(dirname "$(dirname "$nvcc")")
 else
     ## Try a "standard" directory
     CUDA_ROOT="/usr/local/cuda"
