@@ -2,6 +2,8 @@ project CUDA_API_Host is
    type CUDA_Host_Option is ("x86_64-linux", "aarch64-linux");
    CUDA_Host : CUDA_Host_Option := external ("cuda_host", "x86_64-linux");
 
+   CUDA_Root := external ("CUDA_ROOT");
+
    for Target use CUDA_Host;
 
    for Source_Dirs use ("host/cuda_api", "host/cuda_raw_binding", "cuda_internal", "host_static");
@@ -10,8 +12,8 @@ project CUDA_API_Host is
 
    Compiler_Options := ("-gnatX0", "-gnatd_c");
    Linker_Options := (
-            "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib",
-            "-L/usr/local/cuda/targets/" & CUDA_Host & "/lib/stubs",
+            "-L" & CUDA_Root & "/targets/" & CUDA_Host & "/lib",
+            "-L" & CUDA_Root &"/targets/" & CUDA_Host & "/lib/stubs",
             "-lcudadevrt",
             "-lcudart_static",
             "-lrt",
