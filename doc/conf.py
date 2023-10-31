@@ -44,6 +44,13 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "sphinx_rtd_theme"
 
+html_theme_options = {
+    "style_nav_header_background": "#12284c",
+}
+
+html_logo = "adacore-logo-white.png"
+html_favicon = "favicon.ico"
+
 # By default, Sphinx expects the master doc to be `contents`
 # see https://stackoverflow.com/a/56448499/647828
 master_doc = "index"
