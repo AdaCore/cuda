@@ -10,7 +10,7 @@ ROOT=$(dirname "$CURRENT_DIR")
 # https://github.com/koalaman/shellcheck/issues/769#issuecomment-486492469
 . "$ROOT/locate_cuda_root.sh"
 
-export CUDA_PATH=$CUDA_ROOT/include/
+export CUDA_PATH="$CUDA_ROOT/include/"
 test -d "$CUDA_PATH"
 
 assert_has_files() {
