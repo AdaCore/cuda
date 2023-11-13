@@ -50,7 +50,3 @@ html_theme_options = {
 
 html_logo = "adacore-logo-white.png"
 html_favicon = "favicon.ico"
-
-# By default, Sphinx expects the master doc to be `contents`
-# see https://stackoverflow.com/a/56448499/647828
-master_doc = "index"
