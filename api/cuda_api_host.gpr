@@ -1,6 +1,6 @@
 project CUDA_API_Host is
    type CUDA_Host_Option is ("x86_64-linux", "aarch64-linux");
-   CUDA_Host : CUDA_Host_Option := external ("cuda_host", "x86_64-linux");
+   CUDA_Host : CUDA_Host_Option := external ("CUDA_HOST", "x86_64-linux");
 
    CUDA_Root := external ("CUDA_ROOT");
 
