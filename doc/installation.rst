@@ -4,8 +4,8 @@ Prerequisites and environment setup
 
 Before installing this software, make sure you have the pre-requisites
 corresponding to your build environment installed. 
-CUDA Toolkit and native GNAT Ada compiler are required for building the
-CUDA bindings. In addition a cross-compiler may be required.
+CUDA Toolkit and a suitable GNAT Ada compiler are required for building the
+CUDA bindings.
 
 .. note:: 
   
@@ -91,8 +91,6 @@ If the development host is running x86_64 Linux and the target
 aarch64 Linux then the following tools are required:
 
  - An aarch64 Linux environment with CUDA drivers on the target.
- - An installation of GNAT Pro, version 24.0w (20230413) or later
-   for building the gnat-cuda bindings on the development host.
  - An installation of GNAT Pro cross toolchain for aarch64-linux, 
    version 24.0w (20230413) or later, on the development host.
 

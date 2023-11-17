@@ -27,8 +27,13 @@ assert_in_path() {
     fi
 }
 
+case $CUDA_HOST in
+    aarch64-linux) compiler_driver=aarch64-linux-gnu-gcc; uwrap_target_switch="--target=aarch64-linux-gnu"; gnatls_name="aarch64-linux-gnu-gnatls";;
+    *) compiler_driver=gcc; uwrap_target_switch=""; gnatls_name="gnatls";;
+esac
+
 # Pre for uwrap invocations
-assert_in_path gnatls
+assert_in_path $gnatls_name
 
 rm -rf host device
 
@@ -38,10 +43,10 @@ cd host
 rm -rf cuda_api cuda_raw_binding
 mkdir cuda_api cuda_raw_binding
 cd cuda_raw_binding
-gcc -c -fdump-ada-spec "$CUDA_PATH/cuda_runtime_api.h" -w
+$compiler_driver -c -fdump-ada-spec "$CUDA_PATH/cuda_runtime_api.h" -w
 echo "project CUDA_Raw is end CUDA_Raw;" > cuda_raw.gpr
 cd ../cuda_api
-uwrap -l ada -w ../../cuda-host.wrp ../cuda_raw_binding/*.ads -P../cuda_raw_binding/cuda_raw
+uwrap "$uwrap_target_switch" -l ada -w ../../cuda-host.wrp ../cuda_raw_binding/*.ads -P../cuda_raw_binding/cuda_raw
 assert_has_files "$PWD"
 gnatpp ./*
 cd ../..
@@ -52,7 +57,7 @@ cd device
 rm -rf cuda_api cuda_raw_binding
 mkdir cuda_api cuda_raw_binding
 cd cuda_raw_binding
-g++ -c -fdump-ada-spec -D __CUDACC__ -D __CUDA_ARCH__ "$CUDA_PATH/cuda_runtime_api.h" -w
+$compiler_driver -c -fdump-ada-spec -D __CUDACC__ -D __CUDA_ARCH__ "$CUDA_PATH/cuda_runtime_api.h" -w
 echo "project CUDA_Raw is end CUDA_Raw;" > cuda_raw.gpr
 cd ..
 mkdir libdevice
