@@ -13,3 +13,10 @@ host: device
 
 device:
 	gprbuild -P device
+
+# Use double-colon to permit extensions to the rule
+# when this file is included in another Makefile 
+clean::
+	rm -f main
+	rm -rf obj
+	rm -rf lib

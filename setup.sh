@@ -24,10 +24,15 @@ fi
 while [ $# -gt 0 ] ; do
   case $1 in
     -mcpu) GPU_ARCH="$2" ;;
+    -clean) CLEAN="True" ;;
   esac
   shift
 done
 
+if [ -n "$CLEAN" ]; then
+  rm -rf api/obj
+  rm -rf api/lib
+fi
 
 if [ -z "$GPU_ARCH" ]; then
     # shellcheck disable=SC2039 # no POSIX `-n` switch, at worst it's echoed

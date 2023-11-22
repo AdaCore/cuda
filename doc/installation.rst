@@ -12,19 +12,15 @@ CUDA bindings.
   In cross compilation workflow the version of CUDA Toolkit on the development
   host must be the same as that on the target.
 
-CUDA Toolkit installation on a workstation with NVIDIA GPU
-***********************************************************
+.. _DEFAULT_INSTALL:
 
-In case the machine used for development has CUDA-capable NVIDIA GPU the toolkit
+CUDA Toolkit installation on a workstation with NVIDIA GPU
+**********************************************************
+
+In case the machine used for development has a CUDA-capable NVIDIA GPU the toolkit
 can be installed by following the standard setup instructions from NVIDIA.
 Start from downloading the  CUDA Toolkit for your development host from 
 https://developer.nvidia.com/cuda-downloads.
-
-Make the location of CUDA toolkit visible to the rest of the setup process:
-
-.. code-block:: shell
-
-  export CUDA_ROOT=/usr/local/cuda
 
 You need to have the CUDA Toolkit in your PATH, and in particular ``ptxas``.
 You can check that by running:
@@ -33,15 +29,17 @@ You can check that by running:
 
   which ptxas
 
-If it doesn't return anything, CUDA may not be installed, or need to be
-put in your PATH, e.g.:
+If it doesn't return anything, CUDA may not be properly installed,
+or needs to be put in your PATH, e.g.:
 
 .. code-block:: shell
 
-   export PATH=$CUDA_ROOT/bin:$PATH
+   export PATH=/usr/local/cuda/bin:$PATH
 
-CUDA Toolkit installation on a workstation without suitable GPU
-****************************************************************
+.. _CUSTOM_INSTALL:
+
+CUDA Toolkit installation on a workstation without a suitable GPU
+*****************************************************************
 
 In case the development host doesn't have CUDA-capable GPU, the available GPU
 is not compliant with that on the target or the development environment needs
@@ -123,16 +121,23 @@ in the targets folder of your CUDA setup:
 .. code-block:: shell
 
   $ scp -rp <my-aarch64-linux-target>:/usr/local/cuda/targets/aarch64-linux ./
-  $ sudo mv aarch64-linux $CUDA_ROOT/targets
+  $ sudo mv aarch64-linux <CUDA_TOOLBOX_ROOT>/targets
+
+Where <CUDA_TOOLBOX_ROOT> is the location of the cuda toolbox:
+
+* ``$CUDA_ROOT`` in case the toolbox was installed according to the instructions
+  in :ref:`CUSTOM_INSTALL`
+
+* ``/usr/local/cuda`` in case of :ref:`DEFAULT_INSTALL`
 
 Make the sysroot location visible to GNAT via the ``ENV_PREFIX`` environment 
-variable
+variable:
 
 .. code-block:: shell
 
   $ export ENV_PREFIX=`pwd`/sysroot
 
-Let the toolchain know that the intended compilation target is aarch64-linux
+Let the toolchain know that the intended compilation target is aarch64-linux:
 
 .. code-block:: shell
 
@@ -161,7 +166,18 @@ current installation:
 .. code-block:: shell
 
   cd gnat-cuda-[version]-x86_64-linux-bin/cuda
-  ./setup.sh -mcpu sm_<GPU architecture>
+  ./setup.sh [-mcpu sm_<GPU architecture>] [-clean]
+
+If the ``-mcpu`` argument is not provided, then the setup attempts to determine
+the compute capability automatically using the utilities in CUDA toolbox.
+
+The ``-clean`` argument can be optionally used for removing the temporary object
+files in case the environment changes and the change cannot be detected automatically 
+by the binding generation process. This can happen, for instance, when the compiler
+is upgraded or the same gnat-cuda source tree is used for multiple targets 
+(e.g. for native x86_64-linux build and aarch64-linux cross compilation) and 
+you switch from one target to another by changing the value of `$CUDA_HOST`
+variable.
 
 In the same directory, execute:
 
@@ -183,9 +199,16 @@ To check if everything is correctly installed, you can try an example:
 .. note::
 
   In cross compilation workflow you have to copy ``main`` to target
-  before executing it
+  before executing it.
 
-You need only perform this check at installation. You should see:
+.. note::
+
+  If you are switching between different targets by changing the
+  ``$CUDA_HOST`` variable or upgraded the compiler then the old 
+  object files can be removed by calling ``make clean`` before
+  a new build.
+
+After executing the code you should see:
 
 .. code-block:: shell
 
