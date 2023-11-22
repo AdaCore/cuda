@@ -54,6 +54,11 @@ https://developer.nvidia.com/cuda-downloads.
 Decide where the toolkit shall be installed and expose the location of the toolkit
 with environment variable ``CUDA_ROOT``.
 
+.. warning::
+
+   ``CUDA_ROOT`` cannot point to a folder that contains a ``gcc`` or ``gnat`` installation in any of its subdirectories.
+   By default, ``gcc`` is installed in :file:`/usr`. Avoid installing a custom CUDA toolkit in the same folder.
+
 .. code-block:: shell
 
   mkdir cuda-toolkit
