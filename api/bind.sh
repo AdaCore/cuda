@@ -55,7 +55,7 @@ cd ../..
 # binding generation fails is cudaGraphAddNode_v2, which was introduced with CUDA 12.3.
 # It requires perl, so systems that have CUDA 12.3 or later but do not have perl
 # require manual interventions.
-if command -v perl /dev/null; then
+if command -v perl > /dev/null; then
     perl -0777 -i -p hotfix.pl host/cuda_api/cuda-runtime_api.adb
 fi
 
