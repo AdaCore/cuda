@@ -50,9 +50,7 @@ class CUDABaseDriver(DiffTestDriver):
             raise
         except Exception as e:
             # those are test failures
-            logging.error(
-                f"{self.test_name} raised an exception {e.__class__}: {e.with_traceback()}"
-            )
+            logging.error(f"{self.test_name} raised an exception {e.__class__}: {e}")
             logging.error(self.output)
             raise TestAbortWithFailure(e) from e
 
